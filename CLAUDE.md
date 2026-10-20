@@ -136,5 +136,5 @@ npx playwright test                    # browser tests; starts API + web if not 
 # repo root: daily snapshot collection (Windows Task Scheduler, current user)
 powershell -File scripts/register_daily_ingest.ps1   # daily 6pm + Wed-Sat 2pm/9pm; starts Docker; logs in data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
-powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news")
+powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news"); refreshes data/logs/news_report.json
 ```

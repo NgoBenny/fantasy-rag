@@ -28,7 +28,26 @@ $env:PYTHONIOENCODING = "utf-8"
 if ($Job -eq "news") {
     uv run fantasy-rag ingest news 2>&1 | Out-File -Append -Encoding utf8 $log
     $newsExit = $LASTEXITCODE
-    "exit=$newsExit" | Out-File -Append -Encoding utf8 $log
+    # Refresh the Phase 4 evidence after every run: stories per source (last 48 hours)
+    # and how many rostered-player mentions carry the player's ID. Written to a temp file
+    # first, so a failed report never replaces the last good one.
+    $report = Join-Path $logDir "news_report.json"
+    $tmp = "$report.tmp"
+    $err = "$report.err"
+    uv run fantasy-rag ingest news-report 2> $err | Out-File -Encoding utf8 $tmp
+    $reportExit = $LASTEXITCODE
+    if ($reportExit -eq 0) {
+        Move-Item -Force $tmp $report
+    } else {
+        "news-report failed (exit $reportExit); kept the previous report" |
+            Out-File -Append -Encoding utf8 $log
+        Get-Content $err | Out-File -Append -Encoding utf8 $log
+        Remove-Item -Force $tmp -ErrorAction SilentlyContinue
+    }
+    Remove-Item -Force $err -ErrorAction SilentlyContinue
+    "exit=$newsExit report=$reportExit" | Out-File -Append -Encoding utf8 $log
+    # Task Scheduler must see a failure from either step.
+    if ($newsExit -eq 0) { $newsExit = $reportExit }
     exit $newsExit
 }
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
