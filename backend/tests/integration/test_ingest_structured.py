@@ -20,7 +20,7 @@ FIX = Path(__file__).resolve().parents[1] / "fixtures" / "phase1"
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 TABLES = ["sources", "players", "player_external_ids", "schedules", "player_week_stats",
           "snap_counts", "ff_opportunity", "depth_charts", "injury_history", "injury_snapshots",
-          "trending"]  # fmt: skip
+          "trending", "team_week_defense"]  # fmt: skip
 
 
 class FakeNfl:
@@ -49,6 +49,9 @@ class FakeNfl:
 
     def load_injuries(self, seasons: Any) -> pl.DataFrame:
         return self._read("injuries")
+
+    def load_pbp(self, seasons: Any) -> pl.DataFrame:
+        return self._read("pbp")
 
     def load_depth_charts(self, seasons: list[int]) -> pl.DataFrame:
         return self._read("depth_2024" if seasons[0] <= 2024 else "depth_2025plus")

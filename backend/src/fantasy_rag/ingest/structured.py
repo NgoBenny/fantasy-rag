@@ -12,6 +12,7 @@ from sqlalchemy import Connection, Engine, text
 
 from fantasy_rag.config import REPO_ROOT
 from fantasy_rag.ingest import nflverse as nv
+from fantasy_rag.ingest import pbp as pb
 from fantasy_rag.ingest import sleeper as sl
 from fantasy_rag.ingest.base import Run, record_unresolved, stage, sync_run, upsert
 
@@ -297,6 +298,33 @@ def run_structured(
         ["season", "game_type", "week", "team", "player_id"],
         lambda: nv.injuries(nfl.load_injuries(seasons)).filter(pl.col("team").is_not_null()),
         [("gsis_id", "gsis")],
+    )
+
+    def team_defense(run: Run, res: Result) -> None:
+        defense, special = [], []
+        for s in seasons:  # one season of play-by-play at a time keeps memory down
+            raw = nfl.load_pbp([s])
+            defense.append(pb.team_defense(raw))
+            special.append(pb.special_teams(raw))
+        loaded["special_teams"] = pl.concat(special)
+        ids = ["season", "week", "season_type", "team", "game_id", "opponent"]
+        res.changed = upsert(
+            run.conn,
+            "team_week_defense",
+            pb.packed(pl.concat(defense), ids),
+            ["season", "week", "season_type", "team"],
+            run.id,
+        )
+
+    _step(engine, report, "nflverse.pbp_team_defense", team_defense)
+    dataset(
+        "nflverse.pbp_special_teams",
+        "player_week_special_teams",
+        ["season", "week", "season_type", "player_id"],
+        lambda: pb.packed(
+            loaded["special_teams"], ["season", "week", "season_type", "game_id", "player_id"]
+        ),
+        [("player_id", "gsis")],
     )
 
     def nflverse_snapshot(run: Run, res: Result) -> None:

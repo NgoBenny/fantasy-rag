@@ -11,7 +11,8 @@ ALL_TABLES = {
     "sync_runs", "sources", "players", "player_external_ids", "injury_snapshots", "trending",
     "fantasy_leagues", "fantasy_rosters", "projections", "model_runs", "documents", "chunks",
     "query_log", "schedules", "player_week_stats", "snap_counts", "ff_opportunity",
-    "depth_charts", "injury_history", "unresolved_players",
+    "depth_charts", "injury_history", "unresolved_players", "team_week_defense",
+    "player_week_special_teams",
 }  # fmt: skip
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 
