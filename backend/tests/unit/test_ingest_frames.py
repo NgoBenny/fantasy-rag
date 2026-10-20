@@ -1,7 +1,9 @@
+import json
 from datetime import UTC, datetime
 
 import polars as pl
 
+from fantasy_rag.analytics.scoring import ScoringRules, score
 from fantasy_rag.ingest import nflverse as nv
 from fantasy_rag.ingest import sleeper as sl
 from fantasy_rag.ingest.base import search_name
@@ -138,3 +140,19 @@ def test_trending_window_and_team_defenses() -> None:
         [{"player_id": "123", "count": 5}, {"player_id": "DET", "count": 2}], [], 24, now
     )
     assert skipped == 1 and df["sleeper_id"].to_list() == ["123"]
+
+
+def test_kick_distances_survive_ingestion_into_scoring() -> None:
+    raw = pl.DataFrame(
+        {"player_id": ["00-0000009"], "player_display_name": ["K"], "position": ["K"],
+         "season": [2026], "week": [4], "season_type": ["REG"], "game_id": ["g"], "team": ["DAL"],
+         "opponent_team": ["NYG"], "fg_made": [2], "fg_missed": [1], "fg_blocked": [1],
+         "pat_made": [4], "pat_missed": [0], "pat_blocked": [0], "fg_made_list": ["39;50"],
+         "fg_missed_list": ["65"], "fg_blocked_list": ["62"]}
+    )  # fmt: skip
+    stored = json.loads(nv.player_stats(raw)["stats"][0])  # what goes into the jsonb column
+    rules = ScoringRules.from_sleeper(
+        {"fgm": 3, "fgm_yds_over_30": 0.1, "xpm": 1, "fgmiss_50p": -1, "fgmiss_60p": -1}
+    )
+    # 6 + 2.9 (9 + 20 yards over 30) + 4 - 2 (65 miss: 50p, 60p) - 2 (62 blocked: 50p, 60p) = 8.9
+    assert score(stored, "K", rules).points == 8.9

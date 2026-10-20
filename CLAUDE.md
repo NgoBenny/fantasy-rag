@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-1):
+Exists now (Phases 0-2):
 
 ```
 CLAUDE.md
@@ -46,6 +46,7 @@ backend/
   pyproject.toml, uv.lock, alembic.ini
   alembic/versions/0001_initial.py      # extensions + 13 owned tables
   alembic/versions/0002_structured.py   # nflverse tables, snapshot keys, unresolved_players
+  alembic/versions/0003_leagues.py      # league name/settings, weekly matchup results
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine
@@ -54,10 +55,13 @@ backend/
   src/fantasy_rag/ingest/nflverse.py    # pure frame normalizers + ID-only resolve()
   src/fantasy_rag/ingest/sleeper.py     # Sleeper client, injury/trending frames
   src/fantasy_rag/ingest/structured.py  # `ingest structured` orchestrator + sources registry
+  src/fantasy_rag/ingest/league.py      # Sleeper league import (settings, rosters, matchups)
+  src/fantasy_rag/analytics/scoring.py  # Sleeper scoring keys -> points from nflverse stats
+  src/fantasy_rag/analytics/scoring_check.py  # our points vs Sleeper's players_points
   tests/unit/, tests/integration/, tests/fixtures/phase1/ (recorded slices; record_phase1.py)
 ```
 
-Planned (phase in brackets): read-only engine/role [3]; `ingest/` news_espn, rss, entity_link [4]; `analytics/` scoring [2], queries [3], optimizer [9]; `ml/` baseline, backtest [3], features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, tools [3], router, prompts [6]; `api/main.py` [7]; `jobs/scheduler.py` [9]; `tests/eval/golden.yaml` [3, 6]; `frontend/` [7].
+Planned (phase in brackets): read-only engine/role [3]; `ingest/` news_espn, rss, entity_link [4]; `analytics/` queries [3], optimizer [9]; `ml/` baseline, backtest [3], features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, tools [3], router, prompts [6]; `api/main.py` [7]; `jobs/scheduler.py` [9]; `tests/eval/golden.yaml` [3, 6]; `frontend/` [7].
 
 ## Conventions
 
@@ -65,6 +69,7 @@ Planned (phase in brackets): read-only engine/role [3]; `ingest/` news_espn, rss
 - ruff: line length 100, rules E, F, I, B, UP, SIM; `ruff format`. mypy `--strict` on `src/` (pydantic plugin; `nflreadpy` has no type info, so it is ignored).
 - Timestamps are `timestamptz` in UTC. nflverse `gameday` + `gametime` are US/Eastern local strings: convert with an explicit `America/New_York` zone.
 - Migrations are hand-written Alembic files, one per phase. No FK from an owned table to an nflverse-mirroring table.
+- Scoring: `ScoringRules.from_sleeper` keeps only non-zero keys (Sleeper ships unused keys at 0). Keys without a `DERIVE` entry are reported as unsupported; team DEF and special-teams `st_ff`/`st_fum_rec` need play-by-play and are not scored yet.
 - Snapshots can't be backfilled: the scheduled task (scripts/register_daily_ingest.ps1) must stay registered, and the PC on with Docker available, until ingestion moves to a hosted worker (Phase 9).
 - Ingestion: every write goes through `ingest.base.upsert` (re-runs over identical data change 0 rows) inside `sync_run`. Players resolve by ID only (`nflverse.resolve`); unmatched rows go to `unresolved_players`. Name-based `candidates` are hints for a human, never applied.
 - httpx clients: User-Agent `fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)`, a timeout, and a rate limit.
@@ -92,6 +97,8 @@ uv run alembic downgrade base          # drop everything
 uv run fantasy-rag verify-sources      # sample every core source -> docs/data_sources.md
 uv run fantasy-rag ingest structured   # nflverse 2022+ and Sleeper -> Postgres (idempotent)
 uv run python tests/fixtures/record_phase1.py   # re-record test fixtures (network)
+uv run fantasy-rag league import       # your Sleeper leagues (SLEEPER_USERNAME or --league-id)
+uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-week (exit 1 on any miss)
 
 # repo root: daily snapshot collection (Windows Task Scheduler, current user)
 powershell -File scripts/register_daily_ingest.ps1   # daily 7am + Wed-Sat 1pm/6pm; logs in data/logs/

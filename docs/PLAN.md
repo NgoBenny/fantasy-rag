@@ -117,8 +117,8 @@ One Postgres database holds four groups of tables: structured stats, league and 
 | `injury_snapshots` | `player_id`, `status` (Q/D/O/IR), `body_part`, `practice` (DNP/LP/FP), `source`, `reported_at`, `ingested_at` | Sleeper `/players/nfl` (status, body part) and the nflverse injury file (status and practice) | Daily, 3× daily Wed–Sat |
 | `injury_history` | `season`, `week`, `player_id`, report and practice status | `load_injuries()` | Weekly |
 | `trending` | `player_id`, `kind` (add/drop), `count`, `lookback_hours`, `window_start` (6-hour UTC window), `ingested_at` | Sleeper trending endpoint | Every 6 hours |
-| `fantasy_leagues` | `id`, `provider`, `external_league_id`, `season`, `scoring_settings` (raw JSON), `scoring_rules` (validated), `roster_positions` | Sleeper league import | On import + daily |
-| `fantasy_rosters` | `league_id`, `roster_id`, `owner_name`, `week`, `player_ids[]`, `starter_ids[]` | Sleeper rosters and matchups | Daily in season |
+| `fantasy_leagues` | `id`, `provider`, `external_league_id`, `season`, `name`, `settings`, `scoring_settings` (raw JSON), `scoring_rules` (non-zero supported weights + unsupported keys), `roster_positions` | Sleeper league import | On import + daily |
+| `fantasy_rosters` | `league_id`, `roster_id`, `week`, `owner_name`, `matchup_id`, `points`, `player_ids[]`, `starter_ids[]` (GSIS only), `raw` (Sleeper matchup entry incl. team DEF and per-player `players_points`) | Sleeper rosters and matchups | Daily in season |
 | `projections` | `player_id`, `season`, `week`, `model_version`, per-stat predictions, `p10`/`p50`/`p90`, `generated_at` | Projection job | Daily Tue–Sun |
 | `model_runs` | `model_version`, training window, features, metrics (MAE, Spearman, start/sit accuracy) | Training and backtest jobs | Per run |
 | `sources` | `name`, `license`, `attribution`, `storage_allowed` (full/summary/link), `refresh_cadence` | Seeded by hand | On change |

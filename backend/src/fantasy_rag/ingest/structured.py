@@ -170,7 +170,9 @@ def drop_conflicted(conn: Connection, conflicts: pl.DataFrame) -> int:
 def _idmap(conn: Connection) -> tuple[pl.DataFrame, set[str]]:
     ids = conn.execute(text("SELECT provider, external_id, player_id FROM player_external_ids"))
     idmap = pl.DataFrame(
-        ids.fetchall(), schema=["provider", "external_id", "player_id"], orient="row"
+        ids.fetchall(),
+        schema={"provider": pl.String, "external_id": pl.String, "player_id": pl.String},
+        orient="row",
     )
     known = {r[0] for r in conn.execute(text("SELECT id FROM players"))}
     return idmap, known
