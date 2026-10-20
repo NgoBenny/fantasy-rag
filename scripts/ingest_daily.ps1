@@ -28,7 +28,11 @@ $env:PYTHONIOENCODING = "utf-8"
 if ($Job -eq "news") {
     uv run fantasy-rag ingest news 2>&1 | Out-File -Append -Encoding utf8 $log
     $newsExit = $LASTEXITCODE
-    "exit=$newsExit" | Out-File -Append -Encoding utf8 $log
+    # Refresh the Phase 4 evidence after every run: stories per source (last 48 hours)
+    # and how many rostered-player mentions carry the player's ID.
+    uv run fantasy-rag ingest news-report 2>$null |
+        Out-File -Encoding utf8 (Join-Path $logDir "news_report.json")
+    "exit=$newsExit report=$LASTEXITCODE" | Out-File -Append -Encoding utf8 $log
     exit $newsExit
 }
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
