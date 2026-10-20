@@ -165,6 +165,7 @@ def defense_vs_position(conn: Connection, a: DefenseVsPosition) -> dict[str, Any
         "games": len(allowed[team]),
         "rank_most_allowed": ranked.index(team) + 1,
         "teams_ranked": len(ranked),
+        "unscored_rules": rules.unscored_for(a.position),
     }
 
 
@@ -206,6 +207,8 @@ def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[st
         "projected_points": got[0] if got else None,
         "games_used": got[1] if got else 0,
         "model_version": baseline.MODEL_VERSION,
+        # league rules we can't compute for this position: the projection excludes them
+        "unscored_rules": rules.unscored_for(ref.position or ""),
         "last_game": {"season": games[-1][0], "week": games[-1][1], "points": games[-1][2]}
         if games
         else None,
@@ -225,8 +228,16 @@ def compare_start_sit(conn: Connection, a: CompareStartSit) -> dict[str, Any]:
     projections = [_projection(conn, r, a) for r in refs]
     for p in projections:
         p["injury"] = q.injury_snapshots(conn, p["player"]["id"])
-    ranked = sorted(projections, key=lambda p: -(p["projected_points"] or -1e9))
-    return {"ranked": ranked, "higher_projection": ranked[0]["player"]["name"]}
+    # None (no games) sorts last; 0.0 is a real projection and beats a negative one.
+    ranked = sorted(
+        projections,
+        key=lambda p: (p["projected_points"] is None, -(p["projected_points"] or 0.0)),
+    )
+    top = ranked[0]
+    return {
+        "ranked": ranked,
+        "higher_projection": top["player"]["name"] if top["projected_points"] is not None else None,
+    }
 
 
 def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
@@ -258,7 +269,12 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
         "rosters_as_of": {"week": roster_week, "synced_at": synced},
         "rostered_players_excluded": len(taken),
         "candidates": [
-            {**refs[pid].model_dump(), "projected_points": pts, "games_used": n}
+            {
+                **refs[pid].model_dump(),
+                "projected_points": pts,
+                "games_used": n,
+                "unscored_rules": rules.unscored_for(refs[pid].position or ""),
+            }
             for pts, n, pid in picks[: a.limit]
         ],
         "model_version": baseline.MODEL_VERSION,

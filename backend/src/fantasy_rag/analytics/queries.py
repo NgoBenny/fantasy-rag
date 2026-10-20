@@ -25,6 +25,7 @@ _OFFENSE = {
     "rec_2pt": 2,
     "fum_lost": -2,
     "fum_rec_td": 6,
+    "st_td": 6,  # kick/punt return TDs
     "xpm": 1,
     "xpmiss": -1,
     "fgm_0_19": 3,

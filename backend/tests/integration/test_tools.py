@@ -23,8 +23,14 @@ PLAYERS = [  # id, name, position, team
     ("00-3", "Mike Williams", "WR", "NYJ"),
     ("00-4", "Mike Williams", "TE", "WAS"),  # both active fantasy players
     ("00-5", "Free Agent", "WR", "NE"),
+    ("00-6", "Zero Guy", "TE", "KC"),
+    ("00-7", "Negative Guy", "TE", "LV"),
+    ("00-8", "Never Played", "TE", "SF"),
+    ("00-9", "Also Unplayed", "TE", "SEA"),
 ]
 STATS = {  # player -> week -> stats
+    "00-6": {1: {}},  # played, scored 0
+    "00-7": {1: {"fumbles_lost_total": 1}},  # -2
     "00-1": {1: {"receptions": 8, "receiving_yards": 100, "targets": 10},
              2: {"receptions": 6, "receiving_yards": 80, "targets": 9}},
     "00-3": {1: {"receptions": 2, "receiving_yards": 20}},
@@ -67,7 +73,7 @@ def db(scratch_db_url: str) -> str:
                 " scoring_settings, roster_positions, sync_run_id)"
                 " VALUES ('sleeper', 'x', 2026, :s, '[]', :r) RETURNING id"
             ),
-            {"s": json.dumps({"rec": 1, "rec_yd": 0.1}), "r": run},
+            {"s": json.dumps({"rec": 1, "rec_yd": 0.1, "st_ff": 1}), "r": run},
         ).scalar_one()
         c.execute(
             text(
@@ -115,3 +121,22 @@ def test_tools_cannot_write_and_reject_bad_input(db: str) -> None:
             )
         with pytest.raises(ValidationError):
             run_tool(conn, "get_trending", {"limit": 500})
+
+
+def test_projections_report_unscored_rules_and_rank_zero_above_negative(db: str) -> None:
+    with get_readonly_engine(db).connect() as conn:
+        proj = run_tool(conn, "project_player", {"player": {"name": "Free Agent"}, "league_id": 1})
+        assert proj["unscored_rules"] == ["st_ff"]  # league 1 scores a rule we can't compute
+        ss = run_tool(
+            conn,
+            "compare_start_sit",
+            {"players": [{"name": "Negative Guy"}, {"name": "Zero Guy"}], "scoring": "ppr"},
+        )
+        assert [p["projected_points"] for p in ss["ranked"]] == [0.0, -2.0]
+        assert ss["higher_projection"] == "Zero Guy"
+        none = run_tool(
+            conn,
+            "compare_start_sit",
+            {"players": [{"name": "Never Played"}, {"name": "Also Unplayed"}]},
+        )
+        assert none["higher_projection"] is None

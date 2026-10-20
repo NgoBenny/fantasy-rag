@@ -27,6 +27,7 @@ def _pts(rec: float) -> str:
         "rushing_2pt_conversions": 2, "receptions": rec, "receiving_yards": 0.1,
         "receiving_tds": 6, "receiving_2pt_conversions": 2, "fumbles_lost_total": -2,
         "fumble_recovery_tds": 6,
+        "special_teams_tds": 6,
     }  # fmt: skip
     return (
         "round(("

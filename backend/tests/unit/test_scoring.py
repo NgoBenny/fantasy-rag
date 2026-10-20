@@ -82,3 +82,12 @@ def test_individual_return_yards_are_reported_not_dropped() -> None:
     rules = ScoringRules.from_sleeper({"rec": 1, "kr_yd": 0.04, "pr_yd": 0.04, "def_kr_yd": 0.04})
     s = score({"receptions": 0, "kickoff_return_yards": 150}, "WR", rules)
     assert s.points == 0 and s.unscored == ["kr_yd", "pr_yd"]  # def_kr_yd is team DEF only
+
+
+def test_presets_score_return_touchdowns() -> None:
+    from fantasy_rag.analytics.queries import PRESETS
+
+    # nflverse counts a kick/punt return TD as 6 in fantasy_points_ppr.
+    for name in ("ppr", "half", "std"):
+        rules = ScoringRules.from_sleeper(PRESETS[name])
+        assert score({"special_teams_tds": 1}, "WR", rules).points == 6.0, name
