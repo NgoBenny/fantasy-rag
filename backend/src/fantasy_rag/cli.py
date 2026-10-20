@@ -12,6 +12,9 @@ def main(argv: list[str] | None = None) -> None:
     league.add_argument("action", choices=["import", "check-scoring"])
     league.add_argument("--username", help="Sleeper username (default: SLEEPER_USERNAME)")
     league.add_argument("--league-id", help="import one league instead of all of a user's")
+    league.add_argument(
+        "--season", help="with --username: that season's leagues (default: current)"
+    )
     args = parser.parse_args(argv)
 
     if args.command == "verify-sources":
@@ -47,7 +50,7 @@ def _league(args: argparse.Namespace) -> None:
         username = args.username or Settings().sleeper_username
         if not (username or args.league_id):
             sys.exit("give --username, --league-id, or set SLEEPER_USERNAME in .env")
-        for s in import_leagues(engine, Sleeper(), username, args.league_id):
+        for s in import_leagues(engine, Sleeper(), username, args.league_id, args.season):
             print(
                 f"league {s['league_pk']}: {s['rosters']} rosters x {s['weeks']} weeks,"
                 f" {s['changed']} rows changed, {s['unresolved']} unresolved players,"

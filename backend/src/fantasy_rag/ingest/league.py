@@ -80,21 +80,40 @@ def roster_rows(
     return pl.DataFrame(rows), unresolved.unique() if unresolved.height else unresolved
 
 
+REGULAR_SEASON_WEEKS = 18  # 2021 onward; fantasy playoffs end by week 17 or 18
+
+
+def weeks_to_import(league_season: int, state: dict[str, Any]) -> int:
+    """Last week to fetch: elapsed weeks this season, all weeks for a past season."""
+    current = int(state["season"])
+    if league_season < current:
+        return REGULAR_SEASON_WEEKS
+    if league_season == current:
+        return {"regular": int(state["week"]), "post": REGULAR_SEASON_WEEKS}.get(
+            str(state.get("season_type")), 0
+        )
+    return 0  # a future season has no matchups yet
+
+
 def import_leagues(
-    engine: Engine, api: Any, username: str | None, league_id: str | None
+    engine: Engine,
+    api: Any,
+    username: str | None,
+    league_id: str | None,
+    season: str | None = None,
 ) -> list[dict[str, Any]]:
     state = api.get("/state/nfl")
-    season, current_week = str(state["season"]), int(state["week"])
     summaries = []
-    for lid in league_ids(api, username, league_id, season):
+    for lid in league_ids(api, username, league_id, season or str(state["season"])):
         with sync_run(engine, "sleeper.league") as run:
-            summaries.append(_import_one(run, api, lid, current_week))
+            summaries.append(_import_one(run, api, lid, state))
     return summaries
 
 
-def _import_one(run: Run, api: Any, lid: str, current_week: int) -> dict[str, Any]:
+def _import_one(run: Run, api: Any, lid: str, state: dict[str, Any]) -> dict[str, Any]:
     conn = run.conn
     league = api.get(f"/league/{lid}")
+    last_week = weeks_to_import(int(league["season"]), state)
     changed = upsert(
         conn, "fantasy_leagues", league_row(league), ["provider", "external_league_id"], run.id
     )
@@ -115,27 +134,28 @@ def _import_one(run: Run, api: Any, lid: str, current_week: int) -> dict[str, An
         conn.execute(
             text("SELECT provider, external_id, player_id FROM player_external_ids")
         ).fetchall(),
-        schema=["provider", "external_id", "player_id"],
+        schema={"provider": pl.String, "external_id": pl.String, "player_id": pl.String},
         orient="row",
     )
     known = {r[0] for r in conn.execute(text("SELECT id FROM players"))}
     all_rows, all_misses = [], []
-    for week in range(1, current_week + 1):
+    for week in range(1, last_week + 1):
         rows, misses = roster_rows(
             league_pk, week, api.get(f"/league/{lid}/matchups/{week}") or [], owners, idmap, known
         )
-        all_rows.append(rows)
+        if rows.height:  # weeks without matchups (e.g. past the season) add nothing
+            all_rows.append(rows)
         if misses.height:
             all_misses.append(misses)
-    rows = pl.concat(all_rows)
+    rows = pl.concat(all_rows) if all_rows else pl.DataFrame()
     changed += upsert(conn, "fantasy_rosters", rows, ["league_id", "roster_id", "week"], run.id)
     misses = pl.concat(all_misses).unique() if all_misses else pl.DataFrame({"external_id": []})
     record_unresolved(run, f"league.{league_pk}", misses)
     run.rows = changed
     return {
         "league_pk": league_pk,
-        "rosters": int(rows["roster_id"].n_unique()),
-        "weeks": current_week,
+        "rosters": int(rows["roster_id"].n_unique()) if rows.height else 0,
+        "weeks": last_week,
         "changed": changed,
         "unresolved": misses.height,
         "unsupported_scoring": sorted(

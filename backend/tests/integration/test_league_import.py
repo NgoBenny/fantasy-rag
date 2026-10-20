@@ -10,7 +10,7 @@ from alembic.config import Config
 from sqlalchemy import create_engine, text
 
 from fantasy_rag.analytics.scoring_check import check_league
-from fantasy_rag.ingest.league import import_leagues
+from fantasy_rag.ingest.league import import_leagues, weeks_to_import
 
 pytestmark = pytest.mark.db
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
@@ -35,7 +35,7 @@ class FakeSleeper:
              "starters": ["404", "0"], "players_points": {"404": 0.0}},
         ]  # fmt: skip
         return {
-            "/state/nfl": {"season": "2026", "week": 1},
+            "/state/nfl": {"season": "2026", "week": 1, "season_type": "regular"},
             "/user/someone": {"user_id": "u1"},
             "/user/u1/leagues/nfl/2026": [{"league_id": "999"}],
             "/league/999": LEAGUE,
@@ -105,3 +105,43 @@ def test_import_and_scoring_check(scratch_db_url: str) -> None:
         1,
     )
     assert [(m.name, m.sleeper, m.ours) for m in result.mismatches] == [("Wide Out", 15.6, 16.1)]
+
+
+def test_weeks_follow_the_league_season() -> None:
+    regular = {"season": "2026", "week": 2, "season_type": "regular"}
+    assert weeks_to_import(2025, regular) == 18  # completed past season: every week
+    assert weeks_to_import(2026, regular) == 2
+    assert weeks_to_import(2026, {**regular, "season_type": "post"}) == 18
+    assert weeks_to_import(2026, {**regular, "season_type": "pre"}) == 0
+    assert weeks_to_import(2027, regular) == 0
+
+
+class HistoricalSleeper(FakeSleeper):
+    """A 2025 league imported during 2026 week 2."""
+
+    def __init__(self) -> None:
+        self.paths: list[str] = []
+
+    def get(self, path: str, **params: Any) -> Any:
+        self.paths.append(path)
+        if path == "/state/nfl":
+            return {"season": "2026", "week": 2, "season_type": "regular"}
+        if path == "/league/999":
+            return {**LEAGUE, "season": "2025"}
+        if path.startswith("/league/999/matchups/"):
+            return super().get("/league/999/matchups/1") if path.endswith("/17") else []
+        return super().get(path)
+
+
+def test_historical_league_imports_all_weeks(scratch_db_url: str) -> None:
+    cfg = Config(str(ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", scratch_db_url.replace("%", "%%"))
+    command.upgrade(cfg, "head")
+    engine = create_engine(scratch_db_url)
+    api = HistoricalSleeper()
+    summary = import_leagues(engine, api, None, "999")[0]
+    with engine.connect() as conn:
+        weeks = conn.execute(text("SELECT DISTINCT week FROM fantasy_rosters")).scalars().all()
+    engine.dispose()
+    assert summary["weeks"] == 18
+    assert "/league/999/matchups/18" in api.paths and weeks == [17]

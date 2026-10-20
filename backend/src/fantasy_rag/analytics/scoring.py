@@ -15,10 +15,11 @@ from pydantic import BaseModel
 Stats = Mapping[str, Any]
 
 # Team defense and IDP keys only score DEF / defensive players, so their absence does not
-# make an offensive player's or kicker's total incomplete.
+# make an offensive player's or kicker's total incomplete. Individual return yards
+# (kr_yd, pr_yd) can score any player, so they stay visible when unsupported.
 TEAM_DEF_OR_IDP = re.compile(
     r"^(def_|idp_|pts_allow|yds_allow|int$|int_ret|sack|ff$|fum_rec$|fum_ret|safe$|blk_kick"
-    r"|tkl|qb_hit|kr_yd|pr_yd|fg_ret|bonus_def|bonus_sack|bonus_tkl)"
+    r"|tkl|qb_hit|fg_ret|bonus_def|bonus_sack|bonus_tkl)"
 )
 DEF_POSITIONS = {"DEF", "DST", "D/ST"}
 

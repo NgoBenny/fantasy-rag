@@ -76,3 +76,9 @@ def test_zero_keys_are_ignored_and_unsupported_keys_reported() -> None:
     assert score({"receptions": 1}, "WR", rules).unscored == ["rec_0_4", "st_ff"]
     defense = score({}, "DEF", rules)
     assert defense.points == 0 and defense.unscored == ["team defense scoring (not supported yet)"]
+
+
+def test_individual_return_yards_are_reported_not_dropped() -> None:
+    rules = ScoringRules.from_sleeper({"rec": 1, "kr_yd": 0.04, "pr_yd": 0.04, "def_kr_yd": 0.04})
+    s = score({"receptions": 0, "kickoff_return_yards": 150}, "WR", rules)
+    assert s.points == 0 and s.unscored == ["kr_yd", "pr_yd"]  # def_kr_yd is team DEF only
