@@ -48,7 +48,13 @@ def test_espn_story_carries_athlete_ids_and_team_names() -> None:
 def test_clean_and_url_helpers() -> None:
     assert clean("a &amp; <i>b</i>\n c") == "a & b c"
     assert clean("one two three four", limit=9) == "one two…"
-    assert normalize_url("HTTP://Example.com/a/?x=1") == "https://example.com/a"
+    assert (
+        normalize_url("HTTP://Example.com/a/?utm_source=rss&fbclid=x#top")
+        == "https://example.com/a"
+    )
+    # Story-identifying parameters stay, so different stories never collapse into one.
+    assert normalize_url("https://x.com/story?id=1&utm_medium=rss") == "https://x.com/story?id=1"
+    assert normalize_url("https://x.com/story?id=2") != normalize_url("https://x.com/story?id=1")
     assert _when("not a date") is None
 
 
@@ -94,3 +100,21 @@ def test_chunker_splits_long_text_on_sentences() -> None:
     long = " ".join(f"Sentence {i} has five words." for i in range(150))  # 750 words
     pieces = chunk("T", long, max_words=300)
     assert len(pieces) == 3 and all(len(p.split()) <= 300 for p in pieces)
+
+
+def test_article_text_never_becomes_the_summary() -> None:
+    # No <description>: feedparser copies content:encoded into `summary`. Store nothing.
+    raw = b"""<?xml version="1.0"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel><item><title>T</title><link>https://example.com/s</link>
+<content:encoded>FULL ARTICLE TEXT</content:encoded></item></channel></rss>"""
+    [s] = parse_rss(raw)
+    assert s["summary"] == ""
+
+
+def test_namesake_on_another_team_is_not_tagged() -> None:
+    # The Vikings WR is the only fantasy "Justin Jefferson"; a Browns LB shares the name.
+    linker = Linker([Player("wr", "justin jefferson", "MIN")], {}, {"justin jefferson"})
+    browns_story = "Justin Jefferson questionable to return vs. the Ravens"
+    assert linker.players_in(browns_story, ["CLE", "BAL"], []) == ([], ["justin jefferson"])
+    assert linker.players_in("Justin Jefferson had 120 yards", ["MIN"], []) == (["wr"], [])
+    assert linker.players_in("Justin Jefferson had 120 yards", [], []) == (["wr"], [])

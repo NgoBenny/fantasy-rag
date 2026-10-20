@@ -100,3 +100,50 @@ def test_news_job_end_to_end(scratch_db_url: str) -> None:
     again = run_news(engine, FakeEmbedder(), _fetch, FEEDS, EXTRA)
     assert (again.documents_changed, again.chunks_written, again.embedded) == (0, 0, 0)
     engine.dispose()
+
+
+class BrokenEmbedder:
+    model_name = "broken"
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        raise RuntimeError("model crashed")
+
+
+def test_storage_limits_hold_and_failures_are_recorded(scratch_db_url: str) -> None:
+    cfg = Config(str(ROOT / "backend" / "alembic.ini"))
+    cfg.set_main_option("sqlalchemy.url", scratch_db_url.replace("%", "%%"))
+    command.upgrade(cfg, "head")
+    engine = create_engine(scratch_db_url)
+
+    # 1. Every feed down: the run is recorded as failed, not silently skipped.
+    with pytest.raises(RuntimeError, match="every news feed failed"):
+        run_news(engine, FakeEmbedder(), lambda: ({}, ["all down"]), FEEDS, EXTRA)
+
+    # 2. Embedding breaks: ingest is ok, the embed run is failed, chunks stay unembedded.
+    with pytest.raises(RuntimeError, match="model crashed"):
+        run_news(engine, BrokenEmbedder(), _fetch, FEEDS, EXTRA)
+    with engine.connect() as c:
+        runs = dict(c.execute(text("SELECT source, status FROM sync_runs ORDER BY id")).all())
+        missing = c.execute(text("SELECT count(*) FROM chunks WHERE embedding IS NULL")).scalar()
+    assert runs == {"news": "ok", "news.embed": "failed"}  # the last row per source wins
+    assert missing == 5
+    assert run_news(engine, FakeEmbedder(), _fetch, FEEDS, EXTRA).embedded == 5  # caught up
+
+    # 3. A source tightened to link-only stays that way, and loses stored summaries.
+    with engine.begin() as c:
+        c.execute(text("UPDATE sources SET storage_allowed = 'link' WHERE name = 'fixture'"))
+    run_news(engine, FakeEmbedder(), _fetch, FEEDS, EXTRA)
+    with engine.connect() as c:
+        policy = c.execute(text("SELECT storage_allowed FROM sources WHERE name = 'fixture'"))
+        kept = c.execute(
+            text("SELECT count(*) FROM documents WHERE source = 'fixture' AND summary IS NOT NULL")
+        ).scalar()
+        chunk_text = c.execute(
+            text(
+                "SELECT c.text FROM chunks c JOIN documents d ON d.id = c.document_id"
+                " WHERE d.url = 'https://fixtures.invalid/news/1'"
+            )
+        ).scalar()
+    assert policy.scalar() == "link" and kept == 0
+    assert chunk_text == STORIES["stories"][0]["title"]  # rebuilt without the summary
+    engine.dispose()

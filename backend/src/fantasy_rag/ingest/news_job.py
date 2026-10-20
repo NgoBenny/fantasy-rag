@@ -1,6 +1,6 @@
 """`fantasy-rag ingest news`: feeds -> documents -> chunks -> embeddings. Safe to re-run."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -47,7 +47,15 @@ def _linker(conn: Connection) -> Linker:
             text("SELECT external_id, player_id FROM player_external_ids WHERE provider = 'espn'")
         )
     }
-    return Linker(players, espn)
+    fantasy = {p.id for p in players}
+    shared = {
+        norm(name).strip()
+        for pid, name in conn.execute(
+            text("SELECT id, full_name FROM players WHERE status IN ('ACT', 'RES', 'DEV', 'PUP')")
+        )
+        if pid not in fantasy
+    } & {p.name for p in players}
+    return Linker(players, espn, shared)
 
 
 def _arr(values: list[str]) -> str:
@@ -59,58 +67,84 @@ def run_news(
     embedder: Embedder,
     fetch: Callable[[], tuple[Fetched, list[str]]] = news.fetch_all,
     feeds: list[news.Feed] = news.FEEDS,
-    extra_sources: list[tuple[str, str, str, str]] = (),  # type: ignore[assignment]
+    extra_sources: Sequence[tuple[str, str, str, str, str]] = (),
 ) -> NewsReport:
+    """One news run. Ingest and embedding are separate sync_runs, so either can fail visibly."""
     report = NewsReport()
-    fetched, report.feed_errors = fetch()
-    if not fetched:
-        raise RuntimeError(f"every news feed failed: {report.feed_errors[:3]}")
     by_url = {f.url: f for f in feeds}
 
     with sync_run(engine, "news") as run:
         conn = run.conn
-        registry = pl.DataFrame(
-            [(n, lic, att, "summary", "every 30-60 min in season") for n, lic, att in news.SOURCES]
-            + [tuple(s) for s in extra_sources],
-            schema=["name", "license", "attribution", "storage_allowed", "refresh_cadence"],
-            orient="row",
-        )
-        upsert(conn, "sources", registry, ["name"], None)
+        fetched, report.feed_errors = fetch()
+        if not fetched:  # recorded as a failed run, not lost
+            raise RuntimeError(f"every news feed failed: {report.feed_errors[:3]}")
+
+        # Seed sources we don't know yet; an existing row (e.g. tightened to `link`) wins.
+        seed = [
+            (n, lic, att, "summary", "every 30-60 min in season") for n, lic, att in news.SOURCES
+        ]
+        known = {str(n) for n in conn.execute(text("SELECT name FROM sources")).scalars()}
+        new_rows = [r for r in [*seed, *extra_sources] if r[0] not in known]
+        if new_rows:
+            upsert(
+                conn,
+                "sources",
+                pl.DataFrame(
+                    new_rows,
+                    schema=["name", "license", "attribution", "storage_allowed", "refresh_cadence"],
+                    orient="row",
+                ),
+                ["name"],
+                None,
+            )
         allowed = {
             str(n): str(a)
             for n, a in conn.execute(text("SELECT name, storage_allowed FROM sources"))
         }
+        # A source tightened to link-only loses the summaries already stored for it.
+        purged = (
+            conn.execute(
+                text(
+                    "UPDATE documents SET summary = NULL WHERE summary IS NOT NULL AND source IN"
+                    " (SELECT name FROM sources WHERE storage_allowed = 'link') RETURNING url"
+                )
+            )
+            .scalars()
+            .all()
+        )
         linker = _linker(conn)
 
         docs: dict[str, dict[str, Any]] = {}  # url -> row; first feed to carry a story wins
         for feed_url, stories in fetched.items():
             feed = by_url[feed_url]
-            for s in stories:
-                if s["url"] in docs:
+            for st in stories:
+                if st["url"] in docs:
                     continue
-                body = f"{s['title']}. {s['summary']}"
-                teams = linker.teams_in(body, s["team_names"] + ([feed.team] if feed.team else []))
+                body = f"{st['title']}. {st['summary']}"
+                teams = linker.teams_in(body, st["team_names"] + ([feed.team] if feed.team else []))
                 players, ambiguous = linker.players_in(
-                    body + " " + " ".join(s["tags"]), teams, s["espn_athlete_ids"]
+                    body + " " + " ".join(st["tags"]), teams, st["espn_athlete_ids"]
                 )
                 report.ambiguous_names += ambiguous
                 keep = allowed.get(feed.source, "link")
-                docs[s["url"]] = {
+                docs[st["url"]] = {
                     "source": feed.source,
-                    "url": s["url"],
-                    "title": s["title"],
-                    "summary": s["summary"] if keep in ("summary", "full") else None,
-                    "published_at": s["published_at"],
+                    "url": st["url"],
+                    "title": st["title"],
+                    "summary": st["summary"] or None if keep in ("summary", "full") else None,
+                    "published_at": st["published_at"],
                     "teams": _arr(teams),
                     "player_ids": _arr(players),
                 }
         report.stories = len(docs)
         frame = pl.DataFrame(list(docs.values()), schema_overrides={"summary": pl.String})
         report.documents_changed = upsert(conn, "documents", frame, ["url"], run.id)
-        report.chunks_written = _rechunk(conn, list(docs), linker)
+        report.chunks_written = _rechunk(conn, sorted({*docs, *purged}), linker)
         run.rows = report.documents_changed
 
-    report.embedded = embed_missing(engine, embedder)
+    # Separate run: an embedding failure is recorded as failed, never hidden behind "ok".
+    with sync_run(engine, "news.embed") as run:
+        report.embedded = run.rows = embed_missing(run.conn, embedder)
     return report
 
 
@@ -165,24 +199,21 @@ def _rechunk(conn: Connection, urls: list[str], linker: Linker) -> int:
     return written
 
 
-def embed_missing(engine: Engine, embedder: Embedder, batch: int = 64) -> int:
+def embed_missing(conn: Connection, embedder: Embedder, batch: int = 64) -> int:
     """Embed every chunk that has no vector yet (new or rebuilt chunks)."""
     done = 0
-    while True:
-        with engine.begin() as conn:
-            rows = conn.execute(
-                text("SELECT id, text FROM chunks WHERE embedding IS NULL ORDER BY id LIMIT :n"),
-                {"n": batch},
-            ).fetchall()
-            if not rows:
-                return done
-            vectors = embedder.embed([t for _, t in rows])
-            for (cid, _), vec in zip(rows, vectors, strict=True):
-                conn.execute(
-                    text("UPDATE chunks SET embedding = CAST(:v AS vector) WHERE id = :id"),
-                    {"v": "[" + ",".join(f"{x:.6f}" for x in vec) + "]", "id": cid},
-                )
-            done += len(rows)
+    while rows := conn.execute(
+        text("SELECT id, text FROM chunks WHERE embedding IS NULL ORDER BY id LIMIT :n"),
+        {"n": batch},
+    ).fetchall():
+        vectors = embedder.embed([t for _, t in rows])
+        for (cid, _), vec in zip(rows, vectors, strict=True):
+            conn.execute(
+                text("UPDATE chunks SET embedding = CAST(:v AS vector) WHERE id = :id"),
+                {"v": "[" + ",".join(f"{x:.6f}" for x in vec) + "]", "id": cid},
+            )
+        done += len(rows)
+    return done
 
 
 def coverage(conn: Connection, hours: int = 48) -> dict[str, Any]:

@@ -33,6 +33,8 @@ class Player:
 class Linker:
     players: list[Player]
     espn_to_player: dict[str, str] = field(default_factory=dict)
+    # Names also carried by active non-fantasy players (e.g. a linebacker Justin Jefferson).
+    shared_names: set[str] = field(default_factory=set)
 
     def __post_init__(self) -> None:
         self.by_name: dict[str, list[Player]] = {}
@@ -67,7 +69,8 @@ class Linker:
         t = norm(text)
         for name in set(self.pattern.findall(t)) if self.pattern else set():
             cands = self.by_name[name]
-            if len(cands) > 1:
+            if len(cands) > 1 or (name in self.shared_names and teams):
+                # Several candidates, or a namesake on another team: the story's teams decide.
                 cands = [c for c in cands if c.team in teams]
             if len(cands) == 1:
                 ids.add(cands[0].id)

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from typing import Any
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import feedparser
 import httpx
@@ -93,10 +93,15 @@ def clean(text: str | None, limit: int | None = None) -> str:
     return s
 
 
+TRACKING = re.compile(r"^(utm_\w+|fbclid|gclid|mc_cid|mc_eid|ref|cmpid|partner|src)$", re.I)
+
+
 def normalize_url(url: str) -> str:
-    """One URL per story: https, no query string or fragment, no trailing slash."""
+    """One URL per story: https, lowercase host, no fragment or trailing slash, and no
+    tracking parameters. Other query parameters stay: some sites identify stories by them."""
     parts = urlsplit(url.strip())
-    return urlunsplit(("https", parts.netloc.lower(), parts.path.rstrip("/"), "", ""))
+    query = urlencode([(k, v) for k, v in parse_qsl(parts.query) if not TRACKING.match(k)])
+    return urlunsplit(("https", parts.netloc.lower(), parts.path.rstrip("/"), query, ""))
 
 
 def _when(value: str | None) -> datetime | None:
@@ -137,6 +142,15 @@ def parse_espn(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return stories
 
 
+def _rss_summary(entry: Any) -> str:
+    """The feed's own description only. With no description, feedparser fills `summary`
+    from the full article (`content:encoded`); that is article text, so store nothing."""
+    summary = entry.get("summary") or ""
+    if any(summary == (c.get("value") or "") for c in entry.get("content") or []):
+        return ""
+    return clean(summary, SUMMARY_CHARS)
+
+
 def parse_rss(raw: bytes) -> list[dict[str, Any]]:
     stories = []
     for e in feedparser.parse(raw).entries:
@@ -146,8 +160,7 @@ def parse_rss(raw: bytes) -> list[dict[str, Any]]:
             {
                 "url": normalize_url(e["link"]),
                 "title": clean(e["title"]),
-                # `summary` only; `content` (full article text) is deliberately ignored.
-                "summary": clean(e.get("summary"), SUMMARY_CHARS),
+                "summary": _rss_summary(e),
                 "published_at": _when(e.get("published") or e.get("updated")),
                 "espn_athlete_ids": [],
                 "team_names": [],
