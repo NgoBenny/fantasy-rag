@@ -47,15 +47,15 @@ def _linker(conn: Connection) -> Linker:
             text("SELECT external_id, player_id FROM player_external_ids WHERE provider = 'espn'")
         )
     }
-    fantasy = {p.id for p in players}
-    shared = {
-        norm(name).strip()
-        for pid, name in conn.execute(
-            text("SELECT id, full_name FROM players WHERE status IN ('ACT', 'RES', 'DEV', 'PUP')")
-        )
-        if pid not in fantasy
-    } & {p.name for p in players}
-    return Linker(players, espn, shared)
+    fantasy_ids, fantasy_names = {p.id for p in players}, {p.name for p in players}
+    namesakes: dict[str, list[str | None]] = {}
+    for pid, name, team in conn.execute(
+        text("SELECT id, full_name, team FROM players WHERE status IN ('ACT', 'RES', 'DEV', 'PUP')")
+    ):
+        n = norm(name).strip()
+        if pid not in fantasy_ids and n in fantasy_names:
+            namesakes.setdefault(n, []).append(team)
+    return Linker(players, espn, namesakes)
 
 
 def _arr(values: list[str]) -> str:

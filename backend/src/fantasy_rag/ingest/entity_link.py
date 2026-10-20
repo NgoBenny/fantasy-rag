@@ -33,8 +33,9 @@ class Player:
 class Linker:
     players: list[Player]
     espn_to_player: dict[str, str] = field(default_factory=dict)
-    # Names also carried by active non-fantasy players (e.g. a linebacker Justin Jefferson).
-    shared_names: set[str] = field(default_factory=set)
+    # Active non-fantasy players sharing a fantasy player's name -> their teams
+    # (e.g. "justin jefferson" -> ["CLE"] for the Browns linebacker).
+    namesakes: dict[str, list[str | None]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.by_name: dict[str, list[Player]] = {}
@@ -69,11 +70,15 @@ class Linker:
         t = norm(text)
         for name in set(self.pattern.findall(t)) if self.pattern else set():
             cands = self.by_name[name]
-            if len(cands) > 1 or (name in self.shared_names and teams):
-                # Several candidates, or a namesake on another team: the story's teams decide.
-                cands = [c for c in cands if c.team in teams]
-            if len(cands) == 1:
-                ids.add(cands[0].id)
+            others = self.namesakes.get(name, [])
+            if len(cands) == 1 and not others:
+                ids.add(cands[0].id)  # the only active player with this name
+                continue
+            # Same-named players: the story's teams must single out exactly one, and it must
+            # be a fantasy player. No team, or teams fitting several of them: ambiguous.
+            fits = [c for c in cands if c.team in teams]
+            if len(fits) == 1 and not any(t in teams for t in others):
+                ids.add(fits[0].id)
             else:
                 ambiguous.append(name)
         return sorted(ids), sorted(ambiguous)

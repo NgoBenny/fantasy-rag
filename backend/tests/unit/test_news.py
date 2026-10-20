@@ -111,10 +111,14 @@ def test_article_text_never_becomes_the_summary() -> None:
     assert s["summary"] == ""
 
 
-def test_namesake_on_another_team_is_not_tagged() -> None:
+def test_namesakes_need_teams_that_single_out_one_player() -> None:
     # The Vikings WR is the only fantasy "Justin Jefferson"; a Browns LB shares the name.
-    linker = Linker([Player("wr", "justin jefferson", "MIN")], {}, {"justin jefferson"})
-    browns_story = "Justin Jefferson questionable to return vs. the Ravens"
-    assert linker.players_in(browns_story, ["CLE", "BAL"], []) == ([], ["justin jefferson"])
-    assert linker.players_in("Justin Jefferson had 120 yards", ["MIN"], []) == (["wr"], [])
-    assert linker.players_in("Justin Jefferson had 120 yards", [], []) == (["wr"], [])
+    linker = Linker([Player("wr", "justin jefferson", "MIN")], {}, {"justin jefferson": ["CLE"]})
+    story = "Justin Jefferson questionable to return"
+    assert linker.players_in(story, ["MIN"], []) == (["wr"], [])
+    for teams in ([], ["CLE", "BAL"], ["CLE", "MIN"]):  # no team / his team / both teams
+        assert linker.players_in(story, teams, []) == ([], ["justin jefferson"]), teams
+    # An ESPN athlete ID still settles it.
+    assert Linker(linker.players, {"7": "wr"}, linker.namesakes).players_in(story, [], ["7"])[
+        0
+    ] == ["wr"]
