@@ -180,7 +180,10 @@ def run_structured(
     engine: Engine, api: Any = None, now: datetime | None = None, season: int | None = None
 ) -> Report:
     """Fill every Phase 1 table. Safe to re-run: unchanged data changes no rows."""
-    update_config(cache_mode="filesystem", cache_dir=CACHE / "nflreadpy", cache_duration=6 * 3600)
+    # 1h: shorter than the 5h gap between scheduled Wed-Sat runs, so each run sees fresh
+    # injury files; long enough that a quick re-run reuses downloads. (Sleeper's
+    # /players/nfl keeps its own once-per-day cache.)
+    update_config(cache_mode="filesystem", cache_dir=CACHE / "nflreadpy", cache_duration=3600)
     api = api or sl.Sleeper()
     now = now or datetime.now(UTC)
     season = season or int(nfl.get_current_season())
