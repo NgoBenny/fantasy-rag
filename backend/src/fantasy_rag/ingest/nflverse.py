@@ -319,15 +319,22 @@ def resolve(
             )
             df = df.with_columns(pl.col(col).cast(pl.String)).join(m, on=col, how="left")
             df = df.with_columns(pl.coalesce("_pid_out", "_pid").alias("_pid_out")).drop("_pid")
-    first_col, first_provider = routes[0]
+    # Report each miss under the first route that had an ID, so none silently disappear.
+    present = [(c, p) for c, p in routes if c in df.columns]
+    has_id = [pl.col(c).is_not_null() for c, _ in present]
+    miss_provider: pl.Expr = pl.lit(None, pl.String)
+    miss_id: pl.Expr = pl.lit(None, pl.String)
+    for (c, p), cond in reversed(list(zip(present, has_id, strict=True))):
+        miss_provider = pl.when(cond).then(pl.lit(p)).otherwise(miss_provider)
+        miss_id = pl.when(cond).then(pl.col(c).cast(pl.String)).otherwise(miss_id)
     unresolved = (
-        df.filter(pl.col("_pid_out").is_null() & pl.col(first_col).is_not_null())
+        df.filter(pl.col("_pid_out").is_null() & pl.any_horizontal(has_id))
         .select(
-            pl.lit(first_provider).alias("provider"),
-            pl.col(first_col).cast(pl.String).alias("external_id"),
+            miss_provider.alias("provider"),
+            miss_id.alias("external_id"),
             *[pl.col(c) for c in ("name", "team", "position") if c in df.columns],
         )
-        .unique("external_id", keep="first", maintain_order=True)
+        .unique(["provider", "external_id"], keep="first", maintain_order=True)
     )
     resolved = (
         df.filter(pl.col("_pid_out").is_not_null())

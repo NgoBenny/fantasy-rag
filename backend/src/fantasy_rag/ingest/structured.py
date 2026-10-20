@@ -117,7 +117,11 @@ def _columns(conn: Connection, table: str) -> list[str]:
 
 
 def _snapshot(run: Run, source: str, df: pl.DataFrame) -> int:
-    """Insert an injury snapshot only when a player's status differs from his latest one."""
+    """Insert a snapshot when a player's injury info differs from his latest one.
+
+    A first observation is kept if it has any of status, body part or practice status
+    (practice-only reports such as DNP with no game status are real information).
+    """
     df = df.select("player_id", "status", "body_part", "practice", "season", "week").unique(
         "player_id", keep="first"
     )
@@ -134,7 +138,8 @@ def _snapshot(run: Run, source: str, df: pl.DataFrame) -> int:
                 (player_id, status, body_part, practice, season, week, source, sync_run_id)
             SELECT s.player_id, s.status, s.body_part, s.practice, s.season, s.week, :src, :run
             FROM stage s LEFT JOIN latest l USING (player_id)
-            WHERE (l.player_id IS NULL AND s.status IS NOT NULL)
+            WHERE (l.player_id IS NULL
+                   AND COALESCE(s.status, s.body_part, s.practice) IS NOT NULL)
                OR (l.player_id IS NOT NULL AND
                    ROW(s.status, s.body_part, s.practice, s.season, s.week)
                    IS DISTINCT FROM ROW(l.status, l.body_part, l.practice, l.season, l.week))
@@ -144,6 +149,22 @@ def _snapshot(run: Run, source: str, df: pl.DataFrame) -> int:
     ).rowcount
     run.conn.execute(text("DROP TABLE stage"))
     return int(inserted)
+
+
+def drop_conflicted(conn: Connection, conflicts: pl.DataFrame) -> int:
+    """Delete stored mappings for IDs that are now claimed by two players.
+
+    Runs in the same transaction as the ID upsert, before anything resolves through them,
+    so a once-valid ID can't keep attaching data to the wrong player.
+    """
+    if conflicts.is_empty():
+        return 0
+    ids = [f"{p}:{e}" for p, e in conflicts.select("provider", "external_id").rows()]
+    removed = conn.execute(
+        text("DELETE FROM player_external_ids WHERE provider || ':' || external_id = ANY(:ids)"),
+        {"ids": ids},
+    ).rowcount
+    return int(removed)
 
 
 def _idmap(conn: Connection) -> tuple[pl.DataFrame, set[str]]:
@@ -192,8 +213,9 @@ def run_structured(
         res.changed = upsert(
             run.conn, "player_external_ids", good, ["provider", "external_id"], run.id
         )
+        res.changed += drop_conflicted(run.conn, conflicts)
         res.unresolved = conflicts.height
-        res.note = f"{conflicts.height} IDs claimed by two players (skipped)"
+        res.note = f"{conflicts.height} IDs claimed by two players (skipped, old mappings removed)"
         record_unresolved(run, "conflict.player_external_ids", conflicts)
 
     _step(engine, report, "nflverse.player_ids", ids)

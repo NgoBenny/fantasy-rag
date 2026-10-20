@@ -55,6 +55,15 @@ def test_resolve_uses_ids_only_and_tries_routes_in_order() -> None:
     ]
 
 
+def test_resolve_reports_fallback_id_when_primary_is_missing() -> None:
+    idmap = pl.DataFrame({"provider": ["espn"], "external_id": ["77"], "player_id": ["00-1"]})
+    df = pl.DataFrame({"gsis_id": [None, None], "espn_id": ["404", None], "name": ["A", "B"]})
+    resolved, unresolved = nv.resolve(df, [("gsis_id", "gsis"), ("espn_id", "espn")], idmap, set())
+    assert resolved.is_empty()
+    # "A" has only an unknown ESPN ID and must still be reported; "B" has no ID at all.
+    assert unresolved.select("provider", "external_id", "name").rows() == [("espn", "404", "A")]
+
+
 def test_resolve_keeps_an_existing_player_id_column() -> None:
     df = pl.DataFrame({"player_id": ["00-0000001", "00-0000002"], "x": [1, 2]})
     resolved, unresolved = nv.resolve(df, [("player_id", "gsis")], pl.DataFrame(), {"00-0000001"})

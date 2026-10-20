@@ -65,6 +65,7 @@ Planned (phase in brackets): read-only engine/role [3]; `ingest/` news_espn, rss
 - ruff: line length 100, rules E, F, I, B, UP, SIM; `ruff format`. mypy `--strict` on `src/` (pydantic plugin; `nflreadpy` has no type info, so it is ignored).
 - Timestamps are `timestamptz` in UTC. nflverse `gameday` + `gametime` are US/Eastern local strings: convert with an explicit `America/New_York` zone.
 - Migrations are hand-written Alembic files, one per phase. No FK from an owned table to an nflverse-mirroring table.
+- Snapshots can't be backfilled: the scheduled task (scripts/register_daily_ingest.ps1) must stay registered, and the PC on with Docker available, until ingestion moves to a hosted worker (Phase 9).
 - Ingestion: every write goes through `ingest.base.upsert` (re-runs over identical data change 0 rows) inside `sync_run`. Players resolve by ID only (`nflverse.resolve`); unmatched rows go to `unresolved_players`. Name-based `candidates` are hints for a human, never applied.
 - httpx clients: User-Agent `fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)`, a timeout, and a rate limit.
 - pytest markers: `live` (network; deselected by default) and `db` (needs Postgres; uses a throwaway `<db>_migtest` database, never the dev DB).
@@ -91,4 +92,8 @@ uv run alembic downgrade base          # drop everything
 uv run fantasy-rag verify-sources      # sample every core source -> docs/data_sources.md
 uv run fantasy-rag ingest structured   # nflverse 2022+ and Sleeper -> Postgres (idempotent)
 uv run python tests/fixtures/record_phase1.py   # re-record test fixtures (network)
+
+# repo root: daily snapshot collection (Windows Task Scheduler, current user)
+powershell -File scripts/register_daily_ingest.ps1   # daily 7am + Wed-Sat 1pm/6pm; logs in data/logs/
+powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
 ```

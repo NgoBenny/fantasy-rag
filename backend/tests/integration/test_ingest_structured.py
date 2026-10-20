@@ -124,3 +124,77 @@ def test_upsert_updates_only_changed_rows(scratch_db_url: str) -> None:
         with pytest.raises(ValueError, match="unsafe"):
             upsert(conn, "sources; drop table players", rows, ["name"], None)
     engine.dispose()
+
+
+def _migrated(url: str) -> Any:
+    cfg = Config(str(ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
+    command.upgrade(cfg, "head")
+    return create_engine(url)
+
+
+def test_conflicted_id_loses_its_old_mapping(scratch_db_url: str) -> None:
+    engine = _migrated(scratch_db_url)
+    with engine.begin() as conn:
+        run_id = conn.execute(
+            text("INSERT INTO sync_runs (source, status) VALUES ('t', 'ok') RETURNING id")
+        ).scalar_one()
+        conn.execute(
+            text(
+                "INSERT INTO players (id, full_name, search_name, sync_run_id)"
+                " VALUES ('00-1', 'A', 'a', :r), ('00-2', 'B', 'b', :r)"
+            ),
+            {"r": run_id},
+        )
+        # Import 1: pfr X belongs to 00-1 only.
+        conn.execute(
+            text(
+                "INSERT INTO player_external_ids (provider, external_id, player_id, sync_run_id)"
+                " VALUES ('pfr', 'X', '00-1', :r), ('pfr', 'Y', '00-2', :r)"
+            ),
+            {"r": run_id},
+        )
+    # Import 2: X is now claimed by both players.
+    players_raw = pl.DataFrame({"gsis_id": ["00-1", "00-2"], "pfr_id": ["X", "X"]})
+    good, conflicts = structured.nv.external_ids(
+        players_raw,
+        pl.DataFrame({"gsis_id": []}),
+        structured.pl.DataFrame(
+            schema={"provider": pl.String, "external_id": pl.String, "player_id": pl.String}
+        ),
+        {"00-1", "00-2"},
+    )
+    with engine.begin() as conn:
+        assert structured.drop_conflicted(conn, conflicts) == 1
+        left = conn.execute(text("SELECT external_id FROM player_external_ids")).scalars().all()
+    engine.dispose()
+    assert left == ["Y"]
+
+
+def test_first_practice_only_report_is_kept(scratch_db_url: str) -> None:
+    engine = _migrated(scratch_db_url)
+    with engine.begin() as conn:
+        run_id = conn.execute(
+            text("INSERT INTO sync_runs (source, status) VALUES ('t', 'ok') RETURNING id")
+        ).scalar_one()
+        conn.execute(
+            text(
+                "INSERT INTO players (id, full_name, search_name, sync_run_id)"
+                " VALUES ('00-1', 'A', 'a', :r), ('00-2', 'B', 'b', :r)"
+            ),
+            {"r": run_id},
+        )
+        run = structured.Run(run_id, conn)
+        df = pl.DataFrame(
+            {
+                "player_id": ["00-1", "00-2"],
+                "status": [None, None],
+                "body_part": ["Knee", None],
+                "practice": ["Did Not Participate In Practice", None],
+                "season": [2026, 2026],
+                "week": [7, 7],
+            }
+        )
+        assert structured._snapshot(run, "nflverse", df) == 1  # 00-2 has no info at all
+        assert structured._snapshot(run, "nflverse", df) == 0  # re-run: nothing new
+    engine.dispose()
