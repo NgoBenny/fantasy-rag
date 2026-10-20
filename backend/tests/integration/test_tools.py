@@ -2,7 +2,7 @@
 
 import pytest
 from pydantic import ValidationError
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
 
 from fantasy_rag.agent.tools import run_tool
@@ -73,3 +73,39 @@ def test_weekly_rows_merge_special_teams_stats(db: str) -> None:
         rows = weekly_rows(conn, ["00-5"], [2026])
     assert [r["stats"].get("st_ff") for r in rows] == [None, 1]
     assert rows[1]["stats"]["receptions"] == 4
+
+
+def test_bye_and_ruled_out_players_project_zero_and_never_start(db: str) -> None:
+    engine = create_engine(db)
+    with engine.begin() as c:
+        run = c.execute(text("SELECT max(id) FROM sync_runs")).scalar_one()
+        # Week 3 (next week): MIN and NYJ play; NE (Free Agent's team) is on bye.
+        c.execute(
+            text(
+                "INSERT INTO schedules (game_id, season, week, game_type, home_team, away_team,"
+                " sync_run_id) VALUES ('g3', 2026, 3, 'REG', 'MIN', 'NYJ', :r)"
+            ),
+            {"r": run},
+        )
+        c.execute(
+            text(
+                "INSERT INTO injury_snapshots (player_id, status, source, sync_run_id) VALUES"
+                " ('00-1', 'Questionable', 'sleeper', :r), ('00-3', 'Out', 'sleeper', :r)"
+            ),
+            {"r": run},
+        )
+    engine.dispose()
+    with get_readonly_engine(db).connect() as conn:
+        bye = run_tool(conn, "project_player", {"player": {"name": "Free Agent"}})
+        assert bye["projected_points"] == 0.0 and bye["availability"]["status"] == "bye"
+        q = run_tool(conn, "project_player", {"player": {"name": "Justin Jefferson"}})
+        assert q["projected_points"] > 0 and q["availability"]["status"] == "Questionable"
+        out = run_tool(
+            conn, "project_player", {"player": {"name": "Mike Williams", "position": "WR"}}
+        )
+        assert out["projected_points"] == 0.0 and out["availability"]["status"] == "Out"
+        waivers = run_tool(conn, "rank_waivers", {"league_id": 1, "position": "WR"})
+        free_agent = next(c for c in waivers["candidates"] if c["id"] == "00-5")
+        assert free_agent["projected_points"] == 0.0  # healthy but on bye
+        lineup = run_tool(conn, "optimize_lineup", {"league_id": 1, "roster_id": 1})
+        assert lineup["recommended"][0]["player"]["name"] == "Justin Jefferson"  # Q still starts

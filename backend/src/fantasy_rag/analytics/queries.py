@@ -321,3 +321,66 @@ def search_players(
         },  # fmt: skip
     )
     return [dict(r._mapping) for r in rows]
+
+
+# Statuses that mean "won't play this week" (Sleeper and the NFL weekly report).
+OUT_STATUSES = {"Out", "IR", "PUP", "Sus", "Suspended", "NA", "DNR"}
+WARN_STATUSES = {"Doubtful", "Questionable"}
+
+
+def availability(
+    conn: Connection, player_ids: list[str], season: int, week: int
+) -> dict[str, dict[str, Any]]:
+    """Why a player may not play `week`: bye, or his latest observed injury status.
+
+    Only players with something to report are returned. `playable` False means project 0.
+    Sleeper's latest status applies to any week; an nflverse report counts only for its
+    own week. Byes are only judged once that week's schedule exists.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    rows = conn.execute(
+        text(
+            """
+            WITH playing AS (
+                SELECT home_team AS team FROM schedules
+                WHERE season = :s AND week = :w AND game_type = 'REG'
+                UNION SELECT away_team FROM schedules
+                WHERE season = :s AND week = :w AND game_type = 'REG'
+            )
+            SELECT p.id, p.team FROM players p
+            WHERE p.id = ANY(:ids) AND EXISTS (SELECT 1 FROM playing)
+              AND p.team IS NOT NULL AND p.team NOT IN (SELECT team FROM playing)
+            """
+        ),
+        {"s": season, "w": week, "ids": player_ids},
+    )
+    for pid, team in rows:
+        out[pid] = {
+            "status": "bye",
+            "playable": False,
+            "note": f"{team} has no game in week {week}",
+        }
+
+    snaps = conn.execute(
+        text(
+            """
+            SELECT DISTINCT ON (player_id, source) player_id, source, status, ingested_at
+            FROM injury_snapshots
+            WHERE player_id = ANY(:ids)
+              AND (source = 'sleeper' OR (season = :s AND week = :w))
+            ORDER BY player_id, source, ingested_at DESC, id DESC
+            """
+        ),
+        {"s": season, "w": week, "ids": player_ids},
+    )
+    for pid, source, status, seen in snaps:
+        # Keep the worse of the two sources; a bye or an Out already decides it.
+        if not status or (pid in out and not out[pid]["playable"]):
+            continue
+        if status in OUT_STATUSES or status in WARN_STATUSES:
+            current = out.get(pid)
+            playable = status not in OUT_STATUSES
+            if current is None or (current["playable"] and not playable):
+                out[pid] = {"status": status, "playable": playable, "source": source,
+                            "observed_at": seen}  # fmt: skip
+    return out

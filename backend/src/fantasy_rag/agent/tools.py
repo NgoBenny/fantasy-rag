@@ -212,13 +212,18 @@ def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[st
     rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
     games = baseline.scored_history(rows, rules).get(ref.id, [])
     got = baseline.project(games, season, last + 1)
+    avail = q.availability(conn, [ref.id], season, last + 1).get(ref.id)
+    projected = got[0] if got else None
+    if avail and not avail["playable"]:
+        projected = 0.0  # bye or ruled out: he won't score
     return {
         "player": ref.model_dump(),
         "season": season,
         "week": last + 1,
         "scoring": label,
-        "projected_points": got[0] if got else None,
+        "projected_points": projected,
         "games_used": got[1] if got else 0,
+        "availability": avail,
         "model_version": baseline.MODEL_VERSION,
         # league rules we can't compute for this position: the projection excludes them
         "unscored_rules": rules.unscored_for(ref.position or ""),
@@ -226,7 +231,8 @@ def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[st
         if games
         else None,
         "caveats": [
-            "assumes he plays; injuries and depth-chart changes are not in the baseline",
+            "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not "
+            "discounted; depth-chart changes are not in the baseline",
             "no prediction interval yet (Phase 8)",
         ],
     }
@@ -273,6 +279,10 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
         got = baseline.project(history[pid], season, last + 1)
         if got:
             picks.append((got[0], got[1], pid))
+    avail = q.availability(conn, [pid for _, _, pid in picks], season, last + 1)
+    picks = [
+        (0.0 if not avail.get(p, {}).get("playable", True) else pts, n, p) for pts, n, p in picks
+    ]
     picks.sort(reverse=True)
     refs = q.players_by_id(conn, [pid for _, _, pid in picks[: a.limit]])
     return {
@@ -286,30 +296,13 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
                 **refs[pid].model_dump(),
                 "projected_points": pts,
                 "games_used": n,
+                "availability": avail.get(pid),
                 "unscored_rules": rules.unscored_for(refs[pid].position or ""),
             }
             for pts, n, pid in picks[: a.limit]
         ],
         "model_version": baseline.MODEL_VERSION,
     }
-
-
-def _keep_current_order(
-    picks: list[tuple[int, str, str | None]], current: dict[int, str | None]
-) -> list[tuple[int, str, str | None]]:
-    """Among identical slots (WR, WR), leave a chosen player where he already is.
-
-    Swapping two players between equal slots changes nothing, so don't show it as a move.
-    """
-    out = list(picks)
-    for slot in {s for _, s, _ in picks}:
-        group = [k for k, (_, s, _) in enumerate(picks) if s == slot]
-        chosen = {picks[k][2] for k in group}
-        stay = {k: current.get(picks[k][0]) for k in group if current.get(picks[k][0]) in chosen}
-        rest = iter(p for p in (picks[k][2] for k in group) if p not in stay.values())
-        for k in group:
-            out[k] = (picks[k][0], slot, stay[k] if k in stay else next(rest))
-    return out
 
 
 def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
@@ -321,10 +314,12 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     history = baseline.scored_history(q.weekly_rows(conn, ids, [season - 1, season]), rules)
     refs = q.players_by_id(conn, ids)
     projected = {pid: baseline.project(history.get(pid, []), season, last + 1) for pid in ids}
+    avail = q.availability(conn, ids, season, last + 1)
+    # Players on bye or ruled out can't score this week, so they never start.
     candidates = [
         Candidate(pid, refs[pid].position or "", got[0])
         for pid, got in projected.items()
-        if got and pid in refs
+        if got and pid in refs and avail.get(pid, {}).get("playable", True)
     ]
 
     # Sleeper's starters list follows the non-bench slots in order; "0" is an empty slot.
@@ -340,14 +335,21 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         if idx is None:
             raise ValueError(f"locked player {pid} is not a current starter")
         locks[pid] = idx
-    lineup = optimize(slots, candidates, locks)
+    prefer = {g: i for i, g in current.items() if g}
+    lineup = optimize(slots, candidates, locks, prefer)
     points = {c.id: c.points for c in candidates}
-    picks = _keep_current_order(
-        [(i, s, pid) for i, (s, pid, _) in zip(starting_idx, lineup.slots, strict=True)], current
-    )
+    picks = [(i, s, pid) for i, (s, pid, _) in zip(starting_idx, lineup.slots, strict=True)]
+    starting = {pid for _, _, pid in picks if pid}
+    now_starting = {g for g in current.values() if g}
 
     def named(pid: str | None) -> dict[str, Any] | None:
-        return {**refs[pid].model_dump(), "projected_points": points.get(pid)} if pid else None
+        if not pid:
+            return None
+        return {
+            **refs[pid].model_dump(),
+            "projected_points": points.get(pid, 0.0 if pid in avail else None),
+            "availability": avail.get(pid),
+        }
 
     current_total = round(sum(points.get(g or "", 0.0) for g in current.values()), 2)
     return {
@@ -360,11 +362,22 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
             {"slot": s, "player": named(pid), "current": named(current.get(i))}
             for i, s, pid in picks
         ],
+        "bench": sorted(
+            (named(p) for p in ids if p not in starting and p in refs),
+            key=lambda x: -((x or {}).get("projected_points") or -1e9),
+        ),
+        "changes": {
+            "start": [refs[p].name for p in starting - now_starting],
+            "sit": [refs[p].name for p in now_starting - starting if p in refs],
+        },
         "recommended_total": lineup.total,
         "current_total": current_total,
         "gain": round(lineup.total - current_total, 2),
         "unhandled_slots": lineup.unhandled_slots,
         "no_projection": [refs[p].name for p, got in projected.items() if not got and p in refs],
+        "unavailable": [
+            {"name": refs[p].name, **v} for p, v in avail.items() if not v["playable"] and p in refs
+        ],
         "model_version": baseline.MODEL_VERSION,
     }
 

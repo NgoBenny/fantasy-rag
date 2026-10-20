@@ -64,3 +64,13 @@ def test_bench_ignored_def_reported_and_bad_lock_refused() -> None:
     assert ("QB", "qb", 20) in lineup.slots and ("K", "k", 8) in lineup.slots
     with pytest.raises(ValueError, match="can't fill"):
         optimize(SLOTS, players, {"k": 0})  # a kicker can't be locked at QB
+
+
+def test_ties_keep_players_in_their_current_slots() -> None:
+    # Two WRs worth the same: either WR/FLEX order is optimal; keep the current one.
+    players = [Candidate("a", "WR", 10.0), Candidate("b", "WR", 10.0), Candidate("c", "WR", 5.0)]
+    slots = ["WR", "FLEX", "BN"]
+    for prefer in ({"a": 0, "b": 1}, {"b": 0, "a": 1}):
+        lineup = optimize(slots, players, prefer=prefer)
+        assert [pid for _, pid, _ in lineup.slots] == sorted(prefer, key=prefer.__getitem__)
+        assert lineup.total == 20.0

@@ -8,7 +8,7 @@ export default defineConfig({
   use: { baseURL: "http://localhost:3010" },
   webServer: [
     {
-      command: "uv run uvicorn fantasy_rag.api.main:app --port 8010",
+      command: "uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload",
       cwd: "../backend",
       url: "http://localhost:8010/api/health",
       reuseExistingServer: true,

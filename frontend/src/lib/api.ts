@@ -58,10 +58,23 @@ export interface PlayerStats {
   unscored_rules: string[];
 }
 
+export interface Availability {
+  status: string; // "bye", "Out", "IR", "Questionable", ...
+  playable: boolean;
+  note?: string;
+  source?: string;
+  observed_at?: string;
+}
+
+export type LineupPlayer = PlayerRef & {
+  projected_points: number | null;
+  availability: Availability | null;
+};
+
 export interface LineupSlot {
   slot: string;
-  player: (PlayerRef & { projected_points: number | null }) | null;
-  current: (PlayerRef & { projected_points: number | null }) | null;
+  player: LineupPlayer | null;
+  current: LineupPlayer | null;
 }
 
 export interface Lineup {
@@ -69,11 +82,14 @@ export interface Lineup {
   scoring: string;
   rosters_as_of: { week: number; synced_at: string };
   recommended: LineupSlot[];
+  bench: LineupPlayer[];
+  changes: { start: string[]; sit: string[] };
   recommended_total: number;
   current_total: number;
   gain: number;
   unhandled_slots: string[];
   no_projection: string[];
+  unavailable: ({ name: string } & Availability)[];
   model_version: string;
 }
 

@@ -36,3 +36,11 @@ test("empty, not-found and lineup states", async ({ page }) => {
   await page.goto("/lineup");
   await expect(page.getByText("Pick a league.")).toBeVisible();
 });
+
+test("lineup shows moves, recommended slots and the bench", async ({ page }) => {
+  await page.goto("/lineup?league=4&roster=1");
+  await expect(page.getByText(/^(Start: |No changes)/)).toBeVisible();
+  await expect(page.getByRole("table", { name: "Recommended lineup" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Bench" })).toBeVisible();
+  await expect(page.getByText(/project 0 and never start/)).toBeVisible();
+});

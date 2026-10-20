@@ -116,7 +116,7 @@ uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-w
 uv run fantasy-rag tool get_player_stats '{"player":{"name":"Amon-Ra"},"last_n":3}'  # any tool by hand
 uv run fantasy-rag backtest             # tune baseline on 2024, report 2025; writes model_runs
 
-uv run uvicorn fantasy_rag.api.main:app --port 8010   # API (port 8000 is taken on this PC)
+uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 is taken on this PC); --reload so Playwright never reuses stale code
 
 # frontend/
 npm run dev -- --port 3010             # web app; reads API_URL (default http://localhost:8010)

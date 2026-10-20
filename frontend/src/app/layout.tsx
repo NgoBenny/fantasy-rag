@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
         <footer className="border-t px-4 py-3 text-center text-xs text-muted-foreground">
-          Data from nflverse (CC-BY 4.0) and Sleeper. Projections: baseline model, no injury inputs.
+          Data from nflverse (CC-BY 4.0) and Sleeper. Projections: baseline model; byes and Out/IR count as 0.
         </footer>
       </body>
     </html>

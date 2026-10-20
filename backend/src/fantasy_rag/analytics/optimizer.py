@@ -39,11 +39,21 @@ class Lineup:
     unhandled_slots: list[str]  # starting slots this optimizer can't fill (e.g. DEF, IDP)
 
 
+TIE_BREAK = 1e-6  # far below 0.01-point projections, so it only breaks exact ties
+
+
 def optimize(
-    roster_positions: list[str], players: list[Candidate], locks: dict[str, int] | None = None
+    roster_positions: list[str],
+    players: list[Candidate],
+    locks: dict[str, int] | None = None,
+    prefer: dict[str, int] | None = None,
 ) -> Lineup:
-    """`locks` maps player id -> index into roster_positions that the player must keep."""
-    locks = locks or {}
+    """`locks` maps player id -> index into roster_positions that the player must keep.
+
+    `prefer` (player id -> his current slot index) breaks ties toward the current lineup,
+    so equal-value swaps (WR <-> FLEX) aren't recommended as moves.
+    """
+    locks, prefer = locks or {}, prefer or {}
     by_id = {p.id: p for p in players}
     starting = [(i, s) for i, s in enumerate(roster_positions) if s not in BENCH]
     unhandled = [s for _, s in starting if s not in ELIGIBLE]
@@ -62,9 +72,14 @@ def optimize(
         # negative projection, and no slot is ever forced to take an ineligible player.
         value = np.array(
             [
-                [p.points if p.position in ELIGIBLE[s] else FORBIDDEN for p in pool]
+                [
+                    p.points + (TIE_BREAK if prefer.get(p.id) == i else 0.0)
+                    if p.position in ELIGIBLE[s]
+                    else FORBIDDEN
+                    for p in pool
+                ]
                 + [0.0] * len(open_slots)
-                for _, s in open_slots
+                for i, s in open_slots
             ]
         )
         rows, cols = linear_sum_assignment(value, maximize=True)
