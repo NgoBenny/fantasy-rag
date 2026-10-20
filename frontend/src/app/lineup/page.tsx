@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type LineupPlayer, api } from "@/lib/api";
+import { movesSummary } from "@/lib/lineup";
 
 function Status({ p }: { p: LineupPlayer | null }) {
   const a = p?.availability;
@@ -66,9 +67,7 @@ export default async function LineupPage({ searchParams }: PageProps<"/lineup">)
       ) : (
         <>
           <p className="text-sm" aria-label="Lineup changes">
-            {lineup.changes.start.length === 0
-              ? "No changes: your current lineup is already the best by projection."
-              : `Start: ${lineup.changes.start.join(", ")} · Sit: ${lineup.changes.sit.join(", ") || "nobody"}`}
+            {movesSummary(lineup.changes)}
           </p>
           <p className="text-sm">
             Week {lineup.week} · {lineup.scoring} · projected <b>{lineup.recommended_total}</b> vs current{" "}

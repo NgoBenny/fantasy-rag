@@ -51,7 +51,7 @@ def test_matches_brute_force_and_is_legal(seed: int) -> None:
     used = [pid for _, pid, _ in lineup.slots if pid]
     assert len(used) == len(set(used))  # nobody twice
     by_id = {p.id: p for p in players}
-    assert all(pid is None or by_id[pid].position in ELIGIBLE[s] for s, pid, _ in lineup.slots)
+    assert all(pid is None or by_id[pid].fits(s) for s, pid, _ in lineup.slots)
     for pid, idx in locks.items():
         assert lineup.slots[idx][1] == pid  # locked player kept his slot
 
@@ -74,3 +74,11 @@ def test_ties_keep_players_in_their_current_slots() -> None:
         lineup = optimize(slots, players, prefer=prefer)
         assert [pid for _, pid, _ in lineup.slots] == sorted(prefer, key=prefer.__getitem__)
         assert lineup.total == 20.0
+
+
+def test_sleeper_fantasy_eligibility_beats_nfl_position() -> None:
+    # Kyle Juszczyk is an FB to the NFL but RB-eligible on Sleeper.
+    fb = Candidate("fb", "FB", 6.0, ("RB",))
+    lineup = optimize(["RB", "BN"], [fb])
+    assert lineup.slots == [("RB", "fb", 6.0)]
+    assert optimize(["RB"], [Candidate("fb2", "FB", 6.0)]).slots == [("RB", None, 0.0)]

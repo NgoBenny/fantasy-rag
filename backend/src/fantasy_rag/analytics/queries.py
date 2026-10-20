@@ -47,6 +47,7 @@ class PlayerRef(BaseModel):
     name: str
     position: str | None
     team: str | None
+    fantasy_positions: list[str] | None = None  # Sleeper slot eligibility, when known
 
 
 class AmbiguousPlayer(ValueError):
@@ -236,11 +237,21 @@ def rostered(conn: Connection, league_id: int) -> tuple[set[str], int | None, da
 
 def players_by_id(conn: Connection, ids: list[str]) -> dict[str, PlayerRef]:
     rows = conn.execute(
-        text("SELECT id, full_name, position, team FROM players WHERE id = ANY(:ids)"),
+        text(
+            "SELECT id, full_name, position, team, fantasy_positions FROM players"
+            " WHERE id = ANY(:ids)"
+        ),
         {"ids": ids},
     )
     return {
-        r.id: PlayerRef(id=r.id, name=r.full_name, position=r.position, team=r.team) for r in rows
+        r.id: PlayerRef(
+            id=r.id,
+            name=r.full_name,
+            position=r.position,
+            team=r.team,
+            fantasy_positions=r.fantasy_positions,
+        )
+        for r in rows
     }
 
 

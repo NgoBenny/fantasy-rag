@@ -317,7 +317,7 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     avail = q.availability(conn, ids, season, last + 1)
     # Players on bye or ruled out can't score this week, so they never start.
     candidates = [
-        Candidate(pid, refs[pid].position or "", got[0])
+        Candidate(pid, refs[pid].position or "", got[0], tuple(refs[pid].fantasy_positions or ()))
         for pid, got in projected.items()
         if got and pid in refs and avail.get(pid, {}).get("playable", True)
     ]

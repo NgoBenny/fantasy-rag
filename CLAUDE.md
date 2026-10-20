@@ -48,6 +48,7 @@ backend/
   alembic/versions/0002_structured.py   # nflverse tables, snapshot keys, unresolved_players
   alembic/versions/0003_leagues.py      # league name/settings, weekly matchup results
   alembic/versions/0004_readonly_trgm.py  # fantasy_reader role, trigram name index
+  alembic/versions/0006_fantasy_positions.py  # players.fantasy_positions (Sleeper slot eligibility)
   alembic/versions/0005_defense.py      # team_week_defense, player_week_special_teams (from pbp)
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
@@ -121,6 +122,7 @@ uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 
 # frontend/
 npm run dev -- --port 3010             # web app; reads API_URL (default http://localhost:8010)
 npm run lint                           # eslint
+npm test                               # Vitest unit tests
 npm run build                          # type-check + production build (no API needed)
 npx playwright test                    # browser tests; starts API + web if not running (real dev DB)
 

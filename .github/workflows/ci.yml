@@ -50,6 +50,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm test
       # Type-checks and builds; pages render per request, so no API is needed here.
       # Playwright (e2e/) runs locally against the real API + dev database.
       - run: npm run build

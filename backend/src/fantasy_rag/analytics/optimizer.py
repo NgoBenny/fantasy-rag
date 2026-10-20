@@ -30,6 +30,11 @@ class Candidate:
     id: str
     position: str
     points: float
+    # Sleeper's fantasy eligibility (a fullback counts as RB); defaults to `position`.
+    eligible_as: tuple[str, ...] = ()
+
+    def fits(self, slot: str) -> bool:
+        return bool(ELIGIBLE.get(slot, set()) & set(self.eligible_as or (self.position,)))
 
 
 @dataclass
@@ -61,7 +66,7 @@ def optimize(
     chosen: dict[int, Candidate] = {}
     for pid, idx in locks.items():
         p, slot = by_id.get(pid), roster_positions[idx] if 0 <= idx < len(roster_positions) else ""
-        if p is None or p.position not in ELIGIBLE.get(slot, set()):
+        if p is None or not p.fits(slot):
             raise ValueError(f"locked player {pid} can't fill slot {idx} ({slot or 'missing'})")
         chosen[idx] = p
 
@@ -74,7 +79,7 @@ def optimize(
             [
                 [
                     p.points + (TIE_BREAK if prefer.get(p.id) == i else 0.0)
-                    if p.position in ELIGIBLE[s]
+                    if p.fits(s)
                     else FORBIDDEN
                     for p in pool
                 ]
