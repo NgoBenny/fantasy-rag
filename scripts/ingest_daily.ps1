@@ -12,5 +12,8 @@ docker compose up -d db 2>&1 | Out-File -Append -Encoding utf8 $log
 Set-Location (Join-Path $repo "backend")
 $env:PYTHONIOENCODING = "utf-8"
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
-"exit=$LASTEXITCODE" | Out-File -Append -Encoding utf8 $log
-exit $LASTEXITCODE
+$ingestExit = $LASTEXITCODE
+# League rosters and matchups (uses SLEEPER_USERNAME from .env; skipped if unset).
+uv run fantasy-rag league import 2>&1 | Out-File -Append -Encoding utf8 $log
+"exit=$ingestExit league=$LASTEXITCODE" | Out-File -Append -Encoding utf8 $log
+exit $ingestExit

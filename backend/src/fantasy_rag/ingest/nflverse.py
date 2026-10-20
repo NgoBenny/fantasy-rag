@@ -142,16 +142,16 @@ def schedules(raw: pl.DataFrame) -> pl.DataFrame:
     )
 
 
+# Per-kick distances ("51;43"); scoring needs them for per-yard kicker rules.
+KICK_LISTS = ["fg_made_list", "fg_missed_list", "fg_blocked_list"]
+
+
 def _stats_json(raw: pl.DataFrame) -> pl.Expr:
     numeric = [c for c, t in raw.schema.items() if t.is_numeric() and c not in STAT_EXCLUDE]
     # NaN is not valid JSON; Postgres jsonb rejects it.
-    return (
-        pl.struct(
-            [pl.col(c).fill_nan(None) if raw.schema[c].is_float() else pl.col(c) for c in numeric]
-        )
-        .struct.json_encode()
-        .alias("stats")
-    )
+    fields = [pl.col(c).fill_nan(None) if raw.schema[c].is_float() else pl.col(c) for c in numeric]
+    fields += [pl.col(c) for c in KICK_LISTS if c in raw.columns]
+    return pl.struct(fields).struct.json_encode().alias("stats")
 
 
 def player_stats(raw: pl.DataFrame) -> pl.DataFrame:
