@@ -69,13 +69,35 @@ def test_zero_keys_are_ignored_and_unsupported_keys_reported() -> None:
     # Sleeper ships idp_/bonus_ keys at 0 in leagues that don't use them.
     rules = ScoringRules.from_sleeper(
         {"rec": 1, "idp_tkl": 0, "bonus_rec_te": 0, "st_ff": 1, "sack": 1, "pts_allow_0": 10,
-         "rec_0_4": 0.5}
+         "rec_0_4": 0.5, "idp_sack": 1}
     )  # fmt: skip
-    assert set(rules.unsupported) == {"st_ff", "sack", "pts_allow_0", "rec_0_4"}
-    # Team-DEF keys don't affect a WR; a special-teams or per-catch key might.
-    assert score({"receptions": 1}, "WR", rules).unscored == ["rec_0_4", "st_ff"]
-    defense = score({}, "DEF", rules)
-    assert defense.points == 0 and defense.unscored == ["team defense scoring (not supported yet)"]
+    assert set(rules.unsupported) == {"rec_0_4", "idp_sack"}
+    # A per-catch key might change a WR's total; IDP keys can only touch a defense.
+    assert score({"receptions": 1, "st_ff": 1}, "WR", rules).unscored == ["rec_0_4"]
+    assert score({"receptions": 1, "st_ff": 1}, "WR", rules).points == 2.0  # rec + st_ff
+    assert score({"sack": 2}, "DEF", rules).unscored == ["idp_sack"]
+
+
+def test_team_defense() -> None:
+    rules = ScoringRules.from_sleeper(
+        {"sack": 1, "int": 2, "ff": 1, "fum_rec": 2, "safe": 2, "blk_kick": 2, "def_td": 6,
+         "def_st_td": 6, "def_2pt": 2, "def_pass_def": 0.25, "def_3_and_out": 0.5,
+         "def_4_and_stop": 1, "tkl_loss": 0.5, "pts_allow_0": 10, "pts_allow_1_6": 7,
+         "pts_allow_7_13": 4, "pts_allow_14_20": 1, "pts_allow_28_34": -1, "pts_allow_35p": -4,
+         "yds_allow_350_399": -1, "yds_allow_400_449": -2, "rec": 1}
+    )  # fmt: skip
+    week = {"sack": 3, "int": 1, "ff": 1, "fum_rec": 1, "def_td": 1, "def_pass_def": 6,
+            "def_3_and_out": 2, "def_4_and_stop": 1, "tkl_loss": 5, "pts_allow": 13,
+            "yds_allow": 351}  # fmt: skip
+    # 3 + 2 + 1 + 2 + 6 + 1.5 + 1 + 1 + 2.5 + 4 (7-13 band) - 1 (350-399 band) = 23
+    assert score(week, "DEF", rules).points == 23.0
+    # Band edges are inclusive: 6 is in 1-6, 7 in 7-13, 0 only in the shutout band.
+    for allowed, points in [(0, 10), (6, 7), (7, 4), (20, 1), (21, 0), (34, -1), (35, -4)]:
+        assert score({"pts_allow": allowed}, "DEF", rules).points == points
+    assert score({"pts_allow": 21, "yds_allow": 400}, "DEF", rules).points == -2
+    assert score({}, "DEF", rules).points == 0  # bye week, not a shutout
+    # A player's line never picks up team-defense keys (and the reverse).
+    assert score({"receptions": 2, "sack": 1}, "WR", rules).points == 2.0
 
 
 def test_individual_return_yards_are_reported_not_dropped() -> None:

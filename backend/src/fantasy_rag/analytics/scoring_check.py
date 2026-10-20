@@ -29,7 +29,8 @@ class CheckResult:
     weeks: list[int]
     compared: int = 0
     within: int = 0
-    skipped_def: int = 0
+    def_compared: int = 0
+    def_within: int = 0
     skipped_unresolved: int = 0
     mismatches: list[Mismatch] = field(default_factory=list)
 
@@ -57,26 +58,46 @@ def check_league(conn: Connection, league_pk: int) -> CheckResult:
 
     # One Sleeper value per (week, player): a player appears once per league-week.
     sleeper_points: dict[tuple[int, str], float] = {}
+    def_points: dict[tuple[int, str], float] = {}  # team DEF IDs are team abbreviations
     for week, raw in conn.execute(
         text("SELECT week, raw FROM fantasy_rosters WHERE league_id = :l AND week <= :w"),
         {"l": league_pk, "w": last or 0},
     ):
         for sid, pts in ((raw or {}).get("players_points") or {}).items():
             if not sid.isdigit():
-                result.skipped_def += 1
+                def_points[(week, sid)] = float(pts)
             elif sid not in sleeper_to_gsis:
                 result.skipped_unresolved += 1
             else:
                 sleeper_points[(week, sleeper_to_gsis[sid])] = float(pts)
 
     stats = _stats(conn, season, sorted({pid for _, pid in sleeper_points}))
-    for (week, pid), theirs in sorted(sleeper_points.items()):
-        name, position = stats["players"].get(pid, (pid, ""))
-        s = score(stats["weeks"].get((week, pid), {}), position, rules)
+    defense = {
+        (w, team): st
+        for w, team, st in conn.execute(
+            text(
+                "SELECT week, team, stats FROM team_week_defense"
+                " WHERE season = :s AND season_type = 'REG'"
+            ),
+            {"s": season},
+        )
+    }
+    rows = [
+        (week, pid, *stats["players"].get(pid, (pid, "")), stats["weeks"].get((week, pid), {}), pts)
+        for (week, pid), pts in sleeper_points.items()
+    ] + [
+        (week, team, team, "DEF", defense.get((week, team), {}), pts)
+        for (week, team), pts in def_points.items()
+    ]
+    for week, pid, name, position, week_stats, theirs in sorted(rows):
+        s = score(week_stats, position, rules)
+        ok = abs(s.points - theirs) <= TOLERANCE + 1e-9
         result.compared += 1
-        if abs(s.points - theirs) <= TOLERANCE + 1e-9:
-            result.within += 1
-        else:
+        result.within += ok
+        if position == "DEF":
+            result.def_compared += 1
+            result.def_within += ok
+        if not ok:
             result.mismatches.append(
                 Mismatch(week, pid, name, position, theirs, s.points, s.breakdown, s.unscored)
             )
@@ -92,6 +113,15 @@ def _stats(conn: Connection, season: int, player_ids: list[str]) -> dict[str, An
         {"s": season, "ids": player_ids},
     )
     weeks = {(w, pid): st if isinstance(st, dict) else json.loads(st) for w, pid, st in rows}
+    # Special-teams stats from play-by-play join the player's week (st_ff, st_fum_rec).
+    for w, pid, st in conn.execute(
+        text(
+            "SELECT week, player_id, stats FROM player_week_special_teams"
+            " WHERE season = :s AND season_type = 'REG' AND player_id = ANY(:ids)"
+        ),
+        {"s": season, "ids": player_ids},
+    ):
+        weeks[(w, pid)] = {**weeks.get((w, pid), {}), **st}
     players = {
         pid: (name, pos)
         for pid, name, pos in conn.execute(

@@ -2,7 +2,8 @@
 
 Sleeper scores a player as sum(stat[key] * weight[key]) over its scoring keys, so each
 supported key maps to one nflverse-derived stat value. Keys we cannot compute are
-reported per player, never estimated.
+reported per player, never estimated. Team defenses score from `ingest.pbp.team_defense`
+stats, which already use Sleeper's key names.
 """
 
 import math
@@ -134,7 +135,51 @@ DERIVE: dict[str, Callable[[Stats, str], float]] = {
     "fgm_yds_over_30": _yds_over_30,
     "xpm": _col("pat_made"),
     "xpmiss": _sum("pat_missed", "pat_blocked"),
+    # special teams (from play-by-play, merged into the player's weekly stats)
+    "st_ff": _col("st_ff"),
+    "st_fum_rec": _col("st_fum_rec"),
 }
+
+
+def _band(key: str, lo: float, hi: float | None) -> Callable[[Stats, str], float]:
+    """1 when the stat lands in [lo, hi]; Sleeper's labels are inclusive ("pts_allow_7_13")."""
+
+    def f(s: Stats, _pos: str) -> float:
+        v = _n(s, key)
+        return 1.0 if v >= lo and (hi is None or v <= hi) else 0.0
+
+    return f
+
+
+# Sleeper key -> stat for a team DEF (team_week_defense.stats). Bands checked against
+# Sleeper's own pts_allow_* / yds_allow_* flags.
+DEF_DERIVE: dict[str, Callable[[Stats, str], float]] = {
+    **{
+        k: _col(k)
+        for k in (
+            "sack", "int", "ff", "fum_rec", "safe", "blk_kick", "def_td", "def_st_td",
+            "def_st_ff", "def_st_fum_rec", "def_2pt", "def_3_and_out", "def_4_and_stop",
+            "def_pass_def", "tkl_loss", "pts_allow", "yds_allow",
+        )
+    },
+    "pts_allow_0": _band("pts_allow", 0, 0),
+    "pts_allow_1_6": _band("pts_allow", 1, 6),
+    "pts_allow_7_13": _band("pts_allow", 7, 13),
+    "pts_allow_14_20": _band("pts_allow", 14, 20),
+    "pts_allow_21_27": _band("pts_allow", 21, 27),
+    "pts_allow_28_34": _band("pts_allow", 28, 34),
+    "pts_allow_35p": _band("pts_allow", 35, None),
+    # shortcut: 0_100 vs 100_199 at exactly 100 yards is unseen in Sleeper's data; 100 -> 100_199
+    "yds_allow_0_100": _band("yds_allow", float("-inf"), 99),
+    "yds_allow_100_199": _band("yds_allow", 100, 199),
+    "yds_allow_200_299": _band("yds_allow", 200, 299),
+    "yds_allow_300_349": _band("yds_allow", 300, 349),
+    "yds_allow_350_399": _band("yds_allow", 350, 399),
+    "yds_allow_400_449": _band("yds_allow", 400, 449),
+    "yds_allow_450_499": _band("yds_allow", 450, 499),
+    "yds_allow_500_549": _band("yds_allow", 500, 549),
+    "yds_allow_550p": _band("yds_allow", 550, None),
+}  # fmt: skip
 
 
 class ScoringRules(BaseModel):
@@ -145,15 +190,16 @@ class ScoringRules(BaseModel):
     def from_sleeper(cls, scoring_settings: Mapping[str, Any]) -> "ScoringRules":
         nonzero = {k: float(v) for k, v in scoring_settings.items() if v}
         return cls(
-            weights={k: v for k, v in nonzero.items() if k in DERIVE},
-            unsupported={k: v for k, v in nonzero.items() if k not in DERIVE},
+            weights={k: v for k, v in nonzero.items() if k in DERIVE or k in DEF_DERIVE},
+            unsupported={
+                k: v for k, v in nonzero.items() if k not in DERIVE and k not in DEF_DERIVE
+            },
         )
 
     def unscored_for(self, position: str) -> list[str]:
         """Unsupported keys that could change this position's total."""
-        if position in DEF_POSITIONS:
-            return ["team defense scoring (not supported yet)"]
-        return sorted(k for k in self.unsupported if not TEAM_DEF_OR_IDP.match(k))
+        is_def = position in DEF_POSITIONS
+        return sorted(k for k in self.unsupported if bool(TEAM_DEF_OR_IDP.match(k)) == is_def)
 
 
 class Score(BaseModel):
@@ -163,12 +209,18 @@ class Score(BaseModel):
 
 
 def score(stats: Stats, position: str, rules: ScoringRules) -> Score:
-    unscored = rules.unscored_for(position)
-    if position in DEF_POSITIONS:
-        return Score(points=0.0, breakdown={}, unscored=unscored)
-    breakdown = {}
+    derive = DEF_DERIVE if position in DEF_POSITIONS else DERIVE
+    breakdown: dict[str, float] = {}
+    if derive is DEF_DERIVE and "pts_allow" not in stats:  # no game (bye): not a shutout
+        return Score(points=0.0, breakdown=breakdown, unscored=rules.unscored_for(position))
     for key, weight in rules.weights.items():
-        value = DERIVE[key](stats, position) * weight
+        if key not in derive:  # a team-DEF key on a player, or the reverse
+            continue
+        value = derive[key](stats, position) * weight
         if value:
             breakdown[key] = round(value, 4)
-    return Score(points=round(sum(breakdown.values()), 2), breakdown=breakdown, unscored=unscored)
+    return Score(
+        points=round(sum(breakdown.values()), 2),
+        breakdown=breakdown,
+        unscored=rules.unscored_for(position),
+    )

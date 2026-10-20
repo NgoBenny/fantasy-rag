@@ -20,7 +20,7 @@ FIX = Path(__file__).resolve().parents[1] / "fixtures" / "phase1"
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 TABLES = ["sources", "players", "player_external_ids", "schedules", "player_week_stats",
           "snap_counts", "ff_opportunity", "depth_charts", "injury_history", "injury_snapshots",
-          "trending"]  # fmt: skip
+          "trending", "team_week_defense"]  # fmt: skip
 
 
 class FakeNfl:
@@ -49,6 +49,9 @@ class FakeNfl:
 
     def load_injuries(self, seasons: Any) -> pl.DataFrame:
         return self._read("injuries")
+
+    def load_pbp(self, seasons: Any) -> pl.DataFrame:
+        return self._read("pbp")
 
     def load_depth_charts(self, seasons: list[int]) -> pl.DataFrame:
         return self._read("depth_2024" if seasons[0] <= 2024 else "depth_2025plus")
@@ -197,4 +200,69 @@ def test_first_practice_only_report_is_kept(scratch_db_url: str) -> None:
         )
         assert structured._snapshot(run, "nflverse", df) == 1  # 00-2 has no info at all
         assert structured._snapshot(run, "nflverse", df) == 0  # re-run: nothing new
+    engine.dispose()
+
+
+class EditedPbp(FakeNfl):
+    """FakeNfl whose play-by-play can be corrected between runs, or fail to load."""
+
+    def __init__(self) -> None:
+        self.pbp: pl.DataFrame | None = self._read("pbp")
+
+    def load_pbp(self, seasons: Any) -> pl.DataFrame:
+        if self.pbp is None:
+            raise ConnectionError("nflverse unreachable")
+        return self.pbp
+
+
+def _with_forced_fumble(pbp: pl.DataFrame, player_id: str | None) -> pl.DataFrame:
+    """Credit (or un-credit) a forced fumble on the game's first kickoff."""
+    first = pbp.with_row_index("_i").filter(pl.col("play_type") == "kickoff")["_i"][0]
+    return pbp.with_columns(
+        pl.when(pl.int_range(pl.len()) == first)
+        .then(pl.lit(player_id, pl.String))
+        .otherwise(pl.col("forced_fumble_player_1_player_id"))
+        .alias("forced_fumble_player_1_player_id")
+    )
+
+
+def test_corrected_play_by_play_removes_stale_rows(
+    scratch_db_url: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cfg = Config(str(ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", scratch_db_url.replace("%", "%%"))
+    command.upgrade(cfg, "head")
+    nfl = EditedPbp()
+    monkeypatch.setattr(structured, "nfl", nfl)
+    monkeypatch.setattr(structured, "update_config", lambda **_: None)
+    engine = create_engine(scratch_db_url)
+    now = datetime(2026, 10, 20, 12, tzinfo=UTC)
+    original = nfl._read("pbp")
+    a, b = nfl._read("players")["gsis_id"][:2].to_list()
+
+    def state() -> tuple[list[tuple[str, Any]], list[int]]:
+        with engine.connect() as conn:
+            st = conn.execute(
+                text("SELECT player_id, stats->'st_ff' FROM player_week_special_teams")
+            ).all()
+            weeks = conn.execute(text("SELECT DISTINCT week FROM team_week_defense")).scalars()
+            return [tuple(r) for r in st], sorted(weeks)
+
+    def run() -> tuple[list[tuple[str, Any]], list[int]]:
+        assert structured.run_structured(engine, FakeSleeper(), now, season=2026).ok
+        return state()
+
+    nfl.pbp = _with_forced_fumble(original, a)
+    assert run() == ([(a, 1)], [6])
+    nfl.pbp = _with_forced_fumble(original, b)  # stat correction: credit moves
+    assert run() == ([(b, 1)], [6])
+    nfl.pbp = _with_forced_fumble(original, None)  # credit removed
+    assert run() == ([], [6])
+    nfl.pbp = _with_forced_fumble(original, a).with_columns(pl.lit(7).alias("week"))
+    assert run() == ([(a, 1)], [7])  # game moved weeks: old week-6 rows are gone
+    nfl.pbp = None  # a failed load deletes nothing
+    report = structured.run_structured(engine, FakeSleeper(), now, season=2026)
+    failed = {r.source for r in report.results if r.error}
+    assert failed == {"nflverse.pbp_team_defense", "nflverse.pbp_special_teams"}
+    assert state() == ([(a, 1)], [7])
     engine.dispose()

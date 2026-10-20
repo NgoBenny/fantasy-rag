@@ -19,7 +19,7 @@ LEAGUE = {
     "league_id": "999", "season": "2026", "name": "Test League", "settings": {"num_teams": 2},
     "roster_positions": ["WR", "K", "DEF", "BN"],
     "scoring_settings": {"rec": 0.5, "rec_yd": 0.1, "rec_td": 6, "fgm": 3, "xpm": 1,
-                         "idp_tkl": 0, "pts_allow_0": 10},
+                         "idp_tkl": 0, "pts_allow_0": 10, "sack": 1, "st_ff": 1, "idp_sack": 1},
 }  # fmt: skip
 
 
@@ -29,7 +29,7 @@ class FakeSleeper:
             # roster 1: a WR, a kicker and a team defense; Sleeper's own points per player
             {"roster_id": 1, "matchup_id": 1, "points": 22.6, "players": ["11", "22", "DET"],
              "starters": ["11", "22", "DET"],
-             "players_points": {"11": 15.6, "22": 7.0, "DET": 4.0}},
+             "players_points": {"11": 15.6, "22": 8.0, "DET": 13.0}},
             # roster 2: a player nflverse can't map
             {"roster_id": 2, "matchup_id": 1, "points": 0.0, "players": ["404"],
              "starters": ["404", "0"], "players_points": {"404": 0.0}},
@@ -79,9 +79,23 @@ def test_import_and_scoring_check(scratch_db_url: str) -> None:
             ),
             {"wr": json.dumps(wr), "k": json.dumps(k), "r": run},
         )
+        conn.execute(  # the kicker forced a fumble on a kickoff: + 1 st_ff
+            text(
+                "INSERT INTO player_week_special_teams (season, week, season_type, player_id,"
+                " game_id, stats, sync_run_id) VALUES (2026, 1, 'REG', '00-22', 'g', :s, :r)"
+            ),
+            {"s": json.dumps({"st_ff": 1, "st_fum_rec": 0}), "r": run},
+        )
+        conn.execute(  # shutout with 3 sacks: 10 + 3 = 13
+            text(
+                "INSERT INTO team_week_defense (season, week, season_type, team, game_id,"
+                " opponent, stats, sync_run_id) VALUES (2026, 1, 'REG', 'DET', 'g', 'GB', :s, :r)"
+            ),
+            {"s": json.dumps({"pts_allow": 0, "sack": 3}), "r": run},
+        )
 
     first = import_leagues(engine, FakeSleeper(), "someone", None)
-    assert first[0]["unresolved"] == 1 and first[0]["unsupported_scoring"] == ["pts_allow_0"]
+    assert first[0]["unresolved"] == 1 and first[0]["unsupported_scoring"] == ["idp_sack"]
     assert import_leagues(engine, FakeSleeper(), "someone", None)[0]["changed"] == 0
 
     with engine.connect() as conn:
@@ -97,10 +111,10 @@ def test_import_and_scoring_check(scratch_db_url: str) -> None:
         )
     engine.dispose()
 
-    # WR: ours 16.1 vs Sleeper 15.6 -> mismatch; K: 7.0 vs 7.0 -> match; DEF and 404 skipped.
-    assert (result.compared, result.within, result.skipped_def, result.skipped_unresolved) == (
+    # WR: ours 16.1 vs Sleeper 15.6 -> mismatch; K 8 and DEF 13 match; 404 skipped.
+    assert (result.compared, result.within, result.def_within, result.skipped_unresolved) == (
+        3,
         2,
-        1,
         1,
         1,
     )

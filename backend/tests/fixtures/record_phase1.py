@@ -11,6 +11,7 @@ import nflreadpy as nfl
 import polars as pl
 
 from fantasy_rag.config import REPO_ROOT
+from fantasy_rag.ingest.pbp import COLUMNS as PBP_COLUMNS
 from fantasy_rag.ingest.sleeper import Sleeper
 
 OUT = Path(__file__).parent / "phase1"
@@ -46,6 +47,9 @@ def main() -> None:
             (pl.col("dt") == d26["dt"].max()) & pl.col("team").is_in(TEAMS)
         ),
         "injuries": inj.filter((pl.col("week") == inj["week"].max()) & pl.col("team").is_in(TEAMS)),
+        "pbp": nfl.load_pbp([season])
+        .filter(pl.col("game_id").is_in(sched["game_id"].to_list()))
+        .select(PBP_COLUMNS),
     }
     ids_needed = set(gsis)
     for k in ("depth_2024", "depth_2025plus", "injuries"):

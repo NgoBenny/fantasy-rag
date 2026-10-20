@@ -48,6 +48,7 @@ backend/
   alembic/versions/0002_structured.py   # nflverse tables, snapshot keys, unresolved_players
   alembic/versions/0003_leagues.py      # league name/settings, weekly matchup results
   alembic/versions/0004_readonly_trgm.py  # fantasy_reader role, trigram name index
+  alembic/versions/0005_defense.py      # team_week_defense, player_week_special_teams (from pbp)
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine; read-only engine for tools (SET ROLE fantasy_reader)
@@ -57,7 +58,8 @@ backend/
   src/fantasy_rag/ingest/sleeper.py     # Sleeper client, injury/trending frames
   src/fantasy_rag/ingest/structured.py  # `ingest structured` orchestrator + sources registry
   src/fantasy_rag/ingest/league.py      # Sleeper league import (settings, rosters, matchups)
-  src/fantasy_rag/analytics/scoring.py  # Sleeper scoring keys -> points from nflverse stats
+  src/fantasy_rag/ingest/pbp.py         # play-by-play -> team DEF + special-teams stats (pure)
+  src/fantasy_rag/analytics/scoring.py  # Sleeper scoring keys (incl. team DEF) -> points
   src/fantasy_rag/analytics/scoring_check.py  # our points vs Sleeper's players_points
   src/fantasy_rag/analytics/queries.py  # parameterized queries, name resolution, scoring presets
   src/fantasy_rag/ml/baseline.py        # EWM-of-league-points baseline (tuned half-life)

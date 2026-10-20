@@ -12,8 +12,9 @@ from sqlalchemy import Connection, Engine, text
 
 from fantasy_rag.config import REPO_ROOT
 from fantasy_rag.ingest import nflverse as nv
+from fantasy_rag.ingest import pbp as pb
 from fantasy_rag.ingest import sleeper as sl
-from fantasy_rag.ingest.base import Run, record_unresolved, stage, sync_run, upsert
+from fantasy_rag.ingest.base import Run, prune, record_unresolved, stage, sync_run, upsert
 
 FIRST_SEASON = 2022
 OVERRIDES = REPO_ROOT / "data" / "id_overrides.csv"
@@ -73,7 +74,9 @@ class Report:
         return all(r.error is None for r in self.results)
 
 
-def _step(engine: Engine, report: Report, source: str, body: Callable[[Run, Result], None]) -> None:
+def _step(
+    engine: Engine, report: Report, source: str, body: Callable[[Run, Result], object]
+) -> None:
     result = Result(source)
     report.results.append(result)
     try:
@@ -94,7 +97,8 @@ def _load_and_upsert(
     idmap: pl.DataFrame,
     known: set[str],
     unresolved_source: str,
-) -> None:
+) -> pl.DataFrame:
+    """Resolve, upsert, report unresolved; returns the resolved rows."""
     resolved, unresolved = nv.resolve(frame, routes, idmap, known)
     table_cols = [
         c for c in _columns(run.conn, table) if c not in ("ingested_at", "sync_run_id", "id")
@@ -102,6 +106,7 @@ def _load_and_upsert(
     result.changed += upsert(run.conn, table, resolved.select(table_cols), keys, run.id)
     result.unresolved += unresolved.height
     record_unresolved(run, unresolved_source, unresolved)
+    return resolved
 
 
 def _columns(conn: Connection, table: str) -> list[str]:
@@ -298,6 +303,47 @@ def run_structured(
         lambda: nv.injuries(nfl.load_injuries(seasons)).filter(pl.col("team").is_not_null()),
         [("gsis_id", "gsis")],
     )
+
+    def team_defense(run: Run, res: Result) -> None:
+        defense, special, full = [], [], []
+        for s in seasons:  # one season of play-by-play at a time keeps memory down
+            raw = nfl.load_pbp([s])
+            if raw.is_empty():  # not started yet: nothing to refresh or prune
+                continue
+            full.append(s)
+            defense.append(pb.team_defense(raw))
+            special.append(pb.special_teams(raw))
+        # Each loaded season is the complete truth for that season, so rows a corrected
+        # play-by-play no longer produces are pruned in the same transaction.
+        loaded["pbp_seasons"] = full
+        loaded["special_teams"] = pl.concat(special) if special else None
+        ids = ["season", "week", "season_type", "team", "game_id", "opponent"]
+        keys = ["season", "week", "season_type", "team"]
+        frame = pb.packed(pl.concat(defense), ids) if defense else None
+        if frame is not None:
+            res.changed = upsert(run.conn, "team_week_defense", frame, keys, run.id)
+            res.changed += prune(run.conn, "team_week_defense", frame, keys, "season", full)
+
+    _step(engine, report, "nflverse.pbp_team_defense", team_defense)
+
+    def special_teams(run: Run, res: Result) -> None:
+        if "pbp_seasons" not in loaded:
+            raise RuntimeError("play-by-play did not load; special teams left unchanged")
+        keys = ["season", "week", "season_type", "player_id"]
+        frame = loaded["special_teams"]
+        if frame is None:
+            return
+        packed = pb.packed(frame, ["season", "week", "season_type", "game_id", "player_id"])
+        resolved = _load_and_upsert(
+            run, res, "player_week_special_teams", keys, packed, [("player_id", "gsis")],
+            idmap, known, "nflverse.pbp_special_teams",
+        )  # fmt: skip
+        res.changed += prune(
+            run.conn, "player_week_special_teams", resolved, keys, "season",
+            loaded["pbp_seasons"],
+        )  # fmt: skip
+
+    _step(engine, report, "nflverse.pbp_special_teams", special_teams)
 
     def nflverse_snapshot(run: Run, res: Result) -> None:
         inj = nv.injuries(nfl.load_injuries([season]))

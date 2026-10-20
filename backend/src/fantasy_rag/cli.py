@@ -109,7 +109,8 @@ def _league(args: argparse.Namespace) -> None:
             print(
                 f"league {pk}: weeks {span},"
                 f" {r.within}/{r.compared} player-weeks within 0.1"
-                f" (skipped: {r.skipped_def} team DEF, {r.skipped_unresolved} unresolved)"
+                f" (team DEF {r.def_within}/{r.def_compared};"
+                f" skipped: {r.skipped_unresolved} unresolved)"
             )
             for m in sorted(r.mismatches, key=lambda m: -abs(m.ours - m.sleeper))[:10]:
                 print(

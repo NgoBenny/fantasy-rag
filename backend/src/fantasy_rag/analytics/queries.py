@@ -148,12 +148,17 @@ def weekly_rows(
     seasons: list[int],
     weeks: tuple[int, int] | None = None,
 ) -> list[dict[str, Any]]:
-    """Regular-season stat rows with player position; `player_ids=None` means everyone."""
+    """Regular-season stat rows with player position; `player_ids=None` means everyone.
+
+    Special-teams stats from play-by-play (st_ff, st_fum_rec) are merged into `stats`.
+    """
     rows = conn.execute(
         text(
             """
-            SELECT s.player_id, s.season, s.week, s.team, s.opponent, s.stats, p.position
+            SELECT s.player_id, s.season, s.week, s.team, s.opponent, p.position,
+                   s.stats || COALESCE(st.stats, '{}'::jsonb) AS stats
             FROM player_week_stats s JOIN players p ON p.id = s.player_id
+            LEFT JOIN player_week_special_teams st USING (season, week, season_type, player_id)
             WHERE s.season_type = 'REG' AND s.season = ANY(:seasons)
               AND (CAST(:ids AS text[]) IS NULL OR s.player_id = ANY(:ids))
               AND (CAST(:w0 AS int) IS NULL OR s.week BETWEEN :w0 AND :w1)
