@@ -49,4 +49,8 @@ def test_lineup_endpoint_fills_slots_from_the_roster(client: TestClient) -> None
     assert r.status_code == 200, r.text
     body = r.json()
     names = [x["player"]["name"] for x in body["recommended"] if x["player"]]
-    assert names == ["Justin Jefferson"]  # the only rostered player
+    assert names == ["Justin Jefferson"]  # two open slots (WR, FLEX), one rostered WR
+    # The slots shown add up to the total claimed.
+    shown = sum(x["player"]["projected_points"] for x in body["recommended"] if x["player"])
+    assert round(shown, 2) == body["recommended_total"] > 0
+    assert "rec_0_4" in body["unscored_rules"]  # the league scores a rule we can't compute

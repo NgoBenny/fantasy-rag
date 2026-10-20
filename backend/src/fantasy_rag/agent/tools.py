@@ -375,6 +375,10 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         "gain": round(lineup.total - current_total, 2),
         "unhandled_slots": lineup.unhandled_slots,
         "no_projection": [refs[p].name for p, got in projected.items() if not got and p in refs],
+        # league rules we can't compute for these positions: totals exclude them
+        "unscored_rules": sorted(
+            {k for r in refs.values() for k in rules.unscored_for(r.position or "")}
+        ),
         "unavailable": [
             {"name": refs[p].name, **v} for p, v in avail.items() if not v["playable"] and p in refs
         ],

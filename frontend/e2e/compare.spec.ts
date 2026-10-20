@@ -44,3 +44,15 @@ test("lineup shows moves, recommended slots and the bench", async ({ page }) => 
   await expect(page.getByRole("table", { name: "Bench" })).toBeVisible();
   await expect(page.getByText(/project 0 and never start/)).toBeVisible();
 });
+
+test("Try again recovers once the API is back", async ({ page, request }) => {
+  await request.get("http://localhost:8011/__down");
+  try {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Something went wrong" })).toBeVisible();
+  } finally {
+    await request.get("http://localhost:8011/__up");
+  }
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.getByText(/stats through week/)).toBeVisible();
+});

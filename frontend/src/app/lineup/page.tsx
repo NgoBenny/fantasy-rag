@@ -144,6 +144,8 @@ export default async function LineupPage({ searchParams }: PageProps<"/lineup">)
             and never start; Questionable and Doubtful are flagged but not discounted.
             {lineup.unhandled_slots.length > 0 && ` Not optimized: ${lineup.unhandled_slots.join(", ")}.`}
             {lineup.no_projection.length > 0 && ` No projection: ${lineup.no_projection.join(", ")}.`}
+            {lineup.unscored_rules.length > 0 &&
+              ` Projections leave out league rules we can't compute yet: ${lineup.unscored_rules.join(", ")}.`}
           </p>
         </>
       )}

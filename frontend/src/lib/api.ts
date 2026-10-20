@@ -90,6 +90,7 @@ export interface Lineup {
   unhandled_slots: string[];
   no_projection: string[];
   unavailable: ({ name: string } & Availability)[];
+  unscored_rules: string[];
   model_version: string;
 }
 
