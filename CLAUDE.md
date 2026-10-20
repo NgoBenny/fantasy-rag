@@ -33,24 +33,31 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phase 0):
+Exists now (Phases 0-1):
 
 ```
 CLAUDE.md
 docs/PLAN.md, docs/data_sources.md (generated)
 docker-compose.yml          # db only; api + worker added in Phases 7 and 9
 .env.example
+data/id_overrides.csv       # human-confirmed (provider, external_id) -> GSIS pairs
 .github/workflows/ci.yml
 backend/
   pyproject.toml, uv.lock, alembic.ini
-  alembic/versions/0001_initial.py   # extensions + 13 owned tables
-  src/fantasy_rag/config.py          # pydantic-settings, DEMO_MODE
-  src/fantasy_rag/cli.py             # `fantasy-rag` entry point
-  src/fantasy_rag/verify_sources.py  # live source check -> docs/data_sources.md
-  tests/unit/, tests/integration/
+  alembic/versions/0001_initial.py      # extensions + 13 owned tables
+  alembic/versions/0002_structured.py   # nflverse tables, snapshot keys, unresolved_players
+  src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
+  src/fantasy_rag/cli.py                # `fantasy-rag` entry point
+  src/fantasy_rag/db.py                 # engine
+  src/fantasy_rag/verify_sources.py     # live source check -> docs/data_sources.md
+  src/fantasy_rag/ingest/base.py        # sync_run, COPY-based upsert, unresolved report
+  src/fantasy_rag/ingest/nflverse.py    # pure frame normalizers + ID-only resolve()
+  src/fantasy_rag/ingest/sleeper.py     # Sleeper client, injury/trending frames
+  src/fantasy_rag/ingest/structured.py  # `ingest structured` orchestrator + sources registry
+  tests/unit/, tests/integration/, tests/fixtures/phase1/ (recorded slices; record_phase1.py)
 ```
 
-Planned (phase in brackets): `data/fixtures/` [1+], `src/fantasy_rag/db/` models, session [1] and read-only engine/role [3]; `ingest/` base, nflverse, sleeper [1], news_espn, rss, entity_link [4]; `analytics/` scoring [2], queries [3], optimizer [9]; `ml/` baseline, backtest [3], features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, tools [3], router, prompts [6]; `api/main.py` [7]; `jobs/scheduler.py` [9]; `tests/eval/golden.yaml` [3, 6]; `frontend/` [7].
+Planned (phase in brackets): read-only engine/role [3]; `ingest/` news_espn, rss, entity_link [4]; `analytics/` scoring [2], queries [3], optimizer [9]; `ml/` baseline, backtest [3], features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, tools [3], router, prompts [6]; `api/main.py` [7]; `jobs/scheduler.py` [9]; `tests/eval/golden.yaml` [3, 6]; `frontend/` [7].
 
 ## Conventions
 
@@ -58,6 +65,7 @@ Planned (phase in brackets): `data/fixtures/` [1+], `src/fantasy_rag/db/` models
 - ruff: line length 100, rules E, F, I, B, UP, SIM; `ruff format`. mypy `--strict` on `src/` (pydantic plugin; `nflreadpy` has no type info, so it is ignored).
 - Timestamps are `timestamptz` in UTC. nflverse `gameday` + `gametime` are US/Eastern local strings: convert with an explicit `America/New_York` zone.
 - Migrations are hand-written Alembic files, one per phase. No FK from an owned table to an nflverse-mirroring table.
+- Ingestion: every write goes through `ingest.base.upsert` (re-runs over identical data change 0 rows) inside `sync_run`. Players resolve by ID only (`nflverse.resolve`); unmatched rows go to `unresolved_players`. Name-based `candidates` are hints for a human, never applied.
 - httpx clients: User-Agent `fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)`, a timeout, and a rate limit.
 - pytest markers: `live` (network; deselected by default) and `db` (needs Postgres; uses a throwaway `<db>_migtest` database, never the dev DB).
 - Local Postgres listens on 5433 when another Postgres holds 5432 (set `DB_PORT` and `DATABASE_URL` in `.env`).
@@ -77,9 +85,10 @@ uv run ruff check .                    # lint
 uv run ruff format --check .           # format check (drop --check to fix)
 uv run mypy                            # type-check src/
 uv run pytest                          # unit + db tests; live tests deselected
-uv run pytest -m live                  # live source checks (network)
+uv run pytest -m live                  # live checks (network + ingested dev DB)
 uv run alembic upgrade head            # apply migrations
 uv run alembic downgrade base          # drop everything
 uv run fantasy-rag verify-sources      # sample every core source -> docs/data_sources.md
-uv run fantasy-rag ingest structured   # Phase 1 (not implemented yet)
+uv run fantasy-rag ingest structured   # nflverse 2022+ and Sleeper -> Postgres (idempotent)
+uv run python tests/fixtures/record_phase1.py   # re-record test fixtures (network)
 ```

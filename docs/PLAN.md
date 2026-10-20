@@ -110,18 +110,19 @@ One Postgres database holds four groups of tables: structured stats, league and 
 | `players` | `id` (PK, nflverse GSIS ID), `full_name`, `search_name`, `position`, `team`, `status` | `load_players()`, `load_ff_playerids()` | Daily |
 | `player_external_ids` | `player_id`, `provider` (sleeper, espn, pfr…), `external_id`, unique (provider, external_id) | `load_ff_playerids()`, Sleeper `/players/nfl` | Daily |
 | `schedules` | `game_id` (PK), `season`, `week`, `home_team`, `away_team`, `kickoff_at`, `spread_line`, `total_line`, `roof`, `result` | `load_schedules()` | Daily in season |
-| `player_week_stats` | `season`, `week`, `player_id`, `game_id`, `opponent`, targets, receptions, yards, TDs, carries, raw stat columns | `load_player_stats()` | Tuesday morning after Monday night |
+| `player_week_stats` | `season`, `week`, `season_type`, `player_id`, `game_id`, `team`, `opponent`, `stats` (jsonb of every raw numeric nflverse stat column, keyed by nflverse name; no fantasy points) | `load_player_stats()` | Tuesday morning after Monday night |
 | `snap_counts` | `season`, `week`, `player_id` (resolved from nflverse `pfr_player_id` via `player_external_ids`; the source has no GSIS ID), `offense_snaps`, `offense_pct` | `load_snap_counts()` | Weekly |
 | `ff_opportunity` | `season`, `week`, `player_id`, expected points and expected targets vs actual | `load_ff_opportunity()` | Weekly |
-| `depth_charts` | `season`, `as_of` (nflverse `dt` from 2025 on; derived from `week` for 2024 and earlier), `team`, `position`, `depth`, `player_id` (2025+ files have no `week` column; rows are timestamped snapshots) | `load_depth_charts()` + Sleeper `depth_chart_order` | Daily |
+| `depth_charts` | `season`, `week` (2024 and earlier) or `as_of` (nflverse `dt` snapshot time, 2025 on), `team`, `position` (QB/RB/WR/TE/K only), `depth`, `player_id` | `load_depth_charts()` + Sleeper `depth_chart_order` | Daily |
 | `injury_snapshots` | `player_id`, `status` (Q/D/O/IR), `body_part`, `practice` (DNP/LP/FP), `source`, `reported_at`, `ingested_at` | Sleeper `/players/nfl` (status, body part) and the nflverse injury file (status and practice) | Daily, 3× daily Wed–Sat |
 | `injury_history` | `season`, `week`, `player_id`, report and practice status | `load_injuries()` | Weekly |
-| `trending` | `player_id`, `kind` (add/drop), `count`, `lookback_hours`, `ingested_at` | Sleeper trending endpoint | Every 6 hours |
+| `trending` | `player_id`, `kind` (add/drop), `count`, `lookback_hours`, `window_start` (6-hour UTC window), `ingested_at` | Sleeper trending endpoint | Every 6 hours |
 | `fantasy_leagues` | `id`, `provider`, `external_league_id`, `season`, `scoring_settings` (raw JSON), `scoring_rules` (validated), `roster_positions` | Sleeper league import | On import + daily |
 | `fantasy_rosters` | `league_id`, `roster_id`, `owner_name`, `week`, `player_ids[]`, `starter_ids[]` | Sleeper rosters and matchups | Daily in season |
 | `projections` | `player_id`, `season`, `week`, `model_version`, per-stat predictions, `p10`/`p50`/`p90`, `generated_at` | Projection job | Daily Tue–Sun |
 | `model_runs` | `model_version`, training window, features, metrics (MAE, Spearman, start/sit accuracy) | Training and backtest jobs | Per run |
 | `sources` | `name`, `license`, `attribution`, `storage_allowed` (full/summary/link), `refresh_cadence` | Seeded by hand | On change |
+| `unresolved_players` | `source`, `provider`, `external_id`, `name`, `team`, `position`, `candidates` (hints only; a person confirms pairs in `data/id_overrides.csv`) | Every ingestion job | Live |
 | `sync_runs` | `id`, `source`, `started_at`, `finished_at`, `status`, `row_count`, `error` | Every ingestion job | Live |
 | `documents` | `id`, `source`, `url` (unique), `title`, `summary`, `published_at`, `ingested_at`, `teams[]`, `player_ids[]` | News and RSS jobs | Every 30–60 min in season |
 | `chunks` | `id`, `document_id`, `text`, `embedding vector(384)`, `tsv tsvector`, `player_ids[]`, `published_at` | Chunk + embed step after ingestion | With documents |

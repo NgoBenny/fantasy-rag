@@ -1,0 +1,126 @@
+"""End-to-end ingest on recorded fixtures (tests/fixtures/phase1); a re-run is a no-op."""
+
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+import polars as pl
+import pytest
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine, text
+
+from fantasy_rag.ingest import structured
+from fantasy_rag.ingest.base import upsert
+
+pytestmark = pytest.mark.db
+
+FIX = Path(__file__).resolve().parents[1] / "fixtures" / "phase1"
+ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
+TABLES = ["sources", "players", "player_external_ids", "schedules", "player_week_stats",
+          "snap_counts", "ff_opportunity", "depth_charts", "injury_history", "injury_snapshots",
+          "trending"]  # fmt: skip
+
+
+class FakeNfl:
+    """Stands in for nflreadpy: every loader returns its recorded slice."""
+
+    def _read(self, name: str) -> pl.DataFrame:
+        return pl.read_parquet(FIX / f"{name}.parquet")
+
+    def load_players(self) -> pl.DataFrame:
+        return self._read("players")
+
+    def load_ff_playerids(self) -> pl.DataFrame:
+        return self._read("ff_playerids")
+
+    def load_schedules(self, seasons: Any) -> pl.DataFrame:
+        return self._read("schedules")
+
+    def load_player_stats(self, seasons: Any) -> pl.DataFrame:
+        return self._read("player_stats")
+
+    def load_snap_counts(self, seasons: Any) -> pl.DataFrame:
+        return self._read("snap_counts")
+
+    def load_ff_opportunity(self, seasons: Any) -> pl.DataFrame:
+        return self._read("ff_opportunity")
+
+    def load_injuries(self, seasons: Any) -> pl.DataFrame:
+        return self._read("injuries")
+
+    def load_depth_charts(self, seasons: list[int]) -> pl.DataFrame:
+        return self._read("depth_2024" if seasons[0] <= 2024 else "depth_2025plus")
+
+
+class FakeSleeper:
+    def __init__(self) -> None:
+        self.data = json.loads((FIX / "sleeper_players.json").read_text(encoding="utf-8"))
+
+    def players(self, cache_dir: Path) -> dict[str, Any]:
+        return dict(self.data)
+
+    def get(self, path: str, **params: Any) -> Any:
+        ids = list(self.data)[:3]
+        return [{"player_id": i, "count": 7} for i in ids] + [{"player_id": "DET", "count": 1}]
+
+
+def _counts(url: str) -> dict[str, int]:
+    engine = create_engine(url)
+    with engine.connect() as conn:
+        out = {t: int(conn.execute(text(f"SELECT count(*) FROM {t}")).scalar_one()) for t in TABLES}
+    engine.dispose()
+    return out
+
+
+def test_ingest_fills_tables_and_rerun_changes_nothing(
+    scratch_db_url: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cfg = Config(str(ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", scratch_db_url.replace("%", "%%"))
+    command.upgrade(cfg, "head")
+    monkeypatch.setattr(structured, "nfl", FakeNfl())
+    monkeypatch.setattr(structured, "update_config", lambda **_: None)
+    engine = create_engine(scratch_db_url)
+    now = datetime(2026, 10, 20, 12, tzinfo=UTC)
+
+    first = structured.run_structured(engine, FakeSleeper(), now, season=2026)
+    assert first.ok, [r for r in first.results if r.error]
+    counts = _counts(scratch_db_url)
+    assert all(n > 0 for n in counts.values()), counts
+
+    second = structured.run_structured(engine, FakeSleeper(), now, season=2026)
+    assert second.ok
+    assert {r.source: r.changed for r in second.results if r.changed} == {}
+    assert _counts(scratch_db_url) == counts
+
+    with engine.connect() as conn:
+        statuses = conn.execute(text("SELECT DISTINCT status FROM sync_runs")).scalars().all()
+        # stats never carry nflverse's precomputed fantasy points
+        leaked = conn.execute(
+            text("SELECT count(*) FROM player_week_stats WHERE stats ? 'fantasy_points_ppr'")
+        ).scalar_one()
+    engine.dispose()
+    assert statuses == ["ok"] and leaked == 0
+
+
+def test_upsert_updates_only_changed_rows(scratch_db_url: str) -> None:
+    cfg = Config(str(ALEMBIC_INI))
+    cfg.set_main_option("sqlalchemy.url", scratch_db_url.replace("%", "%%"))
+    command.upgrade(cfg, "head")
+    engine = create_engine(scratch_db_url)
+    rows = structured.SOURCES
+    with engine.begin() as conn:
+        assert upsert(conn, "sources", rows, ["name"], None) == len(rows)
+        assert upsert(conn, "sources", rows, ["name"], None) == 0
+        edited = rows.with_columns(
+            pl.when(pl.col("name") == "sleeper")
+            .then(pl.lit("changed"))
+            .otherwise(pl.col("license"))
+            .alias("license")
+        )
+        assert upsert(conn, "sources", edited, ["name"], None) == 1
+        with pytest.raises(ValueError, match="unsafe"):
+            upsert(conn, "sources; drop table players", rows, ["name"], None)
+    engine.dispose()

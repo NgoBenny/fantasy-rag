@@ -8,19 +8,16 @@ are written, because the repo is public.
 import importlib.metadata
 import json
 import re
-import time
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import httpx
 import nflreadpy as nfl
 import polars as pl
 
 from fantasy_rag.config import REPO_ROOT, Settings
+from fantasy_rag.ingest.sleeper import Sleeper
 
-SLEEPER = "https://api.sleeper.app/v1"
-USER_AGENT = "fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)"
 SKILL_POSITIONS = {"QB", "RB", "WR", "TE", "K"}
 GSIS_RE = re.compile(r"^00-\d{7}$")
 
@@ -253,28 +250,6 @@ def check_nflverse(
 # ---------- Sleeper ----------
 
 
-class Sleeper:
-    def __init__(self) -> None:
-        self.client = httpx.Client(base_url=SLEEPER, headers={"User-Agent": USER_AGENT}, timeout=60)
-
-    def get(self, path: str, **params: Any) -> Any:
-        time.sleep(0.25)  # far under Sleeper's 1,000 calls/minute
-        resp = self.client.get(path, params=params)
-        resp.raise_for_status()
-        return resp.json()
-
-    def players(self, cache_dir: Path) -> dict[str, Facts]:
-        """/players/nfl at most once per day: reuse today's cached copy if present."""
-        cache = cache_dir / f"sleeper_players_{date.today().isoformat()}.json"
-        if cache.exists():
-            data: dict[str, Facts] = json.loads(cache.read_text(encoding="utf-8"))
-            return data
-        data = self.get("/players/nfl")
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps(data), encoding="utf-8")
-        return data
-
-
 def summarize_sleeper_players(
     players: dict[str, Facts], crosswalk: pl.DataFrame, stat_gsis: set[str]
 ) -> tuple[Facts, list[str]]:
@@ -358,16 +333,19 @@ def check_league_shapes(api: Sleeper, username: str, season: str, week: int) -> 
         league = api.get(f"/league/{lg['league_id']}")
         rosters = api.get(f"/league/{lg['league_id']}/rosters") or []
         matchups = api.get(f"/league/{lg['league_id']}/matchups/{week}") or []
-        scoring = league.get("scoring_settings") or {}
+        scoring = {k: v for k, v in (league.get("scoring_settings") or {}).items() if v}
         out.append(
             {
                 "status": league.get("status"),
                 "total_rosters": league.get("total_rosters"),
                 "roster_positions": league.get("roster_positions"),
-                "scoring_settings_key_count": len(scoring),
-                "scoring_rec": scoring.get("rec"),
-                "idp_or_bonus_keys": sorted(k for k in scoring if k.startswith(("idp_", "bonus_"))),
-                "scoring_settings_keys": sorted(scoring),
+                "scoring_keys_total_vs_nonzero": (
+                    f"{len(league.get('scoring_settings') or {})} keys, {len(scoring)} non-zero"
+                ),
+                "nonzero_idp_or_bonus": {
+                    k: v for k, v in scoring.items() if k.startswith(("idp_", "bonus_"))
+                },
+                "nonzero_scoring": dict(sorted(scoring.items())),
                 "roster_fields": sorted({k for r in rosters for k in r}),
                 "matchup_fields": sorted({k for m in matchups for k in m}),
                 f"matchups_week_{week}_with_points": sum(
