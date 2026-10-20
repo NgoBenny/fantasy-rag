@@ -15,6 +15,14 @@ def main(argv: list[str] | None = None) -> None:
     league.add_argument(
         "--season", help="with --username: that season's leagues (default: current)"
     )
+    tool = sub.add_parser(
+        "tool", help="run one agent tool by hand, e.g. tool project_player '{...}'"
+    )
+    tool.add_argument("name")
+    tool.add_argument("args", nargs="?", default="{}", help="JSON arguments")
+    bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
+    bt.add_argument("--tune-season", type=int, default=2024)
+    bt.add_argument("--test-season", type=int, default=2025)
     args = parser.parse_args(argv)
 
     if args.command == "verify-sources":
@@ -34,6 +42,38 @@ def main(argv: list[str] | None = None) -> None:
             sys.exit(1)
     elif args.command == "league":
         _league(args)
+    elif args.command == "tool":
+        _tool(args.name, args.args)
+    elif args.command == "backtest":
+        _backtest(args.tune_season, args.test_season)
+
+
+def _tool(name: str, raw_args: str) -> None:
+    import json
+
+    from fantasy_rag.agent.tools import run_tool
+    from fantasy_rag.db import get_readonly_engine
+
+    with get_readonly_engine().connect() as conn:
+        print(json.dumps(run_tool(conn, name, json.loads(raw_args)), indent=2, default=str))
+
+
+def _backtest(tune: int, test: int) -> None:
+    from fantasy_rag.db import get_engine
+    from fantasy_rag.ml.tune import run_backtest
+
+    r = run_backtest(get_engine(), tune, test)
+    b, t = r["best"], r["test"]
+    print(
+        f"tuned on {tune}: half_life={b['half_life']} prior_season={b['use_prior_season']}"
+        f" MAE={b['mae']} start/sit={b['start_sit_accuracy']}"
+    )
+    print(
+        f"test {test}: MAE={t['mae']} by position={t['mae_by_position']}"
+        f" start/sit={t['start_sit_accuracy']} ({t['start_sit_pairs']} pairs, n={t['n']})"
+    )
+    for name, v in r["naive"].items():
+        print(f"  vs {name}: MAE={v['mae']} start/sit={v['start_sit_accuracy']}")
 
 
 def _league(args: argparse.Namespace) -> None:
