@@ -35,3 +35,22 @@ jobs:
       - run: uv run alembic upgrade head
       # live source checks are deselected by pyproject addopts; CI never calls nflverse or Sleeper
       - run: uv run pytest -v
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      # Type-checks and builds; pages render per request, so no API is needed here.
+      # Playwright (e2e/) runs locally against the real API + dev database.
+      - run: npm run build

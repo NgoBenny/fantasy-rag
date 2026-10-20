@@ -8,7 +8,18 @@ $log = Join-Path $logDir ("ingest_{0}.log" -f (Get-Date -Format "yyyy-MM"))
 
 "=== $(Get-Date -Format o)" | Out-File -Append -Encoding utf8 $log
 Set-Location $repo
-docker compose up -d db 2>&1 | Out-File -Append -Encoding utf8 $log
+# A run that catches up right after boot finds Docker Desktop still off: start it and wait.
+docker info *> $null
+if ($LASTEXITCODE -ne 0) {
+    "starting Docker Desktop" | Out-File -Append -Encoding utf8 $log
+    Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    for ($i = 0; $i -lt 36; $i++) {
+        Start-Sleep 5
+        docker info *> $null
+        if ($LASTEXITCODE -eq 0) { break }
+    }
+}
+docker compose up -d --wait db 2>&1 | Out-File -Append -Encoding utf8 $log
 Set-Location (Join-Path $repo "backend")
 $env:PYTHONIOENCODING = "utf-8"
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log

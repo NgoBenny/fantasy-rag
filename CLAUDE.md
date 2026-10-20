@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-3):
+Exists now (Phases 0-3b):
 
 ```
 CLAUDE.md
@@ -48,6 +48,7 @@ backend/
   alembic/versions/0002_structured.py   # nflverse tables, snapshot keys, unresolved_players
   alembic/versions/0003_leagues.py      # league name/settings, weekly matchup results
   alembic/versions/0004_readonly_trgm.py  # fantasy_reader role, trigram name index
+  alembic/versions/0006_fantasy_positions.py  # players.fantasy_positions (Sleeper slot eligibility)
   alembic/versions/0005_defense.py      # team_week_defense, player_week_special_teams (from pbp)
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
@@ -64,12 +65,15 @@ backend/
   src/fantasy_rag/analytics/queries.py  # parameterized queries, name resolution, scoring presets
   src/fantasy_rag/ml/baseline.py        # EWM-of-league-points baseline (tuned half-life)
   src/fantasy_rag/ml/backtest.py, tune.py  # rolling-origin backtest, `fantasy-rag backtest`
-  src/fantasy_rag/agent/tools.py        # 8 typed tools + run_tool (Pydantic-validated, no SQL)
+  src/fantasy_rag/agent/tools.py        # 9 typed tools + run_tool (Pydantic-validated, no SQL)
+  src/fantasy_rag/analytics/optimizer.py  # lineup optimizer (exact assignment, locks, empty slots)
+  src/fantasy_rag/api/main.py           # FastAPI read-only HTTP layer (port 8010)
   tests/eval/golden.yaml                # golden questions (20 stats so far)
   tests/unit/, tests/integration/, tests/fixtures/phase1/ (recorded slices; record_phase1.py)
+frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; e2e/ Playwright
 ```
 
-Planned (phase in brackets): API, player pages, lineup optimizer [3b]; `ingest/` news_espn, rss, entity_link [4]; `analytics/` optimizer [3b]; `ml/` features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, router, prompts [6]; `api/main.py` [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; `frontend/` [7].
+Planned (phase in brackets): `ingest/` news_espn, rss, entity_link [4]; `ml/` features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, router, prompts [6]; API chat/SSE endpoints [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; chat and My League pages [7].
 
 ## Conventions
 
@@ -78,6 +82,7 @@ Planned (phase in brackets): API, player pages, lineup optimizer [3b]; `ingest/`
 - Timestamps are `timestamptz` in UTC. nflverse `gameday` + `gametime` are US/Eastern local strings: convert with an explicit `America/New_York` zone.
 - Migrations are hand-written Alembic files, one per phase. No FK from an owned table to an nflverse-mirroring table.
 - Tools: inputs are Pydantic models in `agent/tools.py`; tools read through `get_readonly_engine()`. Player names resolve by trigram word similarity over fantasy positions; ties prefer players with stats this season; anything still ambiguous raises `AmbiguousPlayer` with candidates (never a guess). League rules are rebuilt from raw `scoring_settings` on every call.
+- Frontend: server components fetch the API (`src/lib/api.ts`); page state lives in the URL (search, compare picks, league/roster), so pages need no client JS. `cacheComponents` is off: every page shows live data. Next.js 16 differs from older versions; read `frontend/AGENTS.md` first.
 - Shared dev DB: sessions in other worktrees use the same Postgres. Coordinate migration numbers before applying, and never downgrade the dev DB.
 - Scoring: `ScoringRules.from_sleeper` keeps only non-zero keys (Sleeper ships unused keys at 0). Keys without a `DERIVE` entry are reported as unsupported; team DEF and special-teams `st_ff`/`st_fum_rec` need play-by-play and are not scored yet.
 - Snapshots can't be backfilled: the scheduled task (scripts/register_daily_ingest.ps1) must stay registered, and the PC on with Docker available, until ingestion moves to a hosted worker (Phase 9).
@@ -112,7 +117,16 @@ uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-w
 uv run fantasy-rag tool get_player_stats '{"player":{"name":"Amon-Ra"},"last_n":3}'  # any tool by hand
 uv run fantasy-rag backtest             # tune baseline on 2024, report 2025; writes model_runs
 
+uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 is taken on this PC); --reload so Playwright never reuses stale code
+
+# frontend/
+npm run dev -- --port 3010             # web app; reads API_URL (default http://localhost:8010)
+npm run lint                           # eslint
+npm test                               # Vitest unit tests
+npm run build                          # type-check + production build (no API needed)
+npx playwright test                    # browser tests; starts API + web if not running (real dev DB)
+
 # repo root: daily snapshot collection (Windows Task Scheduler, current user)
-powershell -File scripts/register_daily_ingest.ps1   # daily 7am + Wed-Sat 1pm/6pm; logs in data/logs/
+powershell -File scripts/register_daily_ingest.ps1   # daily 6pm + Wed-Sat 2pm/9pm; starts Docker; logs in data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
 ```

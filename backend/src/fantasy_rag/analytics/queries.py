@@ -47,6 +47,7 @@ class PlayerRef(BaseModel):
     name: str
     position: str | None
     team: str | None
+    fantasy_positions: list[str] | None = None  # Sleeper slot eligibility, when known
 
 
 class AmbiguousPlayer(ValueError):
@@ -236,9 +237,161 @@ def rostered(conn: Connection, league_id: int) -> tuple[set[str], int | None, da
 
 def players_by_id(conn: Connection, ids: list[str]) -> dict[str, PlayerRef]:
     rows = conn.execute(
-        text("SELECT id, full_name, position, team FROM players WHERE id = ANY(:ids)"),
+        text(
+            "SELECT id, full_name, position, team, fantasy_positions FROM players"
+            " WHERE id = ANY(:ids)"
+        ),
         {"ids": ids},
     )
     return {
-        r.id: PlayerRef(id=r.id, name=r.full_name, position=r.position, team=r.team) for r in rows
+        r.id: PlayerRef(
+            id=r.id,
+            name=r.full_name,
+            position=r.position,
+            team=r.team,
+            fantasy_positions=r.fantasy_positions,
+        )
+        for r in rows
     }
+
+
+def league_roster(conn: Connection, league_id: int, roster_id: int) -> dict[str, Any]:
+    """A roster's latest imported week: GSIS players, Sleeper starters, slot list."""
+    row = conn.execute(
+        text(
+            """
+            SELECT r.week, r.player_ids, r.raw->'starters' AS starters, r.owner_name,
+                   r.ingested_at, l.roster_positions
+            FROM fantasy_rosters r JOIN fantasy_leagues l ON l.id = r.league_id
+            WHERE r.league_id = :l AND r.roster_id = :r
+            ORDER BY r.week DESC LIMIT 1
+            """
+        ),
+        {"l": league_id, "r": roster_id},
+    ).one_or_none()
+    if row is None:
+        raise ValueError(f"no imported roster {roster_id} in league {league_id}")
+    return dict(row._mapping)
+
+
+def sleeper_to_gsis(conn: Connection, sleeper_ids: list[str]) -> dict[str, str]:
+    rows = conn.execute(
+        text(
+            "SELECT external_id, player_id FROM player_external_ids"
+            " WHERE provider = 'sleeper' AND external_id = ANY(:ids)"
+        ),
+        {"ids": sleeper_ids},
+    )
+    return {str(e): str(p) for e, p in rows}
+
+
+def leagues(conn: Connection) -> list[dict[str, Any]]:
+    """Imported leagues with their rosters (owner names stay in the local database)."""
+    rows = conn.execute(
+        text(
+            """
+            SELECT l.id, l.name, l.season, l.roster_positions,
+                   json_agg(json_build_object('roster_id', r.roster_id, 'owner_name', r.owner_name)
+                            ORDER BY r.roster_id) AS rosters
+            FROM fantasy_leagues l
+            JOIN fantasy_rosters r ON r.league_id = l.id
+             AND r.week = (SELECT max(week) FROM fantasy_rosters WHERE league_id = l.id)
+            GROUP BY l.id ORDER BY l.id
+            """
+        )
+    )
+    return [dict(r._mapping) for r in rows]
+
+
+def search_players(
+    conn: Connection, query: str, position: str | None, limit: int
+) -> list[dict[str, Any]]:
+    """Directory search: best name matches among fantasy positions, active players first."""
+    season, _ = latest_week(conn)
+    rows = conn.execute(
+        text(
+            """
+            SELECT p.id, p.full_name AS name, p.position, p.team,
+                   EXISTS (SELECT 1 FROM player_week_stats s
+                           WHERE s.player_id = p.id AND s.season = :season) AS active
+            FROM players p
+            WHERE p.position = ANY(:pos)
+              AND (:q = '' OR p.search_name % :q OR :q <% p.search_name)
+            ORDER BY active DESC,
+                     greatest(similarity(p.search_name, :q),
+                              word_similarity(:q, p.search_name)) DESC,
+                     p.full_name
+            LIMIT :n
+            """
+        ),
+        {
+            "season": season,
+            "q": _normalize(query),
+            "n": limit,
+            "pos": [position] if position else list(SKILL),
+        },  # fmt: skip
+    )
+    return [dict(r._mapping) for r in rows]
+
+
+# Statuses that mean "won't play this week" (Sleeper and the NFL weekly report).
+OUT_STATUSES = {"Out", "IR", "PUP", "Sus", "Suspended", "NA", "DNR"}
+WARN_STATUSES = {"Doubtful", "Questionable"}
+
+
+def availability(
+    conn: Connection, player_ids: list[str], season: int, week: int
+) -> dict[str, dict[str, Any]]:
+    """Why a player may not play `week`: bye, or his latest observed injury status.
+
+    Only players with something to report are returned. `playable` False means project 0.
+    Sleeper's latest status applies to any week; an nflverse report counts only for its
+    own week. Byes are only judged once that week's schedule exists.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    rows = conn.execute(
+        text(
+            """
+            WITH playing AS (
+                SELECT home_team AS team FROM schedules
+                WHERE season = :s AND week = :w AND game_type = 'REG'
+                UNION SELECT away_team FROM schedules
+                WHERE season = :s AND week = :w AND game_type = 'REG'
+            )
+            SELECT p.id, p.team FROM players p
+            WHERE p.id = ANY(:ids) AND EXISTS (SELECT 1 FROM playing)
+              AND p.team IS NOT NULL AND p.team NOT IN (SELECT team FROM playing)
+            """
+        ),
+        {"s": season, "w": week, "ids": player_ids},
+    )
+    for pid, team in rows:
+        out[pid] = {
+            "status": "bye",
+            "playable": False,
+            "note": f"{team} has no game in week {week}",
+        }
+
+    snaps = conn.execute(
+        text(
+            """
+            SELECT DISTINCT ON (player_id, source) player_id, source, status, ingested_at
+            FROM injury_snapshots
+            WHERE player_id = ANY(:ids)
+              AND (source = 'sleeper' OR (season = :s AND week = :w))
+            ORDER BY player_id, source, ingested_at DESC, id DESC
+            """
+        ),
+        {"s": season, "w": week, "ids": player_ids},
+    )
+    for pid, source, status, seen in snaps:
+        # Keep the worse of the two sources; a bye or an Out already decides it.
+        if not status or (pid in out and not out[pid]["playable"]):
+            continue
+        if status in OUT_STATUSES or status in WARN_STATUSES:
+            current = out.get(pid)
+            playable = status not in OUT_STATUSES
+            if current is None or (current["playable"] and not playable):
+                out[pid] = {"status": status, "playable": playable, "source": source,
+                            "observed_at": seen}  # fmt: skip
+    return out

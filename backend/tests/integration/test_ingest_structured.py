@@ -104,8 +104,12 @@ def test_ingest_fills_tables_and_rerun_changes_nothing(
         leaked = conn.execute(
             text("SELECT count(*) FROM player_week_stats WHERE stats ? 'fantasy_points_ppr'")
         ).scalar_one()
+        # Sleeper's fantasy eligibility landed on our players (and the re-run changed none).
+        with_fp = conn.execute(
+            text("SELECT count(*) FROM players WHERE fantasy_positions IS NOT NULL")
+        ).scalar_one()
     engine.dispose()
-    assert statuses == ["ok"] and leaked == 0
+    assert statuses == ["ok"] and leaked == 0 and with_fp > 0
 
 
 def test_upsert_updates_only_changed_rows(scratch_db_url: str) -> None:

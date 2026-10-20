@@ -373,6 +373,31 @@ def run_structured(
 
     _step(engine, report, "snapshot.sleeper_injuries", sleeper_snapshot)
 
+    def fantasy_positions(run: Run, res: Result) -> None:
+        """Sleeper's slot eligibility (a fullback is RB-eligible), keyed to our players."""
+        rows = [
+            {"sleeper_id": str(pid), "fantasy_positions": "{" + ",".join(fp) + "}"}
+            for pid, p in loaded.get("sleeper", {}).items()
+            if (fp := p.get("fantasy_positions"))
+        ]
+        if not rows:
+            return
+        resolved, _ = nv.resolve(pl.DataFrame(rows), [("sleeper_id", "sleeper")], idmap, known)
+        frame = resolved.select(pl.col("player_id").alias("id"), "fantasy_positions")
+        stage(run.conn, "players", frame.unique("id", keep="first"))
+        res.changed = int(
+            run.conn.execute(
+                text(
+                    "UPDATE players p SET fantasy_positions = s.fantasy_positions"
+                    " FROM stage s WHERE p.id = s.id"
+                    " AND p.fantasy_positions IS DISTINCT FROM s.fantasy_positions"
+                )
+            ).rowcount
+        )
+        run.conn.execute(text("DROP TABLE stage"))
+
+    _step(engine, report, "sleeper.fantasy_positions", fantasy_positions)
+
     def trending(run: Run, res: Result) -> None:
         adds = api.get(
             "/players/nfl/trending/add", lookback_hours=TRENDING_LOOKBACK_HOURS, limit=50
