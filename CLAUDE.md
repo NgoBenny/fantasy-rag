@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-4):
+Exists now (Phases 0-5):
 
 ```
 CLAUDE.md
@@ -63,6 +63,8 @@ backend/
   src/fantasy_rag/ingest/entity_link.py # tag stories/chunks with player + team IDs
   src/fantasy_rag/ingest/news_job.py    # `ingest news` + `ingest news-report` (coverage check)
   src/fantasy_rag/index/chunker.py, embedder.py  # ~300-word chunks; Embedder protocol + local bge-small
+  src/fantasy_rag/retrieval/hybrid.py   # vector + full-text, RRF, player/recency filters, dedupe
+  src/fantasy_rag/retrieval/rerank.py, evaluate.py  # optional bge-reranker; `eval news`
   src/fantasy_rag/ingest/pbp.py         # play-by-play -> team DEF + special-teams stats (pure)
   src/fantasy_rag/analytics/scoring.py  # Sleeper scoring keys (incl. team DEF) -> points
   src/fantasy_rag/analytics/scoring_check.py  # our points vs Sleeper's players_points
@@ -72,12 +74,13 @@ backend/
   src/fantasy_rag/agent/tools.py        # 9 typed tools + run_tool (Pydantic-validated, no SQL)
   src/fantasy_rag/analytics/optimizer.py  # lineup optimizer (exact assignment, locks, empty slots)
   src/fantasy_rag/api/main.py           # FastAPI read-only HTTP layer (port 8010)
-  tests/eval/golden.yaml                # golden questions (20 stats so far)
+  tests/eval/golden.yaml                # golden stats questions (20)
+  tests/eval/golden_news.yaml           # 20 labelled news questions (+15 bare-name queries)
   tests/unit/, tests/integration/, tests/fixtures/phase1/ (recorded slices; record_phase1.py)
 frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; e2e/ Playwright
 ```
 
-Planned (phase in brackets): `ml/` features, train, predict [8]; `retrieval/` hybrid, rerank [5]; `agent/` llm, router, prompts [6]; API chat/SSE endpoints [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; chat and My League pages [7].
+Planned (phase in brackets): `ml/` features, train, predict [8]; `agent/` llm, router, prompts [6] (tools incl. `search_news` exist); API chat/SSE endpoints [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; chat and My League pages [7].
 
 ## Conventions
 
@@ -111,7 +114,7 @@ uv run ruff check .                    # lint
 uv run ruff format --check .           # format check (drop --check to fix)
 uv run mypy                            # type-check src/
 uv run pytest                          # unit + db tests; live tests deselected
-uv run pytest -m live                  # live checks: top-10 PPR + 20 golden stats questions (dev DB)
+uv run pytest -m live                  # live checks: top-10 PPR, 20 stats questions, news retrieval (dev DB)
 uv run alembic upgrade head            # apply migrations
 uv run alembic downgrade base          # drop everything
 uv run fantasy-rag verify-sources      # sample every core source -> docs/data_sources.md
@@ -123,6 +126,7 @@ uv run fantasy-rag league import       # your Sleeper leagues (SLEEPER_USERNAME 
 uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-week (exit 1 on any miss)
 uv run fantasy-rag tool get_player_stats '{"player":{"name":"Amon-Ra"},"last_n":3}'  # any tool by hand
 uv run fantasy-rag backtest             # tune baseline on 2024, report 2025; writes model_runs
+uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode (--rerank: 1 GB model)
 
 uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 is taken on this PC); --reload so Playwright never reuses stale code
 

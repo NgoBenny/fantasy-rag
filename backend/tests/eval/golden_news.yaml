@@ -1,0 +1,130 @@
+# Golden set, news part (PLAN.md Phase 5): 20 labelled questions over stories ingested
+# Oct 20, 2026. `relevant` lists every stored story covering that news; any one in the
+# top 5 counts as a hit. `player_name: true` marks questions naming a player (used for the
+# keyword-vs-vector comparison); `name_query` is the bare player name for the same story,
+# the way a tool call often searches. Questions are paraphrased, not copied from headlines.
+# Drafted for review with the user.
+
+news:
+  - id: n01
+    question: How long is Davante Adams going to be out?
+    player_name: true
+    name_query: Davante Adams
+    relevant:
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/rams-put-davante-adams-poona-ford-on-ir
+      - https://sports.yahoo.com/articles/rams-put-davante-adams-poona-222912374.html
+  - id: n02
+    question: Is Terry McLaurin done for the season?
+    player_name: true
+    name_query: Terry McLaurin
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50230371/commanders-wr-terry-mclaurin-torn-patellar-tendon
+      - https://www.cbssports.com/nfl/news/commanders-terry-mclaurin-knee-injury-monday-night-football
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/terry-mclaurin-out-for-year-with-torn-patellar-tendon
+  - id: n03
+    question: Who is kicking for the Rams now?
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50231705/sources-rams-signing-free-agent-kicker-brandon-mcmanus
+      - https://sports.yahoo.com/articles/brandon-mcmanus-becomes-rams-third-212047598.html
+      - https://sports.yahoo.com/articles/rams-turn-third-kicker-three-205700245.html
+      - https://sports.yahoo.com/articles/rams-add-k-brandon-mcmanus-205635763.html
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/rams-add-k-brandon-mcmanus
+      - https://sports.yahoo.com/articles/rams-sign-another-kicker-204740544.html
+  - id: n04
+    question: Did the Giants cut Najee Harris?
+    player_name: true
+    name_query: Najee Harris
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50228752/giants-releasing-rb-najee-harris-source-says
+  - id: n05
+    question: Are the Eagles getting punished for letting Jalen Hurts play with blood clots?
+    player_name: true
+    name_query: Jalen Hurts
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50230816/reports-nfl-punish-eagles-jalen-hurts-situation
+      - https://www.cbssports.com/nfl/news/eagles-will-not-be-punished-jalen-hurts-blood-clots-situation
+      - https://www.espn.com/nfl/story/_/id/50232968/eagles-approach-hurts-was-appropriately-guarded
+  - id: n06
+    question: Why did Pittsburgh bring back Marquez Valdes-Scantling?
+    player_name: true
+    name_query: Marquez Valdes-Scantling
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50232379/steelers-bring-back-marquez-valdes-scantling-amid-wr-injuries
+  - id: n07
+    question: What changed in the Eagles running back room?
+    name_query: Elijah Mitchell
+    relevant:
+      - https://sports.yahoo.com/articles/eagles-sign-rb-elijah-mitchell-221852749.html
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/eagles-sign-rb-elijah-mitchell-to-active-roster-waive-jaydon-blue-and-carson-steele
+  - id: n08
+    question: Which kickers did Miami try out?
+    name_query: Justin Tucker
+    relevant:
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/justin-tucker-was-among-five-kickers-the-dolphins-worked-out
+  - id: n09
+    question: Has Caleb Williams gotten more accurate this year?
+    player_name: true
+    name_query: Caleb Williams
+    relevant:
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/caleb-williams-has-gone-from-32nd-last-year-to-first-this-year-in-completion-percentage
+      - https://sports.yahoo.com/articles/caleb-williams-gone-32nd-last-203543576.html
+  - id: n10
+    question: What did Dan Quinn say about Jayden Daniels throwing the ball away on fourth down?
+    player_name: true
+    name_query: Jayden Daniels
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50231812/quinn-daniels-discuss-qb-throwaway-fourth-play
+      - https://sports.yahoo.com/nfl/article/dan-quinn-says-he-talked-to-jayden-daniels-about-ill-advised-fourth-down-throwaway-vs-49ers-wants-qb-to-take-his-shot-233900445.html
+  - id: n11
+    question: When do the Browns have to decide on their quarterback?
+    relevant:
+      - https://sports.yahoo.com/articles/cleveland-browns-quarterback-d-day-215510090.html
+  - id: n12
+    question: Did Dallas add a quarterback to the practice squad?
+    name_query: Kyle Trask
+    relevant:
+      - https://sports.yahoo.com/articles/cowboys-sign-qb-kyle-trask-203346139.html
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/cowboys-sign-qb-kyle-trask-to-their-practice-squad
+  - id: n13
+    question: Is Tyler Loop's job as the Ravens kicker in danger?
+    player_name: true
+    name_query: Tyler Loop
+    relevant:
+      - https://sports.yahoo.com/articles/ravens-sign-k-jake-moody-190000312.html
+  - id: n14
+    question: Which Packers receiver is leading the way, Watson or Golden?
+    player_name: true
+    name_query: Matthew Golden
+    relevant:
+      - https://sports.yahoo.com/articles/christian-watson-matthew-golden-lead-194009422.html
+  - id: n15
+    question: Why did the Dolphins let go of their kicker?
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50229491/sources-dolphins-release-riley-patterson-amid-kickoff-woes
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/justin-tucker-was-among-five-kickers-the-dolphins-worked-out
+  - id: n16
+    question: Which wide receiver did the Colts add to the practice squad?
+    name_query: Mecole Hardman
+    relevant:
+      - https://sports.yahoo.com/articles/colts-add-wr-mecole-hardman-193614963.html
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/colts-add-wr-mecole-hardman-p-thomas-morstead-to-practice-squad
+  - id: n17
+    question: Is Brock Purdy the most efficient passer in NFL history?
+    player_name: true
+    name_query: Brock Purdy
+    relevant:
+      - https://www.cbssports.com/nfl/news/mr-irrelevant-to-mr-efficient-brock-purdy-nfls-all-time-passer-rating
+  - id: n18
+    question: How clutch has Bo Nix been at the end of games?
+    player_name: true
+    name_query: Bo Nix
+    relevant:
+      - https://sports.yahoo.com/articles/bo-nix-breakneck-pace-game-230000172.html
+  - id: n19
+    question: Whose fantasy value is rising in the rest-of-season rankings?
+    relevant:
+      - https://www.espn.com/fantasy/football/story/_/id/49949224/fantasy-football-2026-updated-rest-season-rankings
+  - id: n20
+    question: Who are the best waiver pickups this week in knockout leagues?
+    relevant:
+      - https://www.espn.com/fantasy/football/story/_/id/50229520/fantasy-football-knockout-waiver-wire-free-agent-pickups-nfl-week-7

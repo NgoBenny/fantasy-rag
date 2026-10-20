@@ -28,6 +28,9 @@ class FakeEmbedder:
     def embed(self, texts: list[str]) -> list[list[float]]:
         return [[b / 255 for b in hashlib.sha256(t.encode()).digest()] * (DIM // 32) for t in texts]
 
+    def embed_query(self, query: str) -> list[float]:
+        return self.embed([query])[0]
+
 
 FEEDS = [news.Feed("fixture", "fixture://full"), news.Feed("fixture_link", "fixture://link")]
 EXTRA = [
@@ -106,6 +109,9 @@ class BrokenEmbedder:
     model_name = "broken"
 
     def embed(self, texts: list[str]) -> list[list[float]]:
+        raise RuntimeError("model crashed")
+
+    def embed_query(self, query: str) -> list[float]:
         raise RuntimeError("model crashed")
 
 

@@ -23,6 +23,9 @@ def main(argv: list[str] | None = None) -> None:
     bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
     bt.add_argument("--tune-season", type=int, default=2024)
     bt.add_argument("--test-season", type=int, default=2025)
+    ev = sub.add_parser("eval", help="evaluate retrieval on the labelled questions")
+    ev.add_argument("what", choices=["news"])
+    ev.add_argument("--rerank", action="store_true", help="also score hybrid + reranker")
     args = parser.parse_args(argv)
 
     if args.command == "verify-sources":
@@ -68,6 +71,17 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "eval":
+        import json
+
+        from fantasy_rag.db import get_readonly_engine
+        from fantasy_rag.index.embedder import LocalBGE
+        from fantasy_rag.retrieval.evaluate import evaluate
+        from fantasy_rag.retrieval.rerank import LocalBGEReranker
+
+        with get_readonly_engine().connect() as conn:
+            rr = LocalBGEReranker() if args.rerank else None
+            print(json.dumps(evaluate(conn, LocalBGE(), reranker=rr), indent=2))
 
 
 def _tool(name: str, raw_args: str) -> None:
