@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import Connection
 
 from fantasy_rag.analytics import queries as q
+from fantasy_rag.analytics.optimizer import Candidate, optimize
 from fantasy_rag.analytics.scoring import score
 from fantasy_rag.ml import baseline
 
@@ -83,6 +84,18 @@ class RankWaivers(BaseModel):
     league_id: int
     position: Position | None = None
     limit: int = Field(default=10, ge=1, le=25)
+
+
+class StatsWindow(ScoringChoice, WeekRange):
+    """Week window + scoring, for callers that already know the player ID (the API)."""
+
+
+class OptimizeLineup(BaseModel):
+    league_id: int
+    roster_id: int
+    locked_player_ids: list[str] = Field(
+        default_factory=list, max_length=20, description="current starters whose games began"
+    )
 
 
 # ---------- implementations ----------
@@ -281,6 +294,81 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
     }
 
 
+def _keep_current_order(
+    picks: list[tuple[int, str, str | None]], current: dict[int, str | None]
+) -> list[tuple[int, str, str | None]]:
+    """Among identical slots (WR, WR), leave a chosen player where he already is.
+
+    Swapping two players between equal slots changes nothing, so don't show it as a move.
+    """
+    out = list(picks)
+    for slot in {s for _, s, _ in picks}:
+        group = [k for k, (_, s, _) in enumerate(picks) if s == slot]
+        chosen = {picks[k][2] for k in group}
+        stay = {k: current.get(picks[k][0]) for k in group if current.get(picks[k][0]) in chosen}
+        rest = iter(p for p in (picks[k][2] for k in group) if p not in stay.values())
+        for k in group:
+            out[k] = (picks[k][0], slot, stay[k] if k in stay else next(rest))
+    return out
+
+
+def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
+    season, last = q.latest_week(conn)
+    roster = q.league_roster(conn, a.league_id, a.roster_id)
+    slots: list[str] = roster["roster_positions"]
+    ids: list[str] = roster["player_ids"]
+    rules, label = q.rules_for(conn, a.league_id, None)
+    history = baseline.scored_history(q.weekly_rows(conn, ids, [season - 1, season]), rules)
+    refs = q.players_by_id(conn, ids)
+    projected = {pid: baseline.project(history.get(pid, []), season, last + 1) for pid in ids}
+    candidates = [
+        Candidate(pid, refs[pid].position or "", got[0])
+        for pid, got in projected.items()
+        if got and pid in refs
+    ]
+
+    # Sleeper's starters list follows the non-bench slots in order; "0" is an empty slot.
+    starting_idx = [i for i, s in enumerate(slots) if s not in ("BN", "IR", "TAXI")]
+    starters = [str(x) for x in roster["starters"] or []]
+    to_gsis = q.sleeper_to_gsis(conn, starters)
+    current = {idx: to_gsis.get(sid) for idx, sid in zip(starting_idx, starters, strict=False)}
+    # A starter can be missing from player_ids (e.g. moved since); still name him.
+    refs |= q.players_by_id(conn, [g for g in current.values() if g and g not in refs])
+    locks = {}
+    for pid in a.locked_player_ids:
+        idx = next((i for i, g in current.items() if g == pid), None)
+        if idx is None:
+            raise ValueError(f"locked player {pid} is not a current starter")
+        locks[pid] = idx
+    lineup = optimize(slots, candidates, locks)
+    points = {c.id: c.points for c in candidates}
+    picks = _keep_current_order(
+        [(i, s, pid) for i, (s, pid, _) in zip(starting_idx, lineup.slots, strict=True)], current
+    )
+
+    def named(pid: str | None) -> dict[str, Any] | None:
+        return {**refs[pid].model_dump(), "projected_points": points.get(pid)} if pid else None
+
+    current_total = round(sum(points.get(g or "", 0.0) for g in current.values()), 2)
+    return {
+        "league_id": a.league_id,
+        "roster_id": a.roster_id,
+        "week": last + 1,
+        "scoring": label,
+        "rosters_as_of": {"week": roster["week"], "synced_at": roster["ingested_at"]},
+        "recommended": [
+            {"slot": s, "player": named(pid), "current": named(current.get(i))}
+            for i, s, pid in picks
+        ],
+        "recommended_total": lineup.total,
+        "current_total": current_total,
+        "gain": round(lineup.total - current_total, 2),
+        "unhandled_slots": lineup.unhandled_slots,
+        "no_projection": [refs[p].name for p, got in projected.items() if not got and p in refs],
+        "model_version": baseline.MODEL_VERSION,
+    }
+
+
 TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, Any]], str]] = {
     "get_player_stats": (
         GetPlayerStats,
@@ -316,6 +404,11 @@ TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, An
         CompareStartSit,
         compare_start_sit,
         "Rank 2-4 players by projection, with injury status.",
+    ),
+    "optimize_lineup": (
+        OptimizeLineup,
+        optimize_lineup,
+        "Best legal lineup for a roster by projection, vs the current one; keeps locks.",
     ),
     "rank_waivers": (
         RankWaivers,

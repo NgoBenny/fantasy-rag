@@ -40,7 +40,15 @@ class FakeSleeper:
             "/user/u1/leagues/nfl/2026": [{"league_id": "999"}],
             "/league/999": LEAGUE,
             "/league/999/users": [{"user_id": "u1", "display_name": "Owner One"}],
-            "/league/999/rosters": [{"roster_id": 1, "owner_id": "u1"}, {"roster_id": 2}],
+            "/league/999/rosters": [
+                {
+                    "roster_id": 1,
+                    "owner_id": "u1",
+                    "players": ["11", "22", "DET"],
+                    "starters": ["11", "22", "DET"],
+                },
+                {"roster_id": 2, "players": ["404"], "starters": ["404", "0"]},
+            ],
             "/league/999/matchups/1": matchups,
         }[path]
 

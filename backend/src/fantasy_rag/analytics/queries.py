@@ -242,3 +242,82 @@ def players_by_id(conn: Connection, ids: list[str]) -> dict[str, PlayerRef]:
     return {
         r.id: PlayerRef(id=r.id, name=r.full_name, position=r.position, team=r.team) for r in rows
     }
+
+
+def league_roster(conn: Connection, league_id: int, roster_id: int) -> dict[str, Any]:
+    """A roster's latest imported week: GSIS players, Sleeper starters, slot list."""
+    row = conn.execute(
+        text(
+            """
+            SELECT r.week, r.player_ids, r.raw->'starters' AS starters, r.owner_name,
+                   r.ingested_at, l.roster_positions
+            FROM fantasy_rosters r JOIN fantasy_leagues l ON l.id = r.league_id
+            WHERE r.league_id = :l AND r.roster_id = :r
+            ORDER BY r.week DESC LIMIT 1
+            """
+        ),
+        {"l": league_id, "r": roster_id},
+    ).one_or_none()
+    if row is None:
+        raise ValueError(f"no imported roster {roster_id} in league {league_id}")
+    return dict(row._mapping)
+
+
+def sleeper_to_gsis(conn: Connection, sleeper_ids: list[str]) -> dict[str, str]:
+    rows = conn.execute(
+        text(
+            "SELECT external_id, player_id FROM player_external_ids"
+            " WHERE provider = 'sleeper' AND external_id = ANY(:ids)"
+        ),
+        {"ids": sleeper_ids},
+    )
+    return {str(e): str(p) for e, p in rows}
+
+
+def leagues(conn: Connection) -> list[dict[str, Any]]:
+    """Imported leagues with their rosters (owner names stay in the local database)."""
+    rows = conn.execute(
+        text(
+            """
+            SELECT l.id, l.name, l.season, l.roster_positions,
+                   json_agg(json_build_object('roster_id', r.roster_id, 'owner_name', r.owner_name)
+                            ORDER BY r.roster_id) AS rosters
+            FROM fantasy_leagues l
+            JOIN fantasy_rosters r ON r.league_id = l.id
+             AND r.week = (SELECT max(week) FROM fantasy_rosters WHERE league_id = l.id)
+            GROUP BY l.id ORDER BY l.id
+            """
+        )
+    )
+    return [dict(r._mapping) for r in rows]
+
+
+def search_players(
+    conn: Connection, query: str, position: str | None, limit: int
+) -> list[dict[str, Any]]:
+    """Directory search: best name matches among fantasy positions, active players first."""
+    season, _ = latest_week(conn)
+    rows = conn.execute(
+        text(
+            """
+            SELECT p.id, p.full_name AS name, p.position, p.team,
+                   EXISTS (SELECT 1 FROM player_week_stats s
+                           WHERE s.player_id = p.id AND s.season = :season) AS active
+            FROM players p
+            WHERE p.position = ANY(:pos)
+              AND (:q = '' OR p.search_name % :q OR :q <% p.search_name)
+            ORDER BY active DESC,
+                     greatest(similarity(p.search_name, :q),
+                              word_similarity(:q, p.search_name)) DESC,
+                     p.full_name
+            LIMIT :n
+            """
+        ),
+        {
+            "season": season,
+            "q": _normalize(query),
+            "n": limit,
+            "pos": [position] if position else list(SKILL),
+        },  # fmt: skip
+    )
+    return [dict(r._mapping) for r in rows]

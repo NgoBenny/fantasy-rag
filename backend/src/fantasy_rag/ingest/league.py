@@ -125,10 +125,10 @@ def _import_one(run: Run, api: Any, lid: str, state: dict[str, Any]) -> dict[str
     ).scalar_one()
 
     users = {u["user_id"]: u.get("display_name") for u in api.get(f"/league/{lid}/users") or []}
-    owners = {
-        int(r["roster_id"]): users.get(r.get("owner_id"))
-        for r in api.get(f"/league/{lid}/rosters") or []
-    }
+    rosters = api.get(f"/league/{lid}/rosters") or []
+    owners = {int(r["roster_id"]): users.get(r.get("owner_id")) for r in rosters}
+    in_season = int(league["season"]) == int(state["season"])
+    live_week = int(state["week"]) if in_season and state.get("season_type") == "regular" else None
 
     idmap = pl.DataFrame(
         conn.execute(
@@ -140,9 +140,20 @@ def _import_one(run: Run, api: Any, lid: str, state: dict[str, Any]) -> dict[str
     known = {r[0] for r in conn.execute(text("SELECT id FROM players"))}
     all_rows, all_misses = [], []
     for week in range(1, last_week + 1):
-        rows, misses = roster_rows(
-            league_pk, week, api.get(f"/league/{lid}/matchups/{week}") or [], owners, idmap, known
-        )
+        matchups = api.get(f"/league/{lid}/matchups/{week}") or []
+        if week == live_week:
+            # The live week's matchup entry can lag or omit roster moves (seen: empty
+            # `players`); /rosters is Sleeper's current roster, so it wins for this week.
+            by_id = {int(m["roster_id"]): m for m in matchups}
+            matchups = [
+                {
+                    **by_id.get(int(r["roster_id"]), {"roster_id": r["roster_id"]}),
+                    "players": r.get("players") or [],
+                    "starters": r.get("starters") or [],
+                }
+                for r in rosters
+            ]
+        rows, misses = roster_rows(league_pk, week, matchups, owners, idmap, known)
         if rows.height:  # weeks without matchups (e.g. past the season) add nothing
             all_rows.append(rows)
         if misses.height:
