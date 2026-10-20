@@ -1,0 +1,182 @@
+# Golden set, stats part (PLAN.md Phase 3): 20 questions.
+# Each item names the tool and arguments the router should choose (route accuracy is
+# Phase 6) and checks every number against an independent direct query, or against
+# Sleeper's own per-player points for league scoring. Drafted for review with the user.
+#
+# Macros expanded by the test: {LATEST} = last 2026 regular-season week with stats;
+# {PTS_PPR} / {PTS_HALF} = standard scoring written directly over nflverse columns
+# (an independent implementation, not scoring.py). League ids 1-4 are this database's
+# imported leagues: 1 = 12-team half-PPR, 4 = 32-team superflex PPR (6-pt pass TD).
+# `tolerance` defaults to 0.01; Sleeper comparisons use 0.1 like `league check-scoring`.
+
+stats:
+  - id: s01
+    question: How many targets has Amon-Ra had over the last 3 weeks?
+    tool: get_player_stats
+    args: {player: {name: Amon-Ra}, last_n: 3}
+    checks:
+      - {path: player.id, equals: "00-0036963"}
+      - path: totals.targets
+        sql: SELECT sum((stats->>'targets')::int) FROM player_week_stats WHERE player_id = '00-0036963' AND season = 2026 AND season_type = 'REG' AND week > {LATEST} - 3
+
+  - id: s02
+    question: How many receiving yards does Puka Nacua have this season?
+    tool: get_player_stats
+    args: {player: {name: Puka Nacua}, season: 2026}
+    checks:
+      - path: totals.receiving_yards
+        sql: SELECT sum((stats->>'receiving_yards')::int) FROM player_week_stats WHERE player_id = '00-0039075' AND season = 2026 AND season_type = 'REG'
+
+  - id: s03
+    question: How many passing touchdowns has Josh Allen thrown this year?
+    tool: get_player_stats
+    args: {player: {name: Josh Allen}, season: 2026}
+    checks:
+      - {path: player.id, equals: "00-0034857"}  # the QB, not the center
+      - path: totals.passing_tds
+        sql: SELECT sum((stats->>'passing_tds')::int) FROM player_week_stats WHERE player_id = '00-0034857' AND season = 2026 AND season_type = 'REG'
+
+  - id: s04
+    question: How many catches does Justin Jefferson have this season?
+    tool: get_player_stats
+    args: {player: {name: Justin Jefferson}, season: 2026}
+    checks:
+      - {path: player.id, equals: "00-0036322"}  # the WR, not the linebacker
+      - path: totals.receptions
+        sql: SELECT sum((stats->>'receptions')::int) FROM player_week_stats WHERE player_id = '00-0036322' AND season = 2026 AND season_type = 'REG'
+
+  - id: s05
+    question: How many PPR points did Bijan Robinson score in week 3?
+    tool: get_player_stats
+    args: {player: {name: Bijan Robinson}, season: 2026, start_week: 3, end_week: 3}
+    checks:
+      - path: total_points
+        sql: SELECT {PTS_PPR} FROM player_week_stats WHERE player_id = '00-0038542' AND season = 2026 AND week = 3 AND season_type = 'REG'
+
+  - id: s06
+    question: How many half-PPR points has CeeDee Lamb scored this season?
+    tool: get_player_stats
+    args: {player: {name: CeeDee Lamb}, season: 2026, scoring: half}
+    checks:
+      - path: total_points
+        sql: SELECT sum({PTS_HALF}) FROM player_week_stats WHERE player_id = '00-0036358' AND season = 2026 AND season_type = 'REG'
+
+  - id: s07
+    question: What is Trey McBride averaging in PPR points per game?
+    tool: get_player_stats
+    args: {player: {name: Trey McBride}, season: 2026}
+    checks:
+      - path: points_per_game
+        sql: SELECT round(avg({PTS_PPR})::numeric, 2) FROM player_week_stats WHERE player_id = '00-0037744' AND season = 2026 AND season_type = 'REG'
+
+  - id: s08
+    question: How many carries has Christian McCaffrey had this year?
+    tool: get_player_stats
+    args: {player: {name: Christian McCaffrey}, season: 2026}
+    checks:
+      - {path: player.id, equals: "00-0033280"}
+      - path: totals.carries
+        sql: SELECT sum((stats->>'carries')::int) FROM player_week_stats WHERE player_id = '00-0033280' AND season = 2026 AND season_type = 'REG'
+
+  - id: s09
+    question: How many rushing yards does Lamar Jackson have this season?
+    tool: get_player_stats
+    args: {player: {name: Lamar Jackson}, season: 2026}
+    checks:
+      - path: totals.rushing_yards
+        sql: SELECT sum((stats->>'rushing_yards')::int) FROM player_week_stats WHERE player_id = '00-0034796' AND season = 2026 AND season_type = 'REG'
+
+  - id: s10
+    question: Who has more receiving yards this season, Jahmyr Gibbs or De'Von Achane?
+    tool: compare_players
+    args: {players: [{name: Jahmyr Gibbs}, {name: Devon Achane}], season: 2026}
+    checks:
+      - {path: players.1.player.id, equals: "00-0039040"}
+      - path: players.0.totals.receiving_yards
+        sql: SELECT sum((stats->>'receiving_yards')::int) FROM player_week_stats WHERE player_id = '00-0039139' AND season = 2026 AND season_type = 'REG'
+      - path: players.1.totals.receiving_yards
+        sql: SELECT sum((stats->>'receiving_yards')::int) FROM player_week_stats WHERE player_id = '00-0039040' AND season = 2026 AND season_type = 'REG'
+
+  - id: s11
+    question: Compare Malik Nabers and Ja'Marr Chase targets over the last 4 weeks.
+    tool: compare_players
+    args: {players: [{name: Malik Nabers}, {name: Jamarr Chase}], last_n: 4}
+    checks:
+      - path: players.0.totals.targets
+        sql: SELECT sum((stats->>'targets')::int) FROM player_week_stats WHERE player_id = '00-0039337' AND season = 2026 AND season_type = 'REG' AND week > {LATEST} - 4
+      - path: players.1.totals.targets
+        sql: SELECT sum((stats->>'targets')::int) FROM player_week_stats WHERE player_id = '00-0036900' AND season = 2026 AND season_type = 'REG' AND week > {LATEST} - 4
+
+  - id: s12
+    question: How many field goals has Brandon Aubrey made this season?
+    tool: get_player_stats
+    args: {player: {name: Brandon Aubrey}, season: 2026}
+    checks:
+      - path: totals.fg_made
+        sql: SELECT sum((stats->>'fg_made')::int) FROM player_week_stats WHERE player_id = '00-0037692' AND season = 2026 AND season_type = 'REG'
+
+  - id: s13
+    question: How many passing yards did Jalen Hurts have in week 5?
+    tool: get_player_stats
+    args: {player: {name: Jalen Hurts}, season: 2026, start_week: 5, end_week: 5}
+    checks:
+      - path: totals.passing_yards
+        sql: SELECT coalesce(sum((stats->>'passing_yards')::int), 0) FROM player_week_stats WHERE player_id = '00-0036389' AND season = 2026 AND week = 5 AND season_type = 'REG'
+
+  - id: s14
+    question: How many rushing touchdowns does Derrick Henry have this year?
+    tool: get_player_stats
+    args: {player: {name: Derrick Henry}, season: 2026}
+    checks:
+      - path: totals.rushing_tds
+        sql: SELECT sum((stats->>'rushing_tds')::int) FROM player_week_stats WHERE player_id = '00-0032764' AND season = 2026 AND season_type = 'REG'
+
+  - id: s15
+    question: How many games has Brock Bowers played this season?
+    tool: get_player_stats
+    args: {player: {name: Brock Bowers}, season: 2026}
+    checks:
+      - path: games
+        sql: SELECT count(*) FROM player_week_stats WHERE player_id = '00-0039338' AND season = 2026 AND season_type = 'REG'
+
+  - id: s16
+    question: How many points did Saquon Barkley score for me in week 3 in my 12-team league?
+    tool: get_player_stats
+    args: {player: {name: Saquon}, league_id: 1, season: 2026, start_week: 3, end_week: 3}
+    checks:
+      - path: total_points
+        tolerance: 0.1
+        sql: SELECT (r.raw->'players_points'->>x.external_id)::float FROM fantasy_rosters r JOIN player_external_ids x ON x.provider = 'sleeper' AND x.player_id = '00-0034844' WHERE r.league_id = 1 AND r.week = 3 AND r.raw->'players_points' ? x.external_id
+
+  - id: s17
+    question: How many points did Josh Allen score in week 2 in my 32-team superflex league?
+    tool: get_player_stats
+    args: {player: {name: Josh Allen}, league_id: 4, season: 2026, start_week: 2, end_week: 2}
+    checks:
+      - path: total_points
+        tolerance: 0.1
+        sql: SELECT (r.raw->'players_points'->>x.external_id)::float FROM fantasy_rosters r JOIN player_external_ids x ON x.provider = 'sleeper' AND x.player_id = '00-0034857' WHERE r.league_id = 4 AND r.week = 2 AND r.raw->'players_points' ? x.external_id LIMIT 1
+
+  - id: s18
+    question: How many PPR points per game has Dallas allowed to wide receivers over the last 4 weeks?
+    tool: defense_vs_position
+    args: {team: DAL, position: WR, last_n: 4}
+    checks:
+      - path: points_allowed_per_game
+        sql: SELECT round(avg(wk)::numeric, 2) FROM (SELECT s.week, sum({PTS_PPR}) AS wk FROM player_week_stats s JOIN players p ON p.id = s.player_id WHERE s.season = 2026 AND s.season_type = 'REG' AND s.opponent = 'DAL' AND p.position = 'WR' AND s.week > {LATEST} - 4 GROUP BY s.week) x
+
+  - id: s19
+    question: How many PPR points per game have the Giants given up to running backs this season?
+    tool: defense_vs_position
+    args: {team: NYG, position: RB, last_n: 18}
+    checks:
+      - path: points_allowed_per_game
+        sql: SELECT round(avg(wk)::numeric, 2) FROM (SELECT s.week, sum({PTS_PPR}) AS wk FROM player_week_stats s JOIN players p ON p.id = s.player_id WHERE s.season = 2026 AND s.season_type = 'REG' AND s.opponent = 'NYG' AND p.position = 'RB' GROUP BY s.week) x
+
+  - id: s20
+    question: How many Sleeper leagues added the most-added player in the latest trending window?
+    tool: get_trending
+    args: {kind: add, limit: 5}
+    checks:
+      - path: players.0.count
+        sql: SELECT max(t.count) FROM trending t JOIN players p ON p.id = t.player_id WHERE t.kind = 'add' AND t.window_start = (SELECT max(window_start) FROM trending)

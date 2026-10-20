@@ -16,7 +16,7 @@ dependencies = [
 fantasy-rag = "fantasy_rag.cli:main"
 
 [dependency-groups]
-dev = ["mypy", "pytest", "ruff"]
+dev = ["mypy", "pytest", "pyyaml", "ruff", "types-pyyaml"]
 
 [build-system]
 requires = ["hatchling"]

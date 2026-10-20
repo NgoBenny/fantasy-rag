@@ -35,10 +35,11 @@ class CheckResult:
 
 
 def check_league(conn: Connection, league_pk: int) -> CheckResult:
-    season, rules_json = conn.execute(
-        text("SELECT season, scoring_rules FROM fantasy_leagues WHERE id = :id"), {"id": league_pk}
+    season, settings = conn.execute(
+        text("SELECT season, scoring_settings FROM fantasy_leagues WHERE id = :id"),
+        {"id": league_pk},
     ).one()
-    rules = ScoringRules.model_validate(rules_json)
+    rules = ScoringRules.from_sleeper(settings)
     # Only weeks nflverse has finished stats for.
     last = conn.execute(
         text("SELECT max(week) FROM player_week_stats WHERE season = :s AND season_type = 'REG'"),
