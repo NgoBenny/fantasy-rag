@@ -48,7 +48,7 @@ backend/
   alembic/versions/0002_structured.py   # nflverse tables, snapshot keys, unresolved_players
   alembic/versions/0003_leagues.py      # league name/settings, weekly matchup results
   alembic/versions/0004_readonly_trgm.py  # fantasy_reader role, trigram name index
-  alembic/versions/0004_defense.py      # team_week_defense, player_week_special_teams (from pbp)
+  alembic/versions/0005_defense.py      # team_week_defense, player_week_special_teams (from pbp)
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine; read-only engine for tools (SET ROLE fantasy_reader)

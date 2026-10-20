@@ -4,8 +4,8 @@ Raw play-by-play is not stored: `ingest.pbp` aggregates it per game into the sta
 scores (team DEF keys, and st_ff / st_fum_rec per player). `team` uses Sleeper's team
 DEF IDs ("LAR", not nflverse's "LA").
 
-Revision ID: 0004
-Revises: 0003
+Revision ID: 0005
+Revises: 0004
 Create Date: 2026-10-20
 """
 
@@ -13,8 +13,8 @@ from collections.abc import Sequence
 
 from alembic import op
 
-revision: str = "0004"
-down_revision: str | None = "0003"
+revision: str = "0005"
+down_revision: str | None = "0004"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
