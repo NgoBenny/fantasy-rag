@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
 
 from fantasy_rag.agent.tools import run_tool
-from fantasy_rag.analytics.queries import AmbiguousPlayer
+from fantasy_rag.analytics.queries import AmbiguousPlayer, weekly_rows
 from fantasy_rag.db import get_readonly_engine
 
 pytestmark = pytest.mark.db
@@ -67,13 +67,20 @@ def db(scratch_db_url: str) -> str:
                     ),
                     {"w": week, "p": pid, "s": json.dumps(st), "r": run},
                 )
+        c.execute(  # a special-teams forced fumble, stored apart from player_week_stats
+            text(
+                "INSERT INTO player_week_special_teams (season, week, season_type, player_id,"
+                " game_id, stats, sync_run_id) VALUES (2026, 2, 'REG', '00-5', 'g', :s, :r)"
+            ),
+            {"s": json.dumps({"st_ff": 1, "st_fum_rec": 0}), "r": run},
+        )
         league = c.execute(
             text(
                 "INSERT INTO fantasy_leagues (provider, external_league_id, season,"
                 " scoring_settings, roster_positions, sync_run_id)"
                 " VALUES ('sleeper', 'x', 2026, :s, '[]', :r) RETURNING id"
             ),
-            {"s": json.dumps({"rec": 1, "rec_yd": 0.1, "st_ff": 1}), "r": run},
+            {"s": json.dumps({"rec": 1, "rec_yd": 0.1, "st_ff": 1, "rec_0_4": 0.5}), "r": run},
         ).scalar_one()
         c.execute(
             text(
@@ -126,7 +133,7 @@ def test_tools_cannot_write_and_reject_bad_input(db: str) -> None:
 def test_projections_report_unscored_rules_and_rank_zero_above_negative(db: str) -> None:
     with get_readonly_engine(db).connect() as conn:
         proj = run_tool(conn, "project_player", {"player": {"name": "Free Agent"}, "league_id": 1})
-        assert proj["unscored_rules"] == ["st_ff"]  # league 1 scores a rule we can't compute
+        assert proj["unscored_rules"] == ["rec_0_4"]  # league 1 scores a rule we can't compute
         ss = run_tool(
             conn,
             "compare_start_sit",
@@ -140,3 +147,10 @@ def test_projections_report_unscored_rules_and_rank_zero_above_negative(db: str)
             {"players": [{"name": "Never Played"}, {"name": "Also Unplayed"}]},
         )
         assert none["higher_projection"] is None
+
+
+def test_weekly_rows_merge_special_teams_stats(db: str) -> None:
+    with get_readonly_engine(db).connect() as conn:
+        rows = weekly_rows(conn, ["00-5"], [2026])
+    assert [r["stats"].get("st_ff") for r in rows] == [None, 1]
+    assert rows[1]["stats"]["receptions"] == 4
