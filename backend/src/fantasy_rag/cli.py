@@ -7,7 +7,7 @@ def main(argv: list[str] | None = None) -> None:
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("verify-sources", help="sample every core source, write docs/data_sources.md")
     ingest = sub.add_parser("ingest", help="load data into Postgres")
-    ingest.add_argument("what", choices=["structured"])
+    ingest.add_argument("what", choices=["structured", "news", "news-report"])
     league = sub.add_parser("league", help="Sleeper league import and scoring check")
     league.add_argument("action", choices=["import", "check-scoring"])
     league.add_argument("--username", help="Sleeper username (default: SLEEPER_USERNAME)")
@@ -33,6 +33,28 @@ def main(argv: list[str] | None = None) -> None:
         from fantasy_rag.db import get_engine
         from fantasy_rag.ingest.structured import run_structured
 
+        if args.what == "news-report":
+            import json
+
+            from fantasy_rag.ingest.news_job import coverage
+
+            with get_engine().connect() as conn:
+                print(json.dumps(coverage(conn), indent=2, default=str))
+            return
+        if args.what == "news":
+            from fantasy_rag.index.embedder import LocalBGE
+            from fantasy_rag.ingest.news_job import run_news
+
+            nr = run_news(get_engine(), LocalBGE())
+            print(
+                f"stories {nr.stories}, documents changed {nr.documents_changed},"
+                f" chunks written {nr.chunks_written}, embedded {nr.embedded},"
+                f" ambiguous names {len(set(nr.ambiguous_names))},"
+                f" feed errors {len(nr.feed_errors)}"
+            )
+            for e in nr.feed_errors:
+                print(f"  feed error: {e}")
+            return
         report = run_structured(get_engine())
         print(f"{'source':32} {'changed':>9} {'unresolved':>11}  note")
         for r in report.results:

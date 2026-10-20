@@ -1,10 +1,13 @@
-# Runs one structured ingest (snapshots included) and appends the result to data/logs.
-# Invoked by the Windows scheduled task that scripts/register_daily_ingest.ps1 creates.
+# Runs one scheduled job and appends the result to data/logs.
+#   -Job daily (default): structured ingest (snapshots) + league import
+#   -Job news: news feeds -> documents, chunks, embeddings
+# Invoked by the scheduled tasks that scripts/register_daily_ingest.ps1 creates.
+param([ValidateSet("daily", "news")] [string]$Job = "daily")
 $ErrorActionPreference = "Continue"
 $repo = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path $repo "data\logs"
 New-Item -ItemType Directory -Force $logDir | Out-Null
-$log = Join-Path $logDir ("ingest_{0}.log" -f (Get-Date -Format "yyyy-MM"))
+$log = Join-Path $logDir ("{0}_{1}.log" -f $(if ($Job -eq "news") { "news" } else { "ingest" }), (Get-Date -Format "yyyy-MM"))
 
 "=== $(Get-Date -Format o)" | Out-File -Append -Encoding utf8 $log
 Set-Location $repo
@@ -22,6 +25,12 @@ if ($LASTEXITCODE -ne 0) {
 docker compose up -d --wait db 2>&1 | Out-File -Append -Encoding utf8 $log
 Set-Location (Join-Path $repo "backend")
 $env:PYTHONIOENCODING = "utf-8"
+if ($Job -eq "news") {
+    uv run fantasy-rag ingest news 2>&1 | Out-File -Append -Encoding utf8 $log
+    $newsExit = $LASTEXITCODE
+    "exit=$newsExit" | Out-File -Append -Encoding utf8 $log
+    exit $newsExit
+}
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
 $ingestExit = $LASTEXITCODE
 # League rosters and matchups (needs SLEEPER_USERNAME in .env; fails without it).
