@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-3b):
+Exists now (Phases 0-4):
 
 ```
 CLAUDE.md
@@ -59,6 +59,10 @@ backend/
   src/fantasy_rag/ingest/sleeper.py     # Sleeper client, injury/trending frames
   src/fantasy_rag/ingest/structured.py  # `ingest structured` orchestrator + sources registry
   src/fantasy_rag/ingest/league.py      # Sleeper league import (settings, rosters, matchups)
+  src/fantasy_rag/ingest/news.py        # news feeds (ESPN JSON, CBS/Yahoo/PFT/32 team RSS) -> stories
+  src/fantasy_rag/ingest/entity_link.py # tag stories/chunks with player + team IDs
+  src/fantasy_rag/ingest/news_job.py    # `ingest news` + `ingest news-report` (coverage check)
+  src/fantasy_rag/index/chunker.py, embedder.py  # ~300-word chunks; Embedder protocol + local bge-small
   src/fantasy_rag/ingest/pbp.py         # play-by-play -> team DEF + special-teams stats (pure)
   src/fantasy_rag/analytics/scoring.py  # Sleeper scoring keys (incl. team DEF) -> points
   src/fantasy_rag/analytics/scoring_check.py  # our points vs Sleeper's players_points
@@ -73,7 +77,7 @@ backend/
 frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; e2e/ Playwright
 ```
 
-Planned (phase in brackets): `ingest/` news_espn, rss, entity_link [4]; `ml/` features, train, predict [8]; `index/` chunker, embedder [4]; `retrieval/` hybrid, rerank [5]; `agent/` llm, router, prompts [6]; API chat/SSE endpoints [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; chat and My League pages [7].
+Planned (phase in brackets): `ml/` features, train, predict [8]; `retrieval/` hybrid, rerank [5]; `agent/` llm, router, prompts [6]; API chat/SSE endpoints [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; chat and My League pages [7].
 
 ## Conventions
 
@@ -83,6 +87,7 @@ Planned (phase in brackets): `ingest/` news_espn, rss, entity_link [4]; `ml/` fe
 - Migrations are hand-written Alembic files, one per phase. No FK from an owned table to an nflverse-mirroring table.
 - Tools: inputs are Pydantic models in `agent/tools.py`; tools read through `get_readonly_engine()`. Player names resolve by trigram word similarity over fantasy positions; ties prefer players with stats this season; anything still ambiguous raises `AmbiguousPlayer` with candidates (never a guess). League rules are rebuilt from raw `scoring_settings` on every call.
 - Frontend: server components fetch the API (`src/lib/api.ts`); page state lives in the URL (search, compare picks, league/roster), so pages need no client JS. `cacheComponents` is off: every page shows live data. Next.js 16 differs from older versions; read `frontend/AGENTS.md` first.
+- News: only title + summary (<= 500 chars) + link are stored, capped by `sources.storage_allowed`; feeds' full article text is ignored. Player tags come from ESPN athlete IDs, team-site editorial tags, and exact full-name mentions of current fantasy players; a full name shared by several players needs the story's team to decide, else it's reported as ambiguous. Embeddings: `BAAI/bge-small-en-v1.5` via fastembed (ONNX, CPU), cached in data/cache/fastembed; tests use a fake embedder.
 - Shared dev DB: sessions in other worktrees use the same Postgres. Coordinate migration numbers before applying, and never downgrade the dev DB.
 - Scoring: `ScoringRules.from_sleeper` keeps only non-zero keys (Sleeper ships unused keys at 0). Keys without a `DERIVE` entry are reported as unsupported; team DEF and special-teams `st_ff`/`st_fum_rec` need play-by-play and are not scored yet.
 - Snapshots can't be backfilled: the scheduled task (scripts/register_daily_ingest.ps1) must stay registered, and the PC on with Docker available, until ingestion moves to a hosted worker (Phase 9).
@@ -111,6 +116,8 @@ uv run alembic upgrade head            # apply migrations
 uv run alembic downgrade base          # drop everything
 uv run fantasy-rag verify-sources      # sample every core source -> docs/data_sources.md
 uv run fantasy-rag ingest structured   # nflverse 2022+ and Sleeper -> Postgres (idempotent)
+uv run fantasy-rag ingest news         # news feeds -> documents, chunks, embeddings (idempotent)
+uv run fantasy-rag ingest news-report  # stories per source + % of rostered-player mentions tagged
 uv run python tests/fixtures/record_phase1.py   # re-record test fixtures (network)
 uv run fantasy-rag league import       # your Sleeper leagues (SLEEPER_USERNAME or --league-id)
 uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-week (exit 1 on any miss)
@@ -129,4 +136,5 @@ npx playwright test                    # browser tests; starts API + web if not 
 # repo root: daily snapshot collection (Windows Task Scheduler, current user)
 powershell -File scripts/register_daily_ingest.ps1   # daily 6pm + Wed-Sat 2pm/9pm; starts Docker; logs in data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
+powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news")
 ```
