@@ -5,6 +5,7 @@ import re
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
+from typing import Any
 
 import polars as pl
 from sqlalchemy import Connection, Engine, text
@@ -140,6 +141,39 @@ def upsert(
         changed_rows = int(cur.rowcount)
         cur.execute("DROP TABLE stage")
     return changed_rows
+
+
+def prune(
+    conn: Connection,
+    table: str,
+    df: pl.DataFrame,
+    keys: Sequence[str],
+    scope: str,
+    values: Sequence[Any],
+) -> int:
+    """Delete rows whose `scope` column is in `values` but whose key is not in `df`.
+
+    For derived tables where `df` is the complete fresh result for those scopes (e.g. every
+    season of play-by-play that loaded), so a corrected source can't leave stale rows.
+    Pass only scopes that loaded in full. Returns rows deleted.
+    """
+    if scope not in keys:
+        raise ValueError(f"scope {scope!r} must be a key column")
+    if not values:
+        return 0
+    stage(conn, table, df.select(keys).unique())
+    match = " AND ".join(f"s.{k} = t.{k}" for k in keys)
+    raw = conn.connection.driver_connection
+    assert raw is not None
+    with raw.cursor() as cur:
+        cur.execute(
+            f"DELETE FROM {table} t WHERE t.{scope} = ANY(%s)"
+            f" AND NOT EXISTS (SELECT 1 FROM stage s WHERE {match})",
+            (list(values),),
+        )
+        deleted = int(cur.rowcount)
+        cur.execute("DROP TABLE stage")
+    return deleted
 
 
 def record_unresolved(run: Run, source: str, df: pl.DataFrame) -> int:
