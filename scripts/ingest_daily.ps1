@@ -2,14 +2,26 @@
 #   -Job daily (default): structured ingest (snapshots) + league import
 #   -Job news: news feeds -> documents, chunks, embeddings; Sleeper transactions
 #   -Job forward: Tuesday 10:30 ET: fresh stats, then the Phase 8 forward run (predict)
+#   -Job forward-check: Tuesday 11:30 ET: toast if this week's on-time forward run is missing
+#   -Job backup: verified dump outside the repo; on Sundays also the restore drill
+# Any failing job shows a Windows toast (scripts/notify.ps1); details stay in data/logs.
 # Invoked by the scheduled tasks that scripts/register_daily_ingest.ps1 creates.
-param([ValidateSet("daily", "news", "forward")] [string]$Job = "daily")
+param([ValidateSet("daily", "news", "forward", "forward-check", "backup")] [string]$Job = "daily")
 $ErrorActionPreference = "Continue"
 $repo = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path $repo "data\logs"
 New-Item -ItemType Directory -Force $logDir | Out-Null
-$name = @{ daily = "ingest"; news = "news"; forward = "forward" }[$Job]
+$name = @{ daily = "ingest"; news = "news"; forward = "forward"; "forward-check" = "forward"; backup = "backup" }[$Job]
 $log = Join-Path $logDir ("{0}_{1}.log" -f $name, (Get-Date -Format "yyyy-MM"))
+
+# Exit with the job's code; a failure also shows a toast (logs hold the details).
+function Finish([int]$code, [string]$message) {
+    if ($code -ne 0) {
+        & (Join-Path $PSScriptRoot "notify.ps1") -Title "fantasy-rag: $Job failed" -Message $message |
+            Out-File -Append -Encoding utf8 $log
+    }
+    exit $code
+}
 
 "=== $(Get-Date -Format o)" | Out-File -Append -Encoding utf8 $log
 Set-Location $repo
@@ -54,7 +66,22 @@ if ($Job -eq "news") {
     # Task Scheduler must see a failure from any step.
     if ($newsExit -eq 0) { $newsExit = $reportExit }
     if ($newsExit -eq 0) { $newsExit = $txExit }
-    exit $newsExit
+    Finish $newsExit "news, report or transactions failed (exit $newsExit); see $log"
+}
+if ($Job -eq "forward-check") {
+    $msg = uv run fantasy-rag forward-check 2>&1
+    $code = $LASTEXITCODE
+    $msg | Out-File -Append -Encoding utf8 $log
+    Finish $code "$msg"
+}
+if ($Job -eq "backup") {
+    uv run fantasy-rag backup 2>&1 | Out-File -Append -Encoding utf8 $log
+    $code = $LASTEXITCODE
+    if ($code -eq 0 -and (Get-Date).DayOfWeek -eq "Sunday") {
+        uv run fantasy-rag backup --verify-latest 2>&1 | Out-File -Append -Encoding utf8 $log
+        $code = $LASTEXITCODE
+    }
+    Finish $code "backup or restore drill failed (exit $code); see $log"
 }
 if ($Job -eq "forward") {
     uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
@@ -64,8 +91,8 @@ if ($Job -eq "forward") {
     uv run fantasy-rag predict 2>&1 | Out-File -Append -Encoding utf8 $log
     $predictExit = $LASTEXITCODE
     "exit=$ingestExit predict=$predictExit" | Out-File -Append -Encoding utf8 $log
-    if ($predictExit -ne 0) { exit $predictExit }
-    exit $ingestExit
+    $code = if ($predictExit -ne 0) { $predictExit } else { $ingestExit }
+    Finish $code "forward run: ingest exit $ingestExit, predict exit $predictExit; see $log"
 }
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
 $ingestExit = $LASTEXITCODE
@@ -74,5 +101,5 @@ uv run fantasy-rag league import 2>&1 | Out-File -Append -Encoding utf8 $log
 $leagueExit = $LASTEXITCODE
 "exit=$ingestExit league=$leagueExit" | Out-File -Append -Encoding utf8 $log
 # Task Scheduler must see a failure if either job failed, or stale data looks fresh.
-if ($ingestExit -ne 0) { exit $ingestExit }
-exit $leagueExit
+$code = if ($ingestExit -ne 0) { $ingestExit } else { $leagueExit }
+Finish $code "daily ingest exit $ingestExit, league import exit $leagueExit; see $log"

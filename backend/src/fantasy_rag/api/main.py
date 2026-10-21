@@ -6,6 +6,7 @@ sample data (api/demo.py) and no database connection or API key is ever used.
 """
 
 from collections.abc import Iterator
+from datetime import UTC, datetime
 from functools import cache
 from typing import Annotated, Any, Literal
 
@@ -21,19 +22,15 @@ from fantasy_rag.api import demo
 from fantasy_rag.api.chat import ChatRequest, ChatServices, process_budget, stream_chat
 from fantasy_rag.config import Settings
 from fantasy_rag.db import get_log_engine, get_readonly_engine
+from fantasy_rag.ingest.health import SOURCES
+from fantasy_rag.ingest.health import health as source_health
 from fantasy_rag.ml import serve
 
 app = FastAPI(title="fantasy-rag", version="0.1")
 DEMO = Settings().demo_mode
 
 # The header's "last refresh" per kind of data, from sync_runs source names.
-STATUS_SOURCES = {
-    "stats": "nflverse.player_stats",
-    "injuries": "snapshot.sleeper_injuries",
-    "news": "news",
-    "rosters": "sleeper.league",
-    "transactions": "sleeper.transactions",
-}
+STATUS_SOURCES = {kind: source for kind, (source, _) in SOURCES.items()}
 
 
 @cache
@@ -119,6 +116,8 @@ def status(conn: Conn) -> dict[str, Any]:
         "latest_week": week,
         "next_week": week + 1,
         "sources": {k: last.get(src) for k, src in STATUS_SOURCES.items()},
+        # fresh / stale / failing per source: the header warns on anything not fresh
+        "health": source_health(conn, datetime.now(UTC)),
     }
 
 
@@ -280,6 +279,24 @@ def forward_runs(conn: Conn) -> dict[str, Any]:
         )
     )
     return {"active": serve.ACTIVE, "runs": [dict(r._mapping) for r in found]}
+
+
+@app.get("/api/forward-results")
+def forward_results(
+    conn: Conn, scoring: Annotated[str, Query(max_length=20)] = "ppr"
+) -> dict[str, Any]:
+    """Baseline vs TE Ridge on finalized on-time forward weeks, under one set of scoring
+    rules, plus every Tuesday's status (on_time / late / early_only / missing)."""
+    if DEMO:
+        return {"scoring": scoring, "rows": [], "matched_total": {"n": 0}, "tuesdays": [],
+                "demo": True}  # fmt: skip
+    from fantasy_rag.ml import forward_results as fr
+
+    try:
+        out = fr.results(conn, scoring)
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+    return out | {"tuesdays": fr.tuesdays(conn, datetime.now(UTC))}
 
 
 @app.get("/api/chat/samples")

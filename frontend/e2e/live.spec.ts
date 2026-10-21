@@ -65,6 +65,12 @@ test("model page: benchmark, ranges and forward runs with honest status", async 
   await expect(forward).toBeVisible();
   // Week 7's runs were made after its Tuesday deadline: shown as late, never on time.
   await expect(forward.getByRole("row").filter({ hasText: "wk 7" }).first()).toContainText("late (not counted)");
+  // Forward results per scoring rules; the selector keeps state in the URL.
+  const results = page.getByLabel("Forward results");
+  await expect(results).toBeVisible();
+  await results.getByRole("link", { name: "HALF" }).click();
+  await expect(page).toHaveURL(/scoring=half/);
+  await expect(page.getByLabel("Forward results")).toBeVisible();
 });
 
 test("start/sit shows each projection's 80% range", async ({ page }) => {

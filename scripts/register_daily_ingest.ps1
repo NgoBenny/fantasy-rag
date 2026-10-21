@@ -3,7 +3,7 @@
 # evenings are when this PC is usually on).
 # StartWhenAvailable runs a missed trigger as soon as the PC is back on.
 # Remove with: Unregister-ScheduledTask -TaskName "fantasy-rag ingest" -Confirm:$false
-#   (and "fantasy-rag news" for the hourly news task, "fantasy-rag forward" for Tuesdays)
+#   (and "fantasy-rag news", "fantasy-rag forward", "fantasy-rag forward-check", "fantasy-rag backup")
 $script = Join-Path $PSScriptRoot "ingest_daily.ps1"
 $action = New-ScheduledTaskAction -Execute "powershell.exe" `
     -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
@@ -39,3 +39,22 @@ $forwardSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -WakeToRun `
     -ExecutionTimeLimit (New-TimeSpan -Hours 1)
 Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -Trigger $tuesday `
     -Settings $forwardSettings -Description "fantasy-rag: Phase 8 Tuesday forward predictions" -Force
+
+# Pre-deadline check: Tuesdays 11:30 ET (30 minutes before the forward run's deadline).
+$check = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(11).AddMinutes(30), "Unspecified")
+$checkLocal = [System.TimeZoneInfo]::ConvertTime($check, $eastern, [System.TimeZoneInfo]::Local)
+$checkAction = New-ScheduledTaskAction -Execute "powershell.exe" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job forward-check"
+Register-ScheduledTask -TaskName "fantasy-rag forward-check" -Action $checkAction `
+    -Trigger (New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $checkLocal.ToString("HH:mm")) `
+    -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 10)) `
+    -Description "fantasy-rag: warn if this week's on-time forward run is missing" -Force
+
+# Backup: daily 7 PM, outside the repo (%USERPROFILE%antasy-rag-backups or BACKUP_DIR);
+# on Sundays the job also restores the newest dump into a fresh container and checks it.
+$backupAction = New-ScheduledTaskAction -Execute "powershell.exe" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job backup"
+Register-ScheduledTask -TaskName "fantasy-rag backup" -Action $backupAction `
+    -Trigger (New-ScheduledTaskTrigger -Daily -At 7:00pm) `
+    -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 30)) `
+    -Description "fantasy-rag: verified local backup (weekly restore drill)" -Force

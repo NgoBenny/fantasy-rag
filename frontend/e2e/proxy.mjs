@@ -27,4 +27,4 @@ http
     upstream.on("error", () => res.writeHead(502).end());
     req.pipe(upstream);
   })
-  .listen(PORT);
+  .listen(PORT, "127.0.0.1");

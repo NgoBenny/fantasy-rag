@@ -227,6 +227,27 @@ Ten phases, each ending in something you can run and a test that proves it; phas
    - Status (Oct 21, 2026, draft PR): frozen 2025 benchmark done. Ridge qualifies for TE only, a small gain (about 0.09 PPR points of MAE); QB/RB/WR stay on the baseline and LightGBM wins nowhere. 80% ranges cover 77–82% everywhere. FantasyPros' Friday rankings beat every Tuesday model on ranking metrics. A Tuesday 10:30 ET task logs the baseline and TE Ridge from the same saved inputs to an insert-only forward log, starting week 8 (Oct 27). Production serves the baseline until TE Ridge's serving code is reviewed.
 10. **Phase 9 — Scheduling, deploy, and stretch.** APScheduler jobs on the cadences in the data model; retries with backoff and stale-source warnings; deploy DB to Supabase, API and worker to Render or Fly.io, frontend to Vercel. Stretch: weather and live-odds tools.
     - Done when: the hosted app answers about this week's games with data under a day old, survives one source being down with an explicit warning, and the README shows architecture, eval numbers and a demo GIF.
+    - Status (Oct 21, 2026, draft PR): **local reliability milestone done; hosting deferred.** The project stays private and local for now (one user, no hosting subscriptions).
+      - **Done locally:**
+        - source-health warnings (`fresh` / `stale` / `failing`) with retries and backoff; an outage drill showed the warning and its recovery;
+        - forward results by scoring rules, plus every Tuesday's status (on time, late, early only, missing);
+        - fixed-ID advisory locks with one owner per job, and duplicate-prediction prevention;
+        - Windows toast notifications, and a pre-deadline check;
+        - verified backups with a fresh-container restore drill against a same-snapshot manifest;
+        - every port bound to 127.0.0.1;
+        - README, `docs/architecture.md` and a demo GIF.
+      - **Not met:** the "hosted app" criterion. Collection still depends on this PC being on.
+    - Deferred hosting notes (Oct 21, 2026), to resume when access away from this PC or sharing is needed:
+      - **Neon Free** (1 GB, 100 CU-hours/month) fits: 437 MB now, about 10–12 MB/week, an estimated 35–45 CU-hours/month. Not yet tested against a real project.
+      - **Render Free** for the API (512 MB; sleeps after 15 minutes, about 1 minute to wake) and **Vercel Hobby** for the frontend; total $0 plus Anthropic usage.
+      - **Required safeguards:**
+        - direct (unpooled) connections for `SET ROLE`, advisory locks, migrations and backups;
+        - migrations tested on a disposable database, with the dump restored into a separate empty one;
+        - GitHub sign-in authorized by numeric user ID, rechecked server-side, with the identity passed to the API by a service token;
+        - a Postgres-backed monthly budget with idempotent settlement that fails closed, plus a separate budget role and per-user rate limits;
+        - peak API memory measured, including after a cold start;
+        - GitHub Actions scheduling treated as best-effort (off-minute crons, manual dispatch, pre-deadline alert);
+        - encrypted backups only.
 
 ## Evaluation and testing
 

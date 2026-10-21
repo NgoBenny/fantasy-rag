@@ -16,6 +16,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 import feedparser
 import httpx
 
+from fantasy_rag.ingest.retry import retry
 from fantasy_rag.ingest.sleeper import USER_AGENT
 
 SUMMARY_CHARS = 500
@@ -178,8 +179,7 @@ def fetch_all(feeds: list[Feed] = FEEDS) -> tuple[dict[str, list[dict[str, Any]]
         for feed in feeds:
             time.sleep(0.5)  # ~2 requests/second across all hosts
             try:
-                r = c.get(feed.url)
-                r.raise_for_status()
+                r = retry(lambda: c.get(feed.url).raise_for_status())  # noqa: B023
                 got[feed.url] = (
                     parse_espn(r.json()) if feed.source == "espn_news" else parse_rss(r.content)
                 )
