@@ -1,0 +1,6125 @@
+{
+ "chat": [
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 968,
+     "data": {
+      "elapsed_ms": 968,
+      "message": "Looked up stats for Bijan Robinson",
+      "ok": true,
+      "stage": "tool",
+      "tool": "get_player_stats"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 1936,
+     "data": {
+      "elapsed_ms": 1936,
+      "message": "Writing the answer",
+      "stage": "writing"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 2904,
+     "data": {
+      "elapsed_ms": 2904,
+      "message": "Checking every number and source",
+      "stage": "checking"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 3872,
+     "data": {
+      "answer": {
+       "answer": "Bijan Robinson scored 35.3 PPR points in week 3 against GB.",
+       "answer_type": "stats",
+       "citations": [
+        "r1"
+       ],
+       "data_as_of": null,
+       "facts": [
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "Bijan Robinson (ATL RB) scored 35.3 PPR points in week 3 vs GB: 29 carries, 194 rushing yards, 2 rushing TDs, 2 receptions on 2 targets for 19 yards."
+        }
+       ],
+       "limitations": [],
+       "model_version": null,
+       "projections": [],
+       "scoring_format": "ppr",
+       "season": 2026,
+       "week": 3
+      },
+      "as_of": {
+       "next_week": 7,
+       "season": 2026
+      },
+      "sources": [
+       {
+        "failed": false,
+        "href": "/players/00-0038542",
+        "id": "r1",
+        "kind": "tool",
+        "label": "Stats: Bijan Robinson",
+        "tool": "get_player_stats"
+       }
+      ],
+      "status": "ok"
+     },
+     "event": "answer"
+    },
+    {
+     "at_ms": 3872,
+     "data": {
+      "answer_ms": 3872,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "How many PPR points did Bijan Robinson score in week 3?",
+   "recorded_from": "eval_answers_20261021T015253Z.json#s05"
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 1228,
+     "data": {
+      "elapsed_ms": 1228,
+      "message": "Looked up recent news",
+      "ok": true,
+      "stage": "tool",
+      "tool": "search_news"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 2456,
+     "data": {
+      "elapsed_ms": 2456,
+      "message": "Writing the answer",
+      "stage": "writing"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 3684,
+     "data": {
+      "elapsed_ms": 3684,
+      "message": "Checking every number and source",
+      "stage": "checking"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 4912,
+     "data": {
+      "answer": {
+       "answer": "Brandon McManus is the Rams' kicker. The team signed him on Oct 20, 2026, and he is their third kicker this season. He replaces Blake Grupe, who was injured in his first game with the team.",
+       "answer_type": "news",
+       "citations": [
+        "news:1407",
+        "news:102",
+        "news:108",
+        "news:4",
+        "news:113"
+       ],
+       "data_as_of": "2026-10-21 01:00:45.764803+00:00",
+       "facts": [
+        {
+         "source_ids": [
+          "news:1407"
+         ],
+         "text": "The Rams signed kicker Brandon McManus (team report published 2026-10-20 22:22:24+00:00). He is their third kicker this season."
+        },
+        {
+         "source_ids": [
+          "news:102",
+          "news:108"
+         ],
+         "text": "McManus replaces Blake Grupe, who was injured in his first game with the team on Sunday. Another report says Grupe suffered a torn ACL."
+        },
+        {
+         "source_ids": [
+          "news:4",
+          "news:113"
+         ],
+         "text": "The Rams had released Harrison Mevis before signing Grupe."
+        }
+       ],
+       "limitations": [
+        "Based on news up to the last sync; no depth chart data was available to confirm McManus as the starter."
+       ],
+       "model_version": null,
+       "projections": [],
+       "scoring_format": null,
+       "season": 2026,
+       "week": 7
+      },
+      "as_of": {
+       "next_week": 7,
+       "season": 2026
+      },
+      "sources": [
+       {
+        "failed": false,
+        "href": "https://www.therams.com/news/rams-sign-kicker-brandon-mcmanus-place-poona-ford-and-davante-adams-on-injured-reserve",
+        "id": "news:1407",
+        "kind": "news",
+        "label": "Rams sign kicker Brandon McManus, place Poona Ford and Davante Adams on Injured Reserve",
+        "published_at": "2026-10-20 22:22:24+00:00",
+        "source": "team_rss"
+       },
+       {
+        "failed": false,
+        "href": "https://sports.yahoo.com/articles/brandon-mcmanus-becomes-rams-third-212047598.html",
+        "id": "news:102",
+        "kind": "news",
+        "label": "Brandon McManus becomes Rams' third kicker this season amid special teams woes",
+        "published_at": "2026-10-20 21:20:47+00:00",
+        "source": "yahoo_rss"
+       },
+       {
+        "failed": false,
+        "href": "https://sports.yahoo.com/articles/rams-turn-third-kicker-three-205700245.html",
+        "id": "news:108",
+        "kind": "news",
+        "label": "Rams turn to third kicker in three weeks after Blake Grupe's injury",
+        "published_at": "2026-10-20 20:57:00+00:00",
+        "source": "yahoo_rss"
+       },
+       {
+        "failed": false,
+        "href": "https://www.espn.com/nfl/story/_/id/50231705/sources-rams-signing-free-agent-kicker-brandon-mcmanus",
+        "id": "news:4",
+        "kind": "news",
+        "label": "Sources: Rams signing free agent kicker Brandon McManus",
+        "published_at": "2026-10-20 21:17:52+00:00",
+        "source": "espn_news"
+       },
+       {
+        "failed": false,
+        "href": "https://sports.yahoo.com/nfl/breaking-news/article/rams-reportedly-signing-brandon-mcmanus-after-kicker-blake-grupe-suffers-torn-acl-in-week-6-204111683.html",
+        "id": "news:113",
+        "kind": "news",
+        "label": "Rams reportedly signing Brandon McManus after kicker Blake Grupe suffers torn ACL in Week 6",
+        "published_at": "2026-10-19 20:04:34+00:00",
+        "source": "yahoo_rss"
+       }
+      ],
+      "status": "ok"
+     },
+     "event": "answer"
+    },
+    {
+     "at_ms": 4912,
+     "data": {
+      "answer_ms": 4912,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "Who is kicking for the Rams now?",
+   "recorded_from": "eval_answers_20261021T015253Z.json#n03"
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 1223,
+     "data": {
+      "elapsed_ms": 1223,
+      "message": "Looked up injury status for A.J. Brown",
+      "ok": true,
+      "stage": "tool",
+      "tool": "get_injury_status"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 2446,
+     "data": {
+      "elapsed_ms": 2446,
+      "message": "Looked up recent news for A.J. Brown",
+      "ok": true,
+      "stage": "tool",
+      "tool": "search_news"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 3669,
+     "data": {
+      "elapsed_ms": 3669,
+      "message": "Writing the answer",
+      "stage": "writing"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 4892,
+     "data": {
+      "elapsed_ms": 4892,
+      "message": "Checking every number and source",
+      "stage": "checking"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 6115,
+     "data": {
+      "answer": {
+       "answer": "No final word yet. A.J. Brown (NE WR) is listed Questionable with an ankle injury, and he was limited in practice on Tuesday. I can't say whether he'll play; check the final inactive list before kickoff. Until then, have a backup ready.",
+       "answer_type": "injury",
+       "citations": [
+        "r1",
+        "news:2076"
+       ],
+       "data_as_of": "2026-10-20 12:21:01.752424+00:00",
+       "facts": [
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "A.J. Brown is listed Questionable with an ankle injury by nflverse (limited participation in practice, week 6 snapshot) and by Sleeper; both snapshots were ingested 2026-10-20 12:21 UTC."
+        },
+        {
+         "source_ids": [
+          "news:2076"
+         ],
+         "text": "Yahoo reported on 2026-10-21 00:06:05 UTC that A.J. Brown was limited in practice on Tuesday and continues to be limited."
+        }
+       ],
+       "limitations": [
+        "The injury snapshots were ingested 2026-10-20, before the latest news item, so they may not reflect the newest practice report.",
+        "No game-day status or official Week 7 designation for Brown was found in the results.",
+        "The Patriots Week 7 injury report article was in the results, but its excerpt doesn't mention Brown, so I didn't rely on it."
+       ],
+       "model_version": null,
+       "projections": [],
+       "scoring_format": null,
+       "season": 2026,
+       "week": 7
+      },
+      "as_of": {
+       "next_week": 7,
+       "season": 2026
+      },
+      "sources": [
+       {
+        "failed": false,
+        "href": "/players/00-0035676",
+        "id": "r1",
+        "kind": "tool",
+        "label": "Injury status: A.J. Brown",
+        "tool": "get_injury_status"
+       },
+       {
+        "failed": false,
+        "href": "https://sports.yahoo.com/articles/j-brown-limited-practice-tuesday-000605784.html",
+        "id": "news:2076",
+        "kind": "news",
+        "label": "A.J. Brown limited in practice on Tuesday",
+        "published_at": "2026-10-21 00:06:05+00:00",
+        "source": "yahoo_rss"
+       }
+      ],
+      "status": "ok"
+     },
+     "event": "answer"
+    },
+    {
+     "at_ms": 6115,
+     "data": {
+      "answer_ms": 6115,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "any update on aj brown, is he playing this week?",
+   "recorded_from": "eval_answers_20261021T015253Z.json#a08"
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 956,
+     "data": {
+      "elapsed_ms": 956,
+      "message": "Player lookup failed: name matches several players",
+      "ok": false,
+      "stage": "tool",
+      "tool": "get_injury_status"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 1912,
+     "data": {
+      "elapsed_ms": 1912,
+      "message": "Writing the answer",
+      "stage": "writing"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 2868,
+     "data": {
+      "elapsed_ms": 2868,
+      "message": "Checking every number and source",
+      "stage": "checking"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 3824,
+     "data": {
+      "answer": {
+       "answer": "Which Mitchell do you mean? Options: Adonai Mitchell (WR, NYJ), Keaton Mitchell (RB, LAC), Mitchell Tinsley (WR, CIN), or Mitchell Evans (TE, CAR).",
+       "answer_type": "clarification",
+       "citations": [
+        "r1"
+       ],
+       "data_as_of": null,
+       "facts": [],
+       "limitations": [
+        "The name 'Mitchell' matches several players, so no injury status was looked up."
+       ],
+       "model_version": null,
+       "projections": [],
+       "scoring_format": null,
+       "season": 2026,
+       "week": 7
+      },
+      "as_of": {
+       "next_week": 7,
+       "season": 2026
+      },
+      "sources": [
+       {
+        "failed": true,
+        "href": null,
+        "id": "r1",
+        "kind": "tool",
+        "label": "Lookup failed: name matches several players",
+        "tool": "get_injury_status"
+       }
+      ],
+      "status": "ok"
+     },
+     "event": "answer"
+    },
+    {
+     "at_ms": 3824,
+     "data": {
+      "answer_ms": 3824,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "is mitchell playing this week",
+   "recorded_from": "eval_answers_20261021T015253Z.json#a13"
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 1062,
+     "data": {
+      "elapsed_ms": 1062,
+      "message": "Writing the answer",
+      "stage": "writing"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 2124,
+     "data": {
+      "elapsed_ms": 2124,
+      "message": "Checking every number and source",
+      "stage": "checking"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 3186,
+     "data": {
+      "answer": {
+       "answer": "I can't help with over/under lines or betting advice, and I have no data on passing-yard lines. I can pull Mahomes' stats or his fantasy projection for week 7 and help with start/sit decisions for your leagues.",
+       "answer_type": "out_of_scope",
+       "citations": [],
+       "data_as_of": null,
+       "facts": [],
+       "limitations": [
+        "Betting lines and over/under advice are out of scope.",
+        "No tools were called, so no Mahomes data is available."
+       ],
+       "model_version": null,
+       "projections": [],
+       "scoring_format": null,
+       "season": 2026,
+       "week": 7
+      },
+      "as_of": {
+       "next_week": 7,
+       "season": 2026
+      },
+      "sources": [],
+      "status": "ok"
+     },
+     "event": "answer"
+    },
+    {
+     "at_ms": 3186,
+     "data": {
+      "answer_ms": 3186,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "What's the over/under on Mahomes passing yards, should I take the over?",
+   "recorded_from": "eval_answers_20261021T015253Z.json#o02"
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 2764,
+     "data": {
+      "elapsed_ms": 2764,
+      "message": "Looked up projections for Jaylen Warren, Bucky Irving",
+      "ok": true,
+      "stage": "tool",
+      "tool": "compare_start_sit"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 4561,
+     "data": {
+      "elapsed_ms": 4561,
+      "message": "Writing the answer",
+      "stage": "writing"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 8734,
+     "data": {
+      "elapsed_ms": 8734,
+      "message": "Checking every number and source",
+      "stage": "checking"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 8734,
+     "data": {
+      "answer": {
+       "answer": "I'd start Jaylen Warren. The baseline projects him higher than Bucky Irving for week 7 in PPR. Neither player has an injury flag in the results. The projection ignores depth-chart changes and news.",
+       "answer_type": "start_sit",
+       "citations": [
+        "r1"
+       ],
+       "data_as_of": null,
+       "facts": [
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "Jaylen Warren (PIT) scored 9.8 PPR points in week 6."
+        },
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "Bucky Irving (TB) scored 6.9 PPR points in week 6."
+        },
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "No injury entries are listed for either player."
+        }
+       ],
+       "limitations": [
+        "No league is known, so PPR scoring was used by default.",
+        "The baseline does not account for depth-chart changes or news.",
+        "No prediction interval is available for the projections."
+       ],
+       "model_version": "baseline-ewm-v1",
+       "projections": [
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "Jaylen Warren is projected for 16.6 points in week 7 (PPR)."
+        },
+        {
+         "source_ids": [
+          "r1"
+         ],
+         "text": "Bucky Irving is projected for 13.5 points in week 7 (PPR)."
+        }
+       ],
+       "scoring_format": "ppr",
+       "season": 2026,
+       "week": 7
+      },
+      "as_of": {
+       "next_week": 7,
+       "season": 2026
+      },
+      "sources": [
+       {
+        "failed": false,
+        "href": "/compare?ids=00-0037228,00-0039361&scoring=ppr",
+        "id": "r1",
+        "kind": "tool",
+        "label": "Projections: Jaylen Warren, Bucky Irving",
+        "tool": "compare_start_sit"
+       }
+      ],
+      "status": "ok"
+     },
+     "event": "answer"
+    },
+    {
+     "at_ms": 8734,
+     "data": {
+      "answer_ms": 8734,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "bucky irving or jaylen warren this week?",
+   "recorded_from": "live run 2026-10-21"
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 400,
+     "data": {
+      "message": "I couldn't match every number and source in my answer to the data, so I'm not showing it. Try asking about one player or one league at a time.",
+      "reason": "verification_failed"
+     },
+     "event": "withheld"
+    },
+    {
+     "at_ms": 400,
+     "data": {
+      "answer_ms": null,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "Demo scenario: an answer that fails verification",
+   "scenario": true
+  },
+  {
+   "events": [
+    {
+     "at_ms": 0,
+     "data": {
+      "elapsed_ms": 0,
+      "message": "Reading the season and your league context",
+      "stage": "context"
+     },
+     "event": "progress"
+    },
+    {
+     "at_ms": 400,
+     "data": {
+      "code": "llm_unavailable",
+      "message": "The answer service is unavailable right now. Stats, projections and lineups still work.",
+      "retryable": true
+     },
+     "event": "error"
+    },
+    {
+     "at_ms": 400,
+     "data": {
+      "answer_ms": null,
+      "logged": false,
+      "progress_first_ms": 0,
+      "query_id": null
+     },
+     "event": "done"
+    }
+   ],
+   "question": "Demo scenario: the answer service is down",
+   "scenario": true
+  }
+ ],
+ "freshness": [
+  {
+   "age_hours": 0.0,
+   "last_ok": "2026-10-21T08:41:27.363961+00:00",
+   "source": "sample data"
+  }
+ ],
+ "label": "Sample data from week 7, 2026, not live",
+ "leagues": [
+  {
+   "id": 900,
+   "name": "Demo League (sample data)",
+   "roster_positions": [
+    "QB",
+    "RB",
+    "RB",
+    "WR",
+    "WR",
+    "TE",
+    "FLEX",
+    "K",
+    "BN",
+    "BN",
+    "BN",
+    "BN",
+    "BN"
+   ],
+   "rosters": [
+    {
+     "owner_name": "Demo team",
+     "roster_id": 1
+    }
+   ],
+   "season": 2026
+  }
+ ],
+ "lineup": {
+  "900:1": {
+   "bench": [
+    {
+     "availability": {
+      "note": "BUF has no game in week 7",
+      "playable": false,
+      "status": "bye"
+     },
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "projected_points": 0.0,
+     "team": "BUF"
+    },
+    {
+     "availability": {
+      "observed_at": "2026-10-20T12:21:01.961449+00:00",
+      "playable": true,
+      "source": "sleeper",
+      "status": "Questionable"
+     },
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "projected_points": 10.51,
+     "team": "NE"
+    }
+   ],
+   "changes": {
+    "sit": [],
+    "start": []
+   },
+   "current_total": 123.23,
+   "gain": 0.0,
+   "label": "Sample data from week 7, 2026, not live",
+   "league_id": 900,
+   "model_version": "baseline-ewm-v1",
+   "no_projection": [],
+   "recommended": [
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0037834",
+      "name": "Brock Purdy",
+      "position": "QB",
+      "projected_points": 21.04,
+      "team": "SF"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0037834",
+      "name": "Brock Purdy",
+      "position": "QB",
+      "projected_points": 21.04,
+      "team": "SF"
+     },
+     "slot": "QB"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0037228",
+      "name": "Jaylen Warren",
+      "position": "RB",
+      "projected_points": 15.03,
+      "team": "PIT"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0037228",
+      "name": "Jaylen Warren",
+      "position": "RB",
+      "projected_points": 15.03,
+      "team": "PIT"
+     },
+     "slot": "RB"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0039361",
+      "name": "Bucky Irving",
+      "position": "RB",
+      "projected_points": 12.31,
+      "team": "TB"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0039361",
+      "name": "Bucky Irving",
+      "position": "RB",
+      "projected_points": 12.31,
+      "team": "TB"
+     },
+     "slot": "RB"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0039075",
+      "name": "Puka Nacua",
+      "position": "WR",
+      "projected_points": 19.62,
+      "team": "LA"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0039075",
+      "name": "Puka Nacua",
+      "position": "WR",
+      "projected_points": 19.62,
+      "team": "LA"
+     },
+     "slot": "WR"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0036900",
+      "name": "Ja'Marr Chase",
+      "position": "WR",
+      "projected_points": 14.71,
+      "team": "CIN"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0036900",
+      "name": "Ja'Marr Chase",
+      "position": "WR",
+      "projected_points": 14.71,
+      "team": "CIN"
+     },
+     "slot": "WR"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0037744",
+      "name": "Trey McBride",
+      "position": "TE",
+      "projected_points": 13.36,
+      "team": "ARI"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0037744",
+      "name": "Trey McBride",
+      "position": "TE",
+      "projected_points": 13.36,
+      "team": "ARI"
+     },
+     "slot": "TE"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0038542",
+      "name": "Bijan Robinson",
+      "position": "RB",
+      "projected_points": 18.83,
+      "team": "ATL"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0038542",
+      "name": "Bijan Robinson",
+      "position": "RB",
+      "projected_points": 18.83,
+      "team": "ATL"
+     },
+     "slot": "FLEX"
+    },
+    {
+     "current": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0040074",
+      "name": "Tyler Loop",
+      "position": "K",
+      "projected_points": 8.33,
+      "team": "BAL"
+     },
+     "player": {
+      "availability": null,
+      "fantasy_positions": null,
+      "id": "00-0040074",
+      "name": "Tyler Loop",
+      "position": "K",
+      "projected_points": 8.33,
+      "team": "BAL"
+     },
+     "slot": "K"
+    }
+   ],
+   "recommended_total": 123.23,
+   "roster_id": 1,
+   "rosters_as_of": {
+    "synced_at": "2026-10-21T08:41:27.363961+00:00",
+    "week": 7
+   },
+   "scoring": "Demo League rules (half PPR)",
+   "unavailable": [
+    {
+     "name": "Josh Allen",
+     "note": "BUF has no game in week 7",
+     "playable": false,
+     "status": "bye"
+    }
+   ],
+   "unhandled_slots": [],
+   "unscored_rules": [
+    "rec_0_4"
+   ],
+   "week": 7
+  }
+ },
+ "model_runs": [
+  {
+   "created_at": "2026-10-20T13:25:34.599680+00:00",
+   "features": [
+    "ewm_points(half_life=4.0, prior_season=True)"
+   ],
+   "metrics": {
+    "naive_test": {
+     "last game": {
+      "half_life": 0.01,
+      "mae": 5.521,
+      "mae_by_position": {
+       "QB": 8.104,
+       "RB": 5.404,
+       "TE": 4.609,
+       "WR": 5.38
+      },
+      "n": 5884,
+      "season": 2025,
+      "start_sit_accuracy": 0.5926,
+      "start_sit_pairs": 61321,
+      "use_prior_season": true
+     },
+     "season average": {
+      "half_life": 1000.0,
+      "mae": 4.509,
+      "mae_by_position": {
+       "QB": 6.836,
+       "RB": 4.381,
+       "TE": 3.665,
+       "WR": 4.42
+      },
+      "n": 5430,
+      "season": 2025,
+      "start_sit_accuracy": 0.6334,
+      "start_sit_pairs": 58256,
+      "use_prior_season": false
+     }
+    },
+    "test": {
+     "half_life": 4.0,
+     "mae": 4.453,
+     "mae_by_position": {
+      "QB": 6.706,
+      "RB": 4.404,
+      "TE": 3.612,
+      "WR": 4.321
+     },
+     "n": 5884,
+     "season": 2025,
+     "start_sit_accuracy": 0.6342,
+     "start_sit_pairs": 61756,
+     "use_prior_season": true
+    },
+    "tune": {
+     "half_life": 4.0,
+     "mae": 4.49,
+     "mae_by_position": {
+      "QB": 6.348,
+      "RB": 4.313,
+      "TE": 3.566,
+      "WR": 4.557
+     },
+     "n": 5726,
+     "season": 2024,
+     "start_sit_accuracy": 0.6363,
+     "start_sit_pairs": 61774,
+     "use_prior_season": true
+    }
+   },
+   "model_version": "baseline-ewm-v1",
+   "training_window": {
+    "scoring": "ppr",
+    "test": 2025,
+    "tune": 2024
+   }
+  }
+ ],
+ "player": {
+  "half": {
+   "00-0034857": {
+    "by_week": [
+     {
+      "attempts": 29,
+      "carries": 6,
+      "completions": 20,
+      "opponent": "HOU",
+      "passing_tds": 2,
+      "passing_yards": 334,
+      "points": 35.66,
+      "rushing_tds": 2,
+      "rushing_yards": 23,
+      "week": 1
+     },
+     {
+      "attempts": 31,
+      "carries": 14,
+      "completions": 20,
+      "opponent": "DET",
+      "passing_tds": 3,
+      "passing_yards": 248,
+      "points": 40.82,
+      "rushing_tds": 2,
+      "rushing_yards": 69,
+      "week": 2
+     },
+     {
+      "attempts": 26,
+      "carries": 8,
+      "completions": 16,
+      "opponent": "LAC",
+      "passing_interceptions": 2,
+      "passing_yards": 204,
+      "points": 16.96,
+      "receiving_yards": 1,
+      "receptions": 1,
+      "rushing_tds": 2,
+      "rushing_yards": 22,
+      "targets": 1,
+      "week": 3
+     },
+     {
+      "attempts": 33,
+      "carries": 5,
+      "completions": 23,
+      "opponent": "NE",
+      "passing_interceptions": 1,
+      "passing_tds": 1,
+      "passing_yards": 253,
+      "points": 18.52,
+      "rushing_tds": 1,
+      "rushing_yards": 4,
+      "week": 4
+     },
+     {
+      "attempts": 19,
+      "carries": 10,
+      "completions": 12,
+      "opponent": "LA",
+      "passing_interceptions": 1,
+      "passing_tds": 1,
+      "passing_yards": 210,
+      "points": 30.5,
+      "rushing_tds": 1,
+      "rushing_yards": 121,
+      "week": 5
+     },
+     {
+      "attempts": 33,
+      "carries": 5,
+      "completions": 23,
+      "opponent": "LV",
+      "passing_tds": 2,
+      "passing_yards": 255,
+      "points": 18.3,
+      "rushing_yards": 1,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "points_per_game": 26.79,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 160.76,
+    "totals": {
+     "attempts": 171,
+     "carries": 48,
+     "completions": 114,
+     "passing_interceptions": 4,
+     "passing_tds": 9,
+     "passing_yards": 1504,
+     "receiving_yards": 1,
+     "receptions": 1,
+     "rushing_tds": 8,
+     "rushing_yards": 240,
+     "targets": 1
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0035676": {
+    "by_week": [
+     {
+      "opponent": "SEA",
+      "points": 4.1,
+      "receiving_yards": 26,
+      "receptions": 3,
+      "targets": 4,
+      "week": 1
+     },
+     {
+      "opponent": "NYJ",
+      "points": 4.2,
+      "receiving_yards": 27,
+      "receptions": 3,
+      "targets": 10,
+      "week": 6
+     }
+    ],
+    "games": 2,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "points_per_game": 4.15,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 8.3,
+    "totals": {
+     "receiving_yards": 53,
+     "receptions": 6,
+     "targets": 14
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036322": {
+    "by_week": [
+     {
+      "opponent": "GB",
+      "points": 27.2,
+      "receiving_tds": 2,
+      "receiving_yards": 92,
+      "receptions": 8,
+      "targets": 9,
+      "week": 1
+     },
+     {
+      "opponent": "CHI",
+      "points": 7.0,
+      "receiving_yards": 55,
+      "receptions": 3,
+      "targets": 6,
+      "week": 2
+     },
+     {
+      "opponent": "TB",
+      "points": 4.2,
+      "receiving_yards": 32,
+      "receptions": 2,
+      "targets": 2,
+      "week": 3
+     },
+     {
+      "carries": 1,
+      "opponent": "NO",
+      "points": 15.8,
+      "receiving_tds": 1,
+      "receiving_yards": 79,
+      "receptions": 6,
+      "rushing_yards": -11,
+      "targets": 7,
+      "week": 5
+     }
+    ],
+    "games": 4,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "points_per_game": 13.55,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 54.2,
+    "totals": {
+     "carries": 1,
+     "receiving_tds": 3,
+     "receiving_yards": 258,
+     "receptions": 19,
+     "rushing_yards": -11,
+     "targets": 24
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036358": {
+    "by_week": [
+     {
+      "carries": 1,
+      "opponent": "NYG",
+      "points": 12.9,
+      "receiving_tds": 1,
+      "receiving_yards": 44,
+      "receptions": 5,
+      "targets": 8,
+      "week": 1
+     },
+     {
+      "opponent": "WAS",
+      "points": 31.3,
+      "receiving_tds": 2,
+      "receiving_yards": 153,
+      "receptions": 8,
+      "targets": 9,
+      "week": 2
+     },
+     {
+      "opponent": "BAL",
+      "points": 16.7,
+      "receiving_yards": 112,
+      "receptions": 7,
+      "targets": 8,
+      "week": 3
+     },
+     {
+      "carries": 1,
+      "opponent": "HOU",
+      "points": 32.8,
+      "receiving_tds": 1,
+      "receiving_yards": 189,
+      "receptions": 17,
+      "rushing_yards": -6,
+      "targets": 21,
+      "week": 4
+     },
+     {
+      "opponent": "TB",
+      "points": 1.9,
+      "receiving_yards": 9,
+      "receptions": 2,
+      "targets": 5,
+      "week": 5
+     },
+     {
+      "opponent": "GB",
+      "points": 11.5,
+      "receiving_yards": 70,
+      "receptions": 9,
+      "targets": 18,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "points_per_game": 17.85,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 107.1,
+    "totals": {
+     "carries": 2,
+     "receiving_tds": 4,
+     "receiving_yards": 577,
+     "receptions": 48,
+     "rushing_yards": -6,
+     "targets": 69
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036900": {
+    "by_week": [
+     {
+      "opponent": "TB",
+      "points": 2.2,
+      "receiving_yards": 12,
+      "receptions": 2,
+      "targets": 4,
+      "week": 1
+     },
+     {
+      "opponent": "HOU",
+      "points": 23.0,
+      "receiving_tds": 2,
+      "receiving_yards": 75,
+      "receptions": 7,
+      "targets": 9,
+      "week": 2
+     },
+     {
+      "opponent": "PIT",
+      "points": 20.3,
+      "receiving_tds": 1,
+      "receiving_yards": 98,
+      "receptions": 9,
+      "targets": 12,
+      "week": 3
+     },
+     {
+      "opponent": "JAX",
+      "points": 4.2,
+      "receiving_yards": 27,
+      "receptions": 3,
+      "targets": 3,
+      "week": 4
+     },
+     {
+      "opponent": "MIA",
+      "points": 16.7,
+      "receiving_tds": 1,
+      "receiving_yards": 77,
+      "receptions": 6,
+      "targets": 10,
+      "week": 5
+     }
+    ],
+    "games": 5,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "points_per_game": 13.28,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 66.4,
+    "totals": {
+     "receiving_tds": 4,
+     "receiving_yards": 289,
+     "receptions": 27,
+     "targets": 38
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037228": {
+    "by_week": [
+     {
+      "carries": 10,
+      "opponent": "ATL",
+      "points": 7.8,
+      "receiving_yards": 27,
+      "receptions": 5,
+      "rushing_yards": 46,
+      "targets": 6,
+      "week": 1
+     },
+     {
+      "carries": 11,
+      "opponent": "NE",
+      "points": 8.7,
+      "receiving_yards": 34,
+      "receptions": 2,
+      "rushing_yards": 43,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 17,
+      "opponent": "CIN",
+      "points": 19.1,
+      "receiving_yards": 49,
+      "receptions": 3,
+      "rushing_yards": 127,
+      "targets": 4,
+      "week": 3
+     },
+     {
+      "carries": 17,
+      "opponent": "CLE",
+      "points": 14.1,
+      "receiving_yards": 33,
+      "receptions": 3,
+      "rushing_yards": 93,
+      "targets": 6,
+      "week": 4
+     },
+     {
+      "carries": 15,
+      "opponent": "IND",
+      "points": 33.8,
+      "receiving_tds": 1,
+      "receiving_yards": 87,
+      "receptions": 6,
+      "rushing_tds": 1,
+      "rushing_yards": 101,
+      "targets": 6,
+      "week": 5
+     },
+     {
+      "carries": 14,
+      "opponent": "TB",
+      "points": 8.8,
+      "receiving_yards": 28,
+      "receptions": 2,
+      "rushing_yards": 50,
+      "targets": 4,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "points_per_game": 15.38,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 92.3,
+    "totals": {
+     "carries": 84,
+     "receiving_tds": 1,
+     "receiving_yards": 258,
+     "receptions": 21,
+     "rushing_tds": 1,
+     "rushing_yards": 460,
+     "targets": 30
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037744": {
+    "by_week": [
+     {
+      "opponent": "LAC",
+      "points": 20.0,
+      "receiving_tds": 1,
+      "receiving_yards": 95,
+      "receptions": 9,
+      "targets": 13,
+      "week": 1
+     },
+     {
+      "opponent": "SEA",
+      "points": 14.1,
+      "receiving_tds": 1,
+      "receiving_yards": 41,
+      "receptions": 8,
+      "targets": 10,
+      "week": 2
+     },
+     {
+      "opponent": "SF",
+      "points": 12.0,
+      "receiving_yards": 75,
+      "receptions": 9,
+      "targets": 11,
+      "week": 3
+     },
+     {
+      "opponent": "NYG",
+      "points": 6.6,
+      "receiving_yards": 31,
+      "receptions": 7,
+      "targets": 12,
+      "week": 4
+     },
+     {
+      "opponent": "DET",
+      "points": 17.1,
+      "receiving_tds": 1,
+      "receiving_yards": 66,
+      "receptions": 9,
+      "targets": 10,
+      "week": 5
+     },
+     {
+      "opponent": "LA",
+      "points": 8.8,
+      "receiving_yards": 53,
+      "receptions": 7,
+      "targets": 9,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "points_per_game": 13.1,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 78.6,
+    "totals": {
+     "receiving_tds": 3,
+     "receiving_yards": 361,
+     "receptions": 49,
+     "targets": 65
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037834": {
+    "by_week": [
+     {
+      "attempts": 34,
+      "carries": 5,
+      "completions": 25,
+      "opponent": "LA",
+      "passing_interceptions": 1,
+      "passing_tds": 3,
+      "passing_yards": 205,
+      "points": 21.1,
+      "rushing_yards": 29,
+      "week": 1
+     },
+     {
+      "attempts": 22,
+      "carries": 3,
+      "completions": 20,
+      "opponent": "MIA",
+      "passing_tds": 2,
+      "passing_yards": 287,
+      "points": 28.48,
+      "rushing_tds": 1,
+      "rushing_yards": 30,
+      "week": 2
+     },
+     {
+      "attempts": 27,
+      "carries": 2,
+      "completions": 15,
+      "opponent": "ARI",
+      "passing_tds": 4,
+      "passing_yards": 297,
+      "points": 31.28,
+      "rushing_yards": 34,
+      "week": 3
+     },
+     {
+      "attempts": 30,
+      "carries": 10,
+      "completions": 19,
+      "opponent": "DEN",
+      "passing_tds": 2,
+      "passing_yards": 218,
+      "points": 19.62,
+      "rushing_yards": 29,
+      "week": 4
+     },
+     {
+      "attempts": 29,
+      "carries": 5,
+      "completions": 19,
+      "opponent": "SEA",
+      "passing_interceptions": 1,
+      "passing_tds": 2,
+      "passing_yards": 189,
+      "points": 16.16,
+      "rushing_yards": 6,
+      "week": 5
+     },
+     {
+      "attempts": 29,
+      "carries": 5,
+      "completions": 21,
+      "opponent": "WAS",
+      "passing_tds": 1,
+      "passing_yards": 264,
+      "points": 17.36,
+      "rushing_yards": 28,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "points_per_game": 22.33,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 134.0,
+    "totals": {
+     "attempts": 171,
+     "carries": 30,
+     "completions": 119,
+     "passing_interceptions": 2,
+     "passing_tds": 14,
+     "passing_yards": 1460,
+     "rushing_tds": 1,
+     "rushing_yards": 156
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0038542": {
+    "by_week": [
+     {
+      "carries": 21,
+      "opponent": "PIT",
+      "points": 27.3,
+      "receiving_tds": 1,
+      "receiving_yards": 90,
+      "receptions": 8,
+      "rushing_yards": 83,
+      "targets": 10,
+      "week": 1
+     },
+     {
+      "carries": 16,
+      "opponent": "CAR",
+      "points": 9.6,
+      "receiving_yards": 9,
+      "receptions": 3,
+      "rushing_yards": 72,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 29,
+      "opponent": "GB",
+      "points": 34.3,
+      "receiving_yards": 19,
+      "receptions": 2,
+      "rushing_tds": 2,
+      "rushing_yards": 194,
+      "targets": 2,
+      "week": 3
+     },
+     {
+      "carries": 19,
+      "opponent": "NO",
+      "points": 27.2,
+      "receiving_yards": 2,
+      "receptions": 1,
+      "rushing_tds": 2,
+      "rushing_yards": 145,
+      "targets": 2,
+      "week": 4
+     },
+     {
+      "carries": 17,
+      "opponent": "BAL",
+      "points": 13.8,
+      "receiving_yards": 32,
+      "receptions": 4,
+      "rushing_yards": 86,
+      "targets": 7,
+      "week": 5
+     },
+     {
+      "carries": 9,
+      "opponent": "CHI",
+      "points": 6.3,
+      "receiving_yards": -8,
+      "receptions": 2,
+      "rushing_yards": 61,
+      "targets": 2,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "points_per_game": 19.75,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 118.5,
+    "totals": {
+     "carries": 111,
+     "receiving_tds": 1,
+     "receiving_yards": 144,
+     "receptions": 20,
+     "rushing_tds": 4,
+     "rushing_yards": 641,
+     "targets": 27
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039075": {
+    "by_week": [
+     {
+      "opponent": "SF",
+      "points": 9.9,
+      "receiving_yards": 74,
+      "receptions": 5,
+      "targets": 9,
+      "week": 1
+     },
+     {
+      "carries": 1,
+      "opponent": "PHI",
+      "points": 23.2,
+      "receiving_yards": 125,
+      "receptions": 9,
+      "rushing_tds": 1,
+      "rushing_yards": 2,
+      "targets": 12,
+      "week": 4
+     },
+     {
+      "carries": 2,
+      "opponent": "BUF",
+      "points": 29.2,
+      "receiving_tds": 1,
+      "receiving_yards": 138,
+      "receptions": 17,
+      "rushing_yards": 9,
+      "targets": 24,
+      "week": 5
+     },
+     {
+      "opponent": "ARI",
+      "points": 11.0,
+      "receiving_yards": 80,
+      "receptions": 6,
+      "targets": 7,
+      "week": 6
+     }
+    ],
+    "games": 4,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "points_per_game": 18.32,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 73.3,
+    "totals": {
+     "carries": 3,
+     "receiving_tds": 1,
+     "receiving_yards": 417,
+     "receptions": 37,
+     "rushing_tds": 1,
+     "rushing_yards": 11,
+     "targets": 52
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039139": {
+    "by_week": [
+     {
+      "carries": 29,
+      "opponent": "NO",
+      "points": 31.1,
+      "receiving_yards": 30,
+      "receptions": 5,
+      "rushing_tds": 2,
+      "rushing_yards": 156,
+      "targets": 5,
+      "week": 1
+     },
+     {
+      "carries": 16,
+      "opponent": "BUF",
+      "points": 20.3,
+      "receiving_tds": 1,
+      "receiving_yards": 61,
+      "receptions": 6,
+      "rushing_yards": 52,
+      "targets": 8,
+      "week": 2
+     },
+     {
+      "carries": 20,
+      "opponent": "NYJ",
+      "points": 37.9,
+      "receiving_tds": 1,
+      "receiving_yards": 65,
+      "receptions": 7,
+      "rushing_tds": 2,
+      "rushing_yards": 99,
+      "targets": 8,
+      "week": 3
+     },
+     {
+      "carries": 15,
+      "opponent": "CAR",
+      "points": 15.7,
+      "receiving_yards": 31,
+      "receptions": 4,
+      "rushing_tds": 1,
+      "rushing_yards": 46,
+      "targets": 7,
+      "week": 4
+     },
+     {
+      "carries": 25,
+      "opponent": "ARI",
+      "points": 35.2,
+      "receiving_yards": 56,
+      "receptions": 5,
+      "rushing_tds": 2,
+      "rushing_yards": 151,
+      "targets": 6,
+      "week": 5
+     }
+    ],
+    "games": 5,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "points_per_game": 28.04,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 140.2,
+    "totals": {
+     "carries": 105,
+     "receiving_tds": 2,
+     "receiving_yards": 243,
+     "receptions": 27,
+     "rushing_tds": 7,
+     "rushing_yards": 504,
+     "targets": 34
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039361": {
+    "by_week": [
+     {
+      "carries": 8,
+      "opponent": "CIN",
+      "points": 16.8,
+      "receiving_yards": 48,
+      "receptions": 7,
+      "rushing_tds": 1,
+      "rushing_yards": 45,
+      "targets": 7,
+      "week": 1
+     },
+     {
+      "carries": 17,
+      "opponent": "CLE",
+      "points": 11.0,
+      "receiving_yards": 1,
+      "receptions": 4,
+      "rushing_yards": 89,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 15,
+      "opponent": "MIN",
+      "points": 6.8,
+      "receiving_yards": 12,
+      "receptions": 2,
+      "rushing_yards": 46,
+      "targets": 4,
+      "week": 3
+     },
+     {
+      "carries": 16,
+      "opponent": "GB",
+      "points": 6.1,
+      "rushing_yards": 61,
+      "week": 4
+     },
+     {
+      "carries": 21,
+      "opponent": "DAL",
+      "points": 30.5,
+      "receiving_tds": 1,
+      "receiving_yards": 10,
+      "receptions": 2,
+      "rushing_tds": 1,
+      "rushing_yards": 165,
+      "targets": 3,
+      "week": 5
+     },
+     {
+      "carries": 19,
+      "opponent": "PIT",
+      "points": 5.9,
+      "receiving_yards": 3,
+      "receptions": 2,
+      "rushing_yards": 46,
+      "targets": 3,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "points_per_game": 12.85,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 77.1,
+    "totals": {
+     "carries": 96,
+     "receiving_tds": 1,
+     "receiving_yards": 74,
+     "receptions": 17,
+     "rushing_tds": 2,
+     "rushing_yards": 452,
+     "targets": 21
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0040074": {
+    "by_week": [
+     {
+      "fg_att": 2,
+      "fg_made": 2,
+      "opponent": "IND",
+      "pat_made": 5,
+      "points": 14.0,
+      "week": 1
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "NO",
+      "pat_made": 2,
+      "points": 5.0,
+      "week": 2
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 2,
+      "opponent": "DAL",
+      "pat_made": 4,
+      "points": 12.0,
+      "week": 3
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "TEN",
+      "pat_made": 3,
+      "points": 7.0,
+      "week": 4
+     },
+     {
+      "fg_att": 3,
+      "fg_made": 3,
+      "opponent": "ATL",
+      "pat_made": 1,
+      "points": 14.0,
+      "week": 5
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "CLE",
+      "pat_made": 1,
+      "points": 3.0,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "points_per_game": 9.17,
+    "scoring": "half",
+    "season": 2026,
+    "total_points": 55.0,
+    "totals": {
+     "fg_att": 13,
+     "fg_made": 10,
+     "pat_made": 16
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   }
+  },
+  "ppr": {
+   "00-0034857": {
+    "by_week": [
+     {
+      "attempts": 29,
+      "carries": 6,
+      "completions": 20,
+      "opponent": "HOU",
+      "passing_tds": 2,
+      "passing_yards": 334,
+      "points": 35.66,
+      "rushing_tds": 2,
+      "rushing_yards": 23,
+      "week": 1
+     },
+     {
+      "attempts": 31,
+      "carries": 14,
+      "completions": 20,
+      "opponent": "DET",
+      "passing_tds": 3,
+      "passing_yards": 248,
+      "points": 40.82,
+      "rushing_tds": 2,
+      "rushing_yards": 69,
+      "week": 2
+     },
+     {
+      "attempts": 26,
+      "carries": 8,
+      "completions": 16,
+      "opponent": "LAC",
+      "passing_interceptions": 2,
+      "passing_yards": 204,
+      "points": 17.46,
+      "receiving_yards": 1,
+      "receptions": 1,
+      "rushing_tds": 2,
+      "rushing_yards": 22,
+      "targets": 1,
+      "week": 3
+     },
+     {
+      "attempts": 33,
+      "carries": 5,
+      "completions": 23,
+      "opponent": "NE",
+      "passing_interceptions": 1,
+      "passing_tds": 1,
+      "passing_yards": 253,
+      "points": 18.52,
+      "rushing_tds": 1,
+      "rushing_yards": 4,
+      "week": 4
+     },
+     {
+      "attempts": 19,
+      "carries": 10,
+      "completions": 12,
+      "opponent": "LA",
+      "passing_interceptions": 1,
+      "passing_tds": 1,
+      "passing_yards": 210,
+      "points": 30.5,
+      "rushing_tds": 1,
+      "rushing_yards": 121,
+      "week": 5
+     },
+     {
+      "attempts": 33,
+      "carries": 5,
+      "completions": 23,
+      "opponent": "LV",
+      "passing_tds": 2,
+      "passing_yards": 255,
+      "points": 18.3,
+      "rushing_yards": 1,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "points_per_game": 26.88,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 161.26,
+    "totals": {
+     "attempts": 171,
+     "carries": 48,
+     "completions": 114,
+     "passing_interceptions": 4,
+     "passing_tds": 9,
+     "passing_yards": 1504,
+     "receiving_yards": 1,
+     "receptions": 1,
+     "rushing_tds": 8,
+     "rushing_yards": 240,
+     "targets": 1
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0035676": {
+    "by_week": [
+     {
+      "opponent": "SEA",
+      "points": 5.6,
+      "receiving_yards": 26,
+      "receptions": 3,
+      "targets": 4,
+      "week": 1
+     },
+     {
+      "opponent": "NYJ",
+      "points": 5.7,
+      "receiving_yards": 27,
+      "receptions": 3,
+      "targets": 10,
+      "week": 6
+     }
+    ],
+    "games": 2,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "points_per_game": 5.65,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 11.3,
+    "totals": {
+     "receiving_yards": 53,
+     "receptions": 6,
+     "targets": 14
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036322": {
+    "by_week": [
+     {
+      "opponent": "GB",
+      "points": 31.2,
+      "receiving_tds": 2,
+      "receiving_yards": 92,
+      "receptions": 8,
+      "targets": 9,
+      "week": 1
+     },
+     {
+      "opponent": "CHI",
+      "points": 8.5,
+      "receiving_yards": 55,
+      "receptions": 3,
+      "targets": 6,
+      "week": 2
+     },
+     {
+      "opponent": "TB",
+      "points": 5.2,
+      "receiving_yards": 32,
+      "receptions": 2,
+      "targets": 2,
+      "week": 3
+     },
+     {
+      "carries": 1,
+      "opponent": "NO",
+      "points": 18.8,
+      "receiving_tds": 1,
+      "receiving_yards": 79,
+      "receptions": 6,
+      "rushing_yards": -11,
+      "targets": 7,
+      "week": 5
+     }
+    ],
+    "games": 4,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "points_per_game": 15.93,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 63.7,
+    "totals": {
+     "carries": 1,
+     "receiving_tds": 3,
+     "receiving_yards": 258,
+     "receptions": 19,
+     "rushing_yards": -11,
+     "targets": 24
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036358": {
+    "by_week": [
+     {
+      "carries": 1,
+      "opponent": "NYG",
+      "points": 15.4,
+      "receiving_tds": 1,
+      "receiving_yards": 44,
+      "receptions": 5,
+      "targets": 8,
+      "week": 1
+     },
+     {
+      "opponent": "WAS",
+      "points": 35.3,
+      "receiving_tds": 2,
+      "receiving_yards": 153,
+      "receptions": 8,
+      "targets": 9,
+      "week": 2
+     },
+     {
+      "opponent": "BAL",
+      "points": 20.2,
+      "receiving_yards": 112,
+      "receptions": 7,
+      "targets": 8,
+      "week": 3
+     },
+     {
+      "carries": 1,
+      "opponent": "HOU",
+      "points": 41.3,
+      "receiving_tds": 1,
+      "receiving_yards": 189,
+      "receptions": 17,
+      "rushing_yards": -6,
+      "targets": 21,
+      "week": 4
+     },
+     {
+      "opponent": "TB",
+      "points": 2.9,
+      "receiving_yards": 9,
+      "receptions": 2,
+      "targets": 5,
+      "week": 5
+     },
+     {
+      "opponent": "GB",
+      "points": 16.0,
+      "receiving_yards": 70,
+      "receptions": 9,
+      "targets": 18,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "points_per_game": 21.85,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 131.1,
+    "totals": {
+     "carries": 2,
+     "receiving_tds": 4,
+     "receiving_yards": 577,
+     "receptions": 48,
+     "rushing_yards": -6,
+     "targets": 69
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036900": {
+    "by_week": [
+     {
+      "opponent": "TB",
+      "points": 3.2,
+      "receiving_yards": 12,
+      "receptions": 2,
+      "targets": 4,
+      "week": 1
+     },
+     {
+      "opponent": "HOU",
+      "points": 26.5,
+      "receiving_tds": 2,
+      "receiving_yards": 75,
+      "receptions": 7,
+      "targets": 9,
+      "week": 2
+     },
+     {
+      "opponent": "PIT",
+      "points": 24.8,
+      "receiving_tds": 1,
+      "receiving_yards": 98,
+      "receptions": 9,
+      "targets": 12,
+      "week": 3
+     },
+     {
+      "opponent": "JAX",
+      "points": 5.7,
+      "receiving_yards": 27,
+      "receptions": 3,
+      "targets": 3,
+      "week": 4
+     },
+     {
+      "opponent": "MIA",
+      "points": 19.7,
+      "receiving_tds": 1,
+      "receiving_yards": 77,
+      "receptions": 6,
+      "targets": 10,
+      "week": 5
+     }
+    ],
+    "games": 5,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "points_per_game": 15.98,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 79.9,
+    "totals": {
+     "receiving_tds": 4,
+     "receiving_yards": 289,
+     "receptions": 27,
+     "targets": 38
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037228": {
+    "by_week": [
+     {
+      "carries": 10,
+      "opponent": "ATL",
+      "points": 10.3,
+      "receiving_yards": 27,
+      "receptions": 5,
+      "rushing_yards": 46,
+      "targets": 6,
+      "week": 1
+     },
+     {
+      "carries": 11,
+      "opponent": "NE",
+      "points": 9.7,
+      "receiving_yards": 34,
+      "receptions": 2,
+      "rushing_yards": 43,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 17,
+      "opponent": "CIN",
+      "points": 20.6,
+      "receiving_yards": 49,
+      "receptions": 3,
+      "rushing_yards": 127,
+      "targets": 4,
+      "week": 3
+     },
+     {
+      "carries": 17,
+      "opponent": "CLE",
+      "points": 15.6,
+      "receiving_yards": 33,
+      "receptions": 3,
+      "rushing_yards": 93,
+      "targets": 6,
+      "week": 4
+     },
+     {
+      "carries": 15,
+      "opponent": "IND",
+      "points": 36.8,
+      "receiving_tds": 1,
+      "receiving_yards": 87,
+      "receptions": 6,
+      "rushing_tds": 1,
+      "rushing_yards": 101,
+      "targets": 6,
+      "week": 5
+     },
+     {
+      "carries": 14,
+      "opponent": "TB",
+      "points": 9.8,
+      "receiving_yards": 28,
+      "receptions": 2,
+      "rushing_yards": 50,
+      "targets": 4,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "points_per_game": 17.13,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 102.8,
+    "totals": {
+     "carries": 84,
+     "receiving_tds": 1,
+     "receiving_yards": 258,
+     "receptions": 21,
+     "rushing_tds": 1,
+     "rushing_yards": 460,
+     "targets": 30
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037744": {
+    "by_week": [
+     {
+      "opponent": "LAC",
+      "points": 24.5,
+      "receiving_tds": 1,
+      "receiving_yards": 95,
+      "receptions": 9,
+      "targets": 13,
+      "week": 1
+     },
+     {
+      "opponent": "SEA",
+      "points": 18.1,
+      "receiving_tds": 1,
+      "receiving_yards": 41,
+      "receptions": 8,
+      "targets": 10,
+      "week": 2
+     },
+     {
+      "opponent": "SF",
+      "points": 16.5,
+      "receiving_yards": 75,
+      "receptions": 9,
+      "targets": 11,
+      "week": 3
+     },
+     {
+      "opponent": "NYG",
+      "points": 10.1,
+      "receiving_yards": 31,
+      "receptions": 7,
+      "targets": 12,
+      "week": 4
+     },
+     {
+      "opponent": "DET",
+      "points": 21.6,
+      "receiving_tds": 1,
+      "receiving_yards": 66,
+      "receptions": 9,
+      "targets": 10,
+      "week": 5
+     },
+     {
+      "opponent": "LA",
+      "points": 12.3,
+      "receiving_yards": 53,
+      "receptions": 7,
+      "targets": 9,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "points_per_game": 17.18,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 103.1,
+    "totals": {
+     "receiving_tds": 3,
+     "receiving_yards": 361,
+     "receptions": 49,
+     "targets": 65
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037834": {
+    "by_week": [
+     {
+      "attempts": 34,
+      "carries": 5,
+      "completions": 25,
+      "opponent": "LA",
+      "passing_interceptions": 1,
+      "passing_tds": 3,
+      "passing_yards": 205,
+      "points": 21.1,
+      "rushing_yards": 29,
+      "week": 1
+     },
+     {
+      "attempts": 22,
+      "carries": 3,
+      "completions": 20,
+      "opponent": "MIA",
+      "passing_tds": 2,
+      "passing_yards": 287,
+      "points": 28.48,
+      "rushing_tds": 1,
+      "rushing_yards": 30,
+      "week": 2
+     },
+     {
+      "attempts": 27,
+      "carries": 2,
+      "completions": 15,
+      "opponent": "ARI",
+      "passing_tds": 4,
+      "passing_yards": 297,
+      "points": 31.28,
+      "rushing_yards": 34,
+      "week": 3
+     },
+     {
+      "attempts": 30,
+      "carries": 10,
+      "completions": 19,
+      "opponent": "DEN",
+      "passing_tds": 2,
+      "passing_yards": 218,
+      "points": 19.62,
+      "rushing_yards": 29,
+      "week": 4
+     },
+     {
+      "attempts": 29,
+      "carries": 5,
+      "completions": 19,
+      "opponent": "SEA",
+      "passing_interceptions": 1,
+      "passing_tds": 2,
+      "passing_yards": 189,
+      "points": 16.16,
+      "rushing_yards": 6,
+      "week": 5
+     },
+     {
+      "attempts": 29,
+      "carries": 5,
+      "completions": 21,
+      "opponent": "WAS",
+      "passing_tds": 1,
+      "passing_yards": 264,
+      "points": 17.36,
+      "rushing_yards": 28,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "points_per_game": 22.33,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 134.0,
+    "totals": {
+     "attempts": 171,
+     "carries": 30,
+     "completions": 119,
+     "passing_interceptions": 2,
+     "passing_tds": 14,
+     "passing_yards": 1460,
+     "rushing_tds": 1,
+     "rushing_yards": 156
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0038542": {
+    "by_week": [
+     {
+      "carries": 21,
+      "opponent": "PIT",
+      "points": 31.3,
+      "receiving_tds": 1,
+      "receiving_yards": 90,
+      "receptions": 8,
+      "rushing_yards": 83,
+      "targets": 10,
+      "week": 1
+     },
+     {
+      "carries": 16,
+      "opponent": "CAR",
+      "points": 11.1,
+      "receiving_yards": 9,
+      "receptions": 3,
+      "rushing_yards": 72,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 29,
+      "opponent": "GB",
+      "points": 35.3,
+      "receiving_yards": 19,
+      "receptions": 2,
+      "rushing_tds": 2,
+      "rushing_yards": 194,
+      "targets": 2,
+      "week": 3
+     },
+     {
+      "carries": 19,
+      "opponent": "NO",
+      "points": 27.7,
+      "receiving_yards": 2,
+      "receptions": 1,
+      "rushing_tds": 2,
+      "rushing_yards": 145,
+      "targets": 2,
+      "week": 4
+     },
+     {
+      "carries": 17,
+      "opponent": "BAL",
+      "points": 15.8,
+      "receiving_yards": 32,
+      "receptions": 4,
+      "rushing_yards": 86,
+      "targets": 7,
+      "week": 5
+     },
+     {
+      "carries": 9,
+      "opponent": "CHI",
+      "points": 7.3,
+      "receiving_yards": -8,
+      "receptions": 2,
+      "rushing_yards": 61,
+      "targets": 2,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "points_per_game": 21.42,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 128.5,
+    "totals": {
+     "carries": 111,
+     "receiving_tds": 1,
+     "receiving_yards": 144,
+     "receptions": 20,
+     "rushing_tds": 4,
+     "rushing_yards": 641,
+     "targets": 27
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039075": {
+    "by_week": [
+     {
+      "opponent": "SF",
+      "points": 12.4,
+      "receiving_yards": 74,
+      "receptions": 5,
+      "targets": 9,
+      "week": 1
+     },
+     {
+      "carries": 1,
+      "opponent": "PHI",
+      "points": 27.7,
+      "receiving_yards": 125,
+      "receptions": 9,
+      "rushing_tds": 1,
+      "rushing_yards": 2,
+      "targets": 12,
+      "week": 4
+     },
+     {
+      "carries": 2,
+      "opponent": "BUF",
+      "points": 37.7,
+      "receiving_tds": 1,
+      "receiving_yards": 138,
+      "receptions": 17,
+      "rushing_yards": 9,
+      "targets": 24,
+      "week": 5
+     },
+     {
+      "opponent": "ARI",
+      "points": 14.0,
+      "receiving_yards": 80,
+      "receptions": 6,
+      "targets": 7,
+      "week": 6
+     }
+    ],
+    "games": 4,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "points_per_game": 22.95,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 91.8,
+    "totals": {
+     "carries": 3,
+     "receiving_tds": 1,
+     "receiving_yards": 417,
+     "receptions": 37,
+     "rushing_tds": 1,
+     "rushing_yards": 11,
+     "targets": 52
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039139": {
+    "by_week": [
+     {
+      "carries": 29,
+      "opponent": "NO",
+      "points": 33.6,
+      "receiving_yards": 30,
+      "receptions": 5,
+      "rushing_tds": 2,
+      "rushing_yards": 156,
+      "targets": 5,
+      "week": 1
+     },
+     {
+      "carries": 16,
+      "opponent": "BUF",
+      "points": 23.3,
+      "receiving_tds": 1,
+      "receiving_yards": 61,
+      "receptions": 6,
+      "rushing_yards": 52,
+      "targets": 8,
+      "week": 2
+     },
+     {
+      "carries": 20,
+      "opponent": "NYJ",
+      "points": 41.4,
+      "receiving_tds": 1,
+      "receiving_yards": 65,
+      "receptions": 7,
+      "rushing_tds": 2,
+      "rushing_yards": 99,
+      "targets": 8,
+      "week": 3
+     },
+     {
+      "carries": 15,
+      "opponent": "CAR",
+      "points": 17.7,
+      "receiving_yards": 31,
+      "receptions": 4,
+      "rushing_tds": 1,
+      "rushing_yards": 46,
+      "targets": 7,
+      "week": 4
+     },
+     {
+      "carries": 25,
+      "opponent": "ARI",
+      "points": 37.7,
+      "receiving_yards": 56,
+      "receptions": 5,
+      "rushing_tds": 2,
+      "rushing_yards": 151,
+      "targets": 6,
+      "week": 5
+     }
+    ],
+    "games": 5,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "points_per_game": 30.74,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 153.7,
+    "totals": {
+     "carries": 105,
+     "receiving_tds": 2,
+     "receiving_yards": 243,
+     "receptions": 27,
+     "rushing_tds": 7,
+     "rushing_yards": 504,
+     "targets": 34
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039361": {
+    "by_week": [
+     {
+      "carries": 8,
+      "opponent": "CIN",
+      "points": 20.3,
+      "receiving_yards": 48,
+      "receptions": 7,
+      "rushing_tds": 1,
+      "rushing_yards": 45,
+      "targets": 7,
+      "week": 1
+     },
+     {
+      "carries": 17,
+      "opponent": "CLE",
+      "points": 13.0,
+      "receiving_yards": 1,
+      "receptions": 4,
+      "rushing_yards": 89,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 15,
+      "opponent": "MIN",
+      "points": 7.8,
+      "receiving_yards": 12,
+      "receptions": 2,
+      "rushing_yards": 46,
+      "targets": 4,
+      "week": 3
+     },
+     {
+      "carries": 16,
+      "opponent": "GB",
+      "points": 6.1,
+      "rushing_yards": 61,
+      "week": 4
+     },
+     {
+      "carries": 21,
+      "opponent": "DAL",
+      "points": 31.5,
+      "receiving_tds": 1,
+      "receiving_yards": 10,
+      "receptions": 2,
+      "rushing_tds": 1,
+      "rushing_yards": 165,
+      "targets": 3,
+      "week": 5
+     },
+     {
+      "carries": 19,
+      "opponent": "PIT",
+      "points": 6.9,
+      "receiving_yards": 3,
+      "receptions": 2,
+      "rushing_yards": 46,
+      "targets": 3,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "points_per_game": 14.27,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 85.6,
+    "totals": {
+     "carries": 96,
+     "receiving_tds": 1,
+     "receiving_yards": 74,
+     "receptions": 17,
+     "rushing_tds": 2,
+     "rushing_yards": 452,
+     "targets": 21
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0040074": {
+    "by_week": [
+     {
+      "fg_att": 2,
+      "fg_made": 2,
+      "opponent": "IND",
+      "pat_made": 5,
+      "points": 14.0,
+      "week": 1
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "NO",
+      "pat_made": 2,
+      "points": 5.0,
+      "week": 2
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 2,
+      "opponent": "DAL",
+      "pat_made": 4,
+      "points": 12.0,
+      "week": 3
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "TEN",
+      "pat_made": 3,
+      "points": 7.0,
+      "week": 4
+     },
+     {
+      "fg_att": 3,
+      "fg_made": 3,
+      "opponent": "ATL",
+      "pat_made": 1,
+      "points": 14.0,
+      "week": 5
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "CLE",
+      "pat_made": 1,
+      "points": 3.0,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "points_per_game": 9.17,
+    "scoring": "ppr",
+    "season": 2026,
+    "total_points": 55.0,
+    "totals": {
+     "fg_att": 13,
+     "fg_made": 10,
+     "pat_made": 16
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   }
+  },
+  "std": {
+   "00-0034857": {
+    "by_week": [
+     {
+      "attempts": 29,
+      "carries": 6,
+      "completions": 20,
+      "opponent": "HOU",
+      "passing_tds": 2,
+      "passing_yards": 334,
+      "points": 35.66,
+      "rushing_tds": 2,
+      "rushing_yards": 23,
+      "week": 1
+     },
+     {
+      "attempts": 31,
+      "carries": 14,
+      "completions": 20,
+      "opponent": "DET",
+      "passing_tds": 3,
+      "passing_yards": 248,
+      "points": 40.82,
+      "rushing_tds": 2,
+      "rushing_yards": 69,
+      "week": 2
+     },
+     {
+      "attempts": 26,
+      "carries": 8,
+      "completions": 16,
+      "opponent": "LAC",
+      "passing_interceptions": 2,
+      "passing_yards": 204,
+      "points": 16.46,
+      "receiving_yards": 1,
+      "receptions": 1,
+      "rushing_tds": 2,
+      "rushing_yards": 22,
+      "targets": 1,
+      "week": 3
+     },
+     {
+      "attempts": 33,
+      "carries": 5,
+      "completions": 23,
+      "opponent": "NE",
+      "passing_interceptions": 1,
+      "passing_tds": 1,
+      "passing_yards": 253,
+      "points": 18.52,
+      "rushing_tds": 1,
+      "rushing_yards": 4,
+      "week": 4
+     },
+     {
+      "attempts": 19,
+      "carries": 10,
+      "completions": 12,
+      "opponent": "LA",
+      "passing_interceptions": 1,
+      "passing_tds": 1,
+      "passing_yards": 210,
+      "points": 30.5,
+      "rushing_tds": 1,
+      "rushing_yards": 121,
+      "week": 5
+     },
+     {
+      "attempts": 33,
+      "carries": 5,
+      "completions": 23,
+      "opponent": "LV",
+      "passing_tds": 2,
+      "passing_yards": 255,
+      "points": 18.3,
+      "rushing_yards": 1,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "points_per_game": 26.71,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 160.26,
+    "totals": {
+     "attempts": 171,
+     "carries": 48,
+     "completions": 114,
+     "passing_interceptions": 4,
+     "passing_tds": 9,
+     "passing_yards": 1504,
+     "receiving_yards": 1,
+     "receptions": 1,
+     "rushing_tds": 8,
+     "rushing_yards": 240,
+     "targets": 1
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0035676": {
+    "by_week": [
+     {
+      "opponent": "SEA",
+      "points": 2.6,
+      "receiving_yards": 26,
+      "receptions": 3,
+      "targets": 4,
+      "week": 1
+     },
+     {
+      "opponent": "NYJ",
+      "points": 2.7,
+      "receiving_yards": 27,
+      "receptions": 3,
+      "targets": 10,
+      "week": 6
+     }
+    ],
+    "games": 2,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "points_per_game": 2.65,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 5.3,
+    "totals": {
+     "receiving_yards": 53,
+     "receptions": 6,
+     "targets": 14
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036322": {
+    "by_week": [
+     {
+      "opponent": "GB",
+      "points": 23.2,
+      "receiving_tds": 2,
+      "receiving_yards": 92,
+      "receptions": 8,
+      "targets": 9,
+      "week": 1
+     },
+     {
+      "opponent": "CHI",
+      "points": 5.5,
+      "receiving_yards": 55,
+      "receptions": 3,
+      "targets": 6,
+      "week": 2
+     },
+     {
+      "opponent": "TB",
+      "points": 3.2,
+      "receiving_yards": 32,
+      "receptions": 2,
+      "targets": 2,
+      "week": 3
+     },
+     {
+      "carries": 1,
+      "opponent": "NO",
+      "points": 12.8,
+      "receiving_tds": 1,
+      "receiving_yards": 79,
+      "receptions": 6,
+      "rushing_yards": -11,
+      "targets": 7,
+      "week": 5
+     }
+    ],
+    "games": 4,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "points_per_game": 11.18,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 44.7,
+    "totals": {
+     "carries": 1,
+     "receiving_tds": 3,
+     "receiving_yards": 258,
+     "receptions": 19,
+     "rushing_yards": -11,
+     "targets": 24
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036358": {
+    "by_week": [
+     {
+      "carries": 1,
+      "opponent": "NYG",
+      "points": 10.4,
+      "receiving_tds": 1,
+      "receiving_yards": 44,
+      "receptions": 5,
+      "targets": 8,
+      "week": 1
+     },
+     {
+      "opponent": "WAS",
+      "points": 27.3,
+      "receiving_tds": 2,
+      "receiving_yards": 153,
+      "receptions": 8,
+      "targets": 9,
+      "week": 2
+     },
+     {
+      "opponent": "BAL",
+      "points": 13.2,
+      "receiving_yards": 112,
+      "receptions": 7,
+      "targets": 8,
+      "week": 3
+     },
+     {
+      "carries": 1,
+      "opponent": "HOU",
+      "points": 24.3,
+      "receiving_tds": 1,
+      "receiving_yards": 189,
+      "receptions": 17,
+      "rushing_yards": -6,
+      "targets": 21,
+      "week": 4
+     },
+     {
+      "opponent": "TB",
+      "points": 0.9,
+      "receiving_yards": 9,
+      "receptions": 2,
+      "targets": 5,
+      "week": 5
+     },
+     {
+      "opponent": "GB",
+      "points": 7.0,
+      "receiving_yards": 70,
+      "receptions": 9,
+      "targets": 18,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "points_per_game": 13.85,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 83.1,
+    "totals": {
+     "carries": 2,
+     "receiving_tds": 4,
+     "receiving_yards": 577,
+     "receptions": 48,
+     "rushing_yards": -6,
+     "targets": 69
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0036900": {
+    "by_week": [
+     {
+      "opponent": "TB",
+      "points": 1.2,
+      "receiving_yards": 12,
+      "receptions": 2,
+      "targets": 4,
+      "week": 1
+     },
+     {
+      "opponent": "HOU",
+      "points": 19.5,
+      "receiving_tds": 2,
+      "receiving_yards": 75,
+      "receptions": 7,
+      "targets": 9,
+      "week": 2
+     },
+     {
+      "opponent": "PIT",
+      "points": 15.8,
+      "receiving_tds": 1,
+      "receiving_yards": 98,
+      "receptions": 9,
+      "targets": 12,
+      "week": 3
+     },
+     {
+      "opponent": "JAX",
+      "points": 2.7,
+      "receiving_yards": 27,
+      "receptions": 3,
+      "targets": 3,
+      "week": 4
+     },
+     {
+      "opponent": "MIA",
+      "points": 13.7,
+      "receiving_tds": 1,
+      "receiving_yards": 77,
+      "receptions": 6,
+      "targets": 10,
+      "week": 5
+     }
+    ],
+    "games": 5,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "points_per_game": 10.58,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 52.9,
+    "totals": {
+     "receiving_tds": 4,
+     "receiving_yards": 289,
+     "receptions": 27,
+     "targets": 38
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037228": {
+    "by_week": [
+     {
+      "carries": 10,
+      "opponent": "ATL",
+      "points": 5.3,
+      "receiving_yards": 27,
+      "receptions": 5,
+      "rushing_yards": 46,
+      "targets": 6,
+      "week": 1
+     },
+     {
+      "carries": 11,
+      "opponent": "NE",
+      "points": 7.7,
+      "receiving_yards": 34,
+      "receptions": 2,
+      "rushing_yards": 43,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 17,
+      "opponent": "CIN",
+      "points": 17.6,
+      "receiving_yards": 49,
+      "receptions": 3,
+      "rushing_yards": 127,
+      "targets": 4,
+      "week": 3
+     },
+     {
+      "carries": 17,
+      "opponent": "CLE",
+      "points": 12.6,
+      "receiving_yards": 33,
+      "receptions": 3,
+      "rushing_yards": 93,
+      "targets": 6,
+      "week": 4
+     },
+     {
+      "carries": 15,
+      "opponent": "IND",
+      "points": 30.8,
+      "receiving_tds": 1,
+      "receiving_yards": 87,
+      "receptions": 6,
+      "rushing_tds": 1,
+      "rushing_yards": 101,
+      "targets": 6,
+      "week": 5
+     },
+     {
+      "carries": 14,
+      "opponent": "TB",
+      "points": 7.8,
+      "receiving_yards": 28,
+      "receptions": 2,
+      "rushing_yards": 50,
+      "targets": 4,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "points_per_game": 13.63,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 81.8,
+    "totals": {
+     "carries": 84,
+     "receiving_tds": 1,
+     "receiving_yards": 258,
+     "receptions": 21,
+     "rushing_tds": 1,
+     "rushing_yards": 460,
+     "targets": 30
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037744": {
+    "by_week": [
+     {
+      "opponent": "LAC",
+      "points": 15.5,
+      "receiving_tds": 1,
+      "receiving_yards": 95,
+      "receptions": 9,
+      "targets": 13,
+      "week": 1
+     },
+     {
+      "opponent": "SEA",
+      "points": 10.1,
+      "receiving_tds": 1,
+      "receiving_yards": 41,
+      "receptions": 8,
+      "targets": 10,
+      "week": 2
+     },
+     {
+      "opponent": "SF",
+      "points": 7.5,
+      "receiving_yards": 75,
+      "receptions": 9,
+      "targets": 11,
+      "week": 3
+     },
+     {
+      "opponent": "NYG",
+      "points": 3.1,
+      "receiving_yards": 31,
+      "receptions": 7,
+      "targets": 12,
+      "week": 4
+     },
+     {
+      "opponent": "DET",
+      "points": 12.6,
+      "receiving_tds": 1,
+      "receiving_yards": 66,
+      "receptions": 9,
+      "targets": 10,
+      "week": 5
+     },
+     {
+      "opponent": "LA",
+      "points": 5.3,
+      "receiving_yards": 53,
+      "receptions": 7,
+      "targets": 9,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "points_per_game": 9.02,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 54.1,
+    "totals": {
+     "receiving_tds": 3,
+     "receiving_yards": 361,
+     "receptions": 49,
+     "targets": 65
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0037834": {
+    "by_week": [
+     {
+      "attempts": 34,
+      "carries": 5,
+      "completions": 25,
+      "opponent": "LA",
+      "passing_interceptions": 1,
+      "passing_tds": 3,
+      "passing_yards": 205,
+      "points": 21.1,
+      "rushing_yards": 29,
+      "week": 1
+     },
+     {
+      "attempts": 22,
+      "carries": 3,
+      "completions": 20,
+      "opponent": "MIA",
+      "passing_tds": 2,
+      "passing_yards": 287,
+      "points": 28.48,
+      "rushing_tds": 1,
+      "rushing_yards": 30,
+      "week": 2
+     },
+     {
+      "attempts": 27,
+      "carries": 2,
+      "completions": 15,
+      "opponent": "ARI",
+      "passing_tds": 4,
+      "passing_yards": 297,
+      "points": 31.28,
+      "rushing_yards": 34,
+      "week": 3
+     },
+     {
+      "attempts": 30,
+      "carries": 10,
+      "completions": 19,
+      "opponent": "DEN",
+      "passing_tds": 2,
+      "passing_yards": 218,
+      "points": 19.62,
+      "rushing_yards": 29,
+      "week": 4
+     },
+     {
+      "attempts": 29,
+      "carries": 5,
+      "completions": 19,
+      "opponent": "SEA",
+      "passing_interceptions": 1,
+      "passing_tds": 2,
+      "passing_yards": 189,
+      "points": 16.16,
+      "rushing_yards": 6,
+      "week": 5
+     },
+     {
+      "attempts": 29,
+      "carries": 5,
+      "completions": 21,
+      "opponent": "WAS",
+      "passing_tds": 1,
+      "passing_yards": 264,
+      "points": 17.36,
+      "rushing_yards": 28,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "points_per_game": 22.33,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 134.0,
+    "totals": {
+     "attempts": 171,
+     "carries": 30,
+     "completions": 119,
+     "passing_interceptions": 2,
+     "passing_tds": 14,
+     "passing_yards": 1460,
+     "rushing_tds": 1,
+     "rushing_yards": 156
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0038542": {
+    "by_week": [
+     {
+      "carries": 21,
+      "opponent": "PIT",
+      "points": 23.3,
+      "receiving_tds": 1,
+      "receiving_yards": 90,
+      "receptions": 8,
+      "rushing_yards": 83,
+      "targets": 10,
+      "week": 1
+     },
+     {
+      "carries": 16,
+      "opponent": "CAR",
+      "points": 8.1,
+      "receiving_yards": 9,
+      "receptions": 3,
+      "rushing_yards": 72,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 29,
+      "opponent": "GB",
+      "points": 33.3,
+      "receiving_yards": 19,
+      "receptions": 2,
+      "rushing_tds": 2,
+      "rushing_yards": 194,
+      "targets": 2,
+      "week": 3
+     },
+     {
+      "carries": 19,
+      "opponent": "NO",
+      "points": 26.7,
+      "receiving_yards": 2,
+      "receptions": 1,
+      "rushing_tds": 2,
+      "rushing_yards": 145,
+      "targets": 2,
+      "week": 4
+     },
+     {
+      "carries": 17,
+      "opponent": "BAL",
+      "points": 11.8,
+      "receiving_yards": 32,
+      "receptions": 4,
+      "rushing_yards": 86,
+      "targets": 7,
+      "week": 5
+     },
+     {
+      "carries": 9,
+      "opponent": "CHI",
+      "points": 5.3,
+      "receiving_yards": -8,
+      "receptions": 2,
+      "rushing_yards": 61,
+      "targets": 2,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "points_per_game": 18.08,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 108.5,
+    "totals": {
+     "carries": 111,
+     "receiving_tds": 1,
+     "receiving_yards": 144,
+     "receptions": 20,
+     "rushing_tds": 4,
+     "rushing_yards": 641,
+     "targets": 27
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039075": {
+    "by_week": [
+     {
+      "opponent": "SF",
+      "points": 7.4,
+      "receiving_yards": 74,
+      "receptions": 5,
+      "targets": 9,
+      "week": 1
+     },
+     {
+      "carries": 1,
+      "opponent": "PHI",
+      "points": 18.7,
+      "receiving_yards": 125,
+      "receptions": 9,
+      "rushing_tds": 1,
+      "rushing_yards": 2,
+      "targets": 12,
+      "week": 4
+     },
+     {
+      "carries": 2,
+      "opponent": "BUF",
+      "points": 20.7,
+      "receiving_tds": 1,
+      "receiving_yards": 138,
+      "receptions": 17,
+      "rushing_yards": 9,
+      "targets": 24,
+      "week": 5
+     },
+     {
+      "opponent": "ARI",
+      "points": 8.0,
+      "receiving_yards": 80,
+      "receptions": 6,
+      "targets": 7,
+      "week": 6
+     }
+    ],
+    "games": 4,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "points_per_game": 13.7,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 54.8,
+    "totals": {
+     "carries": 3,
+     "receiving_tds": 1,
+     "receiving_yards": 417,
+     "receptions": 37,
+     "rushing_tds": 1,
+     "rushing_yards": 11,
+     "targets": 52
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039139": {
+    "by_week": [
+     {
+      "carries": 29,
+      "opponent": "NO",
+      "points": 28.6,
+      "receiving_yards": 30,
+      "receptions": 5,
+      "rushing_tds": 2,
+      "rushing_yards": 156,
+      "targets": 5,
+      "week": 1
+     },
+     {
+      "carries": 16,
+      "opponent": "BUF",
+      "points": 17.3,
+      "receiving_tds": 1,
+      "receiving_yards": 61,
+      "receptions": 6,
+      "rushing_yards": 52,
+      "targets": 8,
+      "week": 2
+     },
+     {
+      "carries": 20,
+      "opponent": "NYJ",
+      "points": 34.4,
+      "receiving_tds": 1,
+      "receiving_yards": 65,
+      "receptions": 7,
+      "rushing_tds": 2,
+      "rushing_yards": 99,
+      "targets": 8,
+      "week": 3
+     },
+     {
+      "carries": 15,
+      "opponent": "CAR",
+      "points": 13.7,
+      "receiving_yards": 31,
+      "receptions": 4,
+      "rushing_tds": 1,
+      "rushing_yards": 46,
+      "targets": 7,
+      "week": 4
+     },
+     {
+      "carries": 25,
+      "opponent": "ARI",
+      "points": 32.7,
+      "receiving_yards": 56,
+      "receptions": 5,
+      "rushing_tds": 2,
+      "rushing_yards": 151,
+      "targets": 6,
+      "week": 5
+     }
+    ],
+    "games": 5,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "points_per_game": 25.34,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 126.7,
+    "totals": {
+     "carries": 105,
+     "receiving_tds": 2,
+     "receiving_yards": 243,
+     "receptions": 27,
+     "rushing_tds": 7,
+     "rushing_yards": 504,
+     "targets": 34
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0039361": {
+    "by_week": [
+     {
+      "carries": 8,
+      "opponent": "CIN",
+      "points": 13.3,
+      "receiving_yards": 48,
+      "receptions": 7,
+      "rushing_tds": 1,
+      "rushing_yards": 45,
+      "targets": 7,
+      "week": 1
+     },
+     {
+      "carries": 17,
+      "opponent": "CLE",
+      "points": 9.0,
+      "receiving_yards": 1,
+      "receptions": 4,
+      "rushing_yards": 89,
+      "targets": 4,
+      "week": 2
+     },
+     {
+      "carries": 15,
+      "opponent": "MIN",
+      "points": 5.8,
+      "receiving_yards": 12,
+      "receptions": 2,
+      "rushing_yards": 46,
+      "targets": 4,
+      "week": 3
+     },
+     {
+      "carries": 16,
+      "opponent": "GB",
+      "points": 6.1,
+      "rushing_yards": 61,
+      "week": 4
+     },
+     {
+      "carries": 21,
+      "opponent": "DAL",
+      "points": 29.5,
+      "receiving_tds": 1,
+      "receiving_yards": 10,
+      "receptions": 2,
+      "rushing_tds": 1,
+      "rushing_yards": 165,
+      "targets": 3,
+      "week": 5
+     },
+     {
+      "carries": 19,
+      "opponent": "PIT",
+      "points": 4.9,
+      "receiving_yards": 3,
+      "receptions": 2,
+      "rushing_yards": 46,
+      "targets": 3,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "points_per_game": 11.43,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 68.6,
+    "totals": {
+     "carries": 96,
+     "receiving_tds": 1,
+     "receiving_yards": 74,
+     "receptions": 17,
+     "rushing_tds": 2,
+     "rushing_yards": 452,
+     "targets": 21
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   },
+   "00-0040074": {
+    "by_week": [
+     {
+      "fg_att": 2,
+      "fg_made": 2,
+      "opponent": "IND",
+      "pat_made": 5,
+      "points": 14.0,
+      "week": 1
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "NO",
+      "pat_made": 2,
+      "points": 5.0,
+      "week": 2
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 2,
+      "opponent": "DAL",
+      "pat_made": 4,
+      "points": 12.0,
+      "week": 3
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "TEN",
+      "pat_made": 3,
+      "points": 7.0,
+      "week": 4
+     },
+     {
+      "fg_att": 3,
+      "fg_made": 3,
+      "opponent": "ATL",
+      "pat_made": 1,
+      "points": 14.0,
+      "week": 5
+     },
+     {
+      "fg_att": 2,
+      "fg_made": 1,
+      "opponent": "CLE",
+      "pat_made": 1,
+      "points": 3.0,
+      "week": 6
+     }
+    ],
+    "games": 6,
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "points_per_game": 9.17,
+    "scoring": "std",
+    "season": 2026,
+    "total_points": 55.0,
+    "totals": {
+     "fg_att": 13,
+     "fg_made": 10,
+     "pat_made": 16
+    },
+    "unscored_rules": [],
+    "weeks": [
+     1,
+     6
+    ]
+   }
+  }
+ },
+ "players": [
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0034857",
+   "name": "Josh Allen",
+   "position": "QB",
+   "team": "BUF"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0038542",
+   "name": "Bijan Robinson",
+   "position": "RB",
+   "team": "ATL"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0037228",
+   "name": "Jaylen Warren",
+   "position": "RB",
+   "team": "PIT"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0039361",
+   "name": "Bucky Irving",
+   "position": "RB",
+   "team": "TB"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0036900",
+   "name": "Ja'Marr Chase",
+   "position": "WR",
+   "team": "CIN"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0035676",
+   "name": "A.J. Brown",
+   "position": "WR",
+   "team": "NE"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0039075",
+   "name": "Puka Nacua",
+   "position": "WR",
+   "team": "LA"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0036322",
+   "name": "Justin Jefferson",
+   "position": "WR",
+   "team": "MIN"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0037744",
+   "name": "Trey McBride",
+   "position": "TE",
+   "team": "ARI"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0039139",
+   "name": "Jahmyr Gibbs",
+   "position": "RB",
+   "team": "DET"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0037834",
+   "name": "Brock Purdy",
+   "position": "QB",
+   "team": "SF"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0040074",
+   "name": "Tyler Loop",
+   "position": "K",
+   "team": "BAL"
+  },
+  {
+   "active": true,
+   "fantasy_positions": null,
+   "id": "00-0036358",
+   "name": "CeeDee Lamb",
+   "position": "WR",
+   "team": "DAL"
+  }
+ ],
+ "projection": {
+  "half": {
+   "00-0034857": {
+    "availability": {
+     "note": "BUF has no game in week 7",
+     "playable": false,
+     "status": "bye"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 18.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "projected_points": 0.0,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0035676": {
+    "availability": {
+     "observed_at": "2026-10-20T12:21:01.961449+00:00",
+     "playable": true,
+     "source": "sleeper",
+     "status": "Questionable"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 17,
+    "injury": [
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "practice": "Limited Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": "Questionable",
+      "week": 6
+     },
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.961449+00:00",
+      "practice": null,
+      "season": null,
+      "source": "sleeper",
+      "status": "Questionable",
+      "week": null
+     }
+    ],
+    "last_game": {
+     "points": 4.2,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "projected_points": 10.51,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036322": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 15.8,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "projected_points": 10.63,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036358": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 19,
+    "injury": [
+     {
+      "body_part": null,
+      "ingested_at": "2026-10-20T12:39:23.639982+00:00",
+      "practice": "Full Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": null,
+      "week": 6
+     }
+    ],
+    "last_game": {
+     "points": 11.5,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "projected_points": 14.51,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036900": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 16.7,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "projected_points": 14.71,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037228": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 8.8,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "projected_points": 15.03,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037744": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 8.8,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "projected_points": 13.36,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037834": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 15,
+    "injury": [],
+    "last_game": {
+     "points": 17.36,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "projected_points": 21.04,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0038542": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 6.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "projected_points": 18.83,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039075": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 20,
+    "injury": [],
+    "last_game": {
+     "points": 11.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "projected_points": 19.62,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039139": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 35.2,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "projected_points": 24.22,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039361": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 16,
+    "injury": [],
+    "last_game": {
+     "points": 5.9,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "projected_points": 12.31,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0040074": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 3.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "projected_points": 8.33,
+    "scoring": "half",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   }
+  },
+  "league:900": {
+   "00-0034857": {
+    "availability": {
+     "note": "BUF has no game in week 7",
+     "playable": false,
+     "status": "bye"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 18.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "projected_points": 0.0,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0035676": {
+    "availability": {
+     "observed_at": "2026-10-20T12:21:01.961449+00:00",
+     "playable": true,
+     "source": "sleeper",
+     "status": "Questionable"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 17,
+    "injury": [
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "practice": "Limited Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": "Questionable",
+      "week": 6
+     },
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.961449+00:00",
+      "practice": null,
+      "season": null,
+      "source": "sleeper",
+      "status": "Questionable",
+      "week": null
+     }
+    ],
+    "last_game": {
+     "points": 4.2,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "projected_points": 10.51,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0036322": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 15.8,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "projected_points": 10.63,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0036358": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 19,
+    "injury": [
+     {
+      "body_part": null,
+      "ingested_at": "2026-10-20T12:39:23.639982+00:00",
+      "practice": "Full Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": null,
+      "week": 6
+     }
+    ],
+    "last_game": {
+     "points": 11.5,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "projected_points": 14.51,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0036900": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 16.7,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "projected_points": 14.71,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0037228": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 8.8,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "projected_points": 15.03,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0037744": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 8.8,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "projected_points": 13.36,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0037834": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 15,
+    "injury": [],
+    "last_game": {
+     "points": 17.36,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "projected_points": 21.04,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0038542": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 6.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "projected_points": 18.83,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0039075": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 20,
+    "injury": [],
+    "last_game": {
+     "points": 11.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "projected_points": 19.62,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0039139": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 35.2,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "projected_points": 24.22,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0039361": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 16,
+    "injury": [],
+    "last_game": {
+     "points": 5.9,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "projected_points": 12.31,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   },
+   "00-0040074": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 3.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "projected_points": 8.33,
+    "scoring": "Demo League rules (half PPR)",
+    "season": 2026,
+    "unscored_rules": [
+     "rec_0_4"
+    ],
+    "week": 7
+   }
+  },
+  "ppr": {
+   "00-0034857": {
+    "availability": {
+     "note": "BUF has no game in week 7",
+     "playable": false,
+     "status": "bye"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 18.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "projected_points": 0.0,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0035676": {
+    "availability": {
+     "observed_at": "2026-10-20T12:21:01.961449+00:00",
+     "playable": true,
+     "source": "sleeper",
+     "status": "Questionable"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 17,
+    "injury": [
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "practice": "Limited Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": "Questionable",
+      "week": 6
+     },
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.961449+00:00",
+      "practice": null,
+      "season": null,
+      "source": "sleeper",
+      "status": "Questionable",
+      "week": null
+     }
+    ],
+    "last_game": {
+     "points": 5.7,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "projected_points": 12.98,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036322": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 18.8,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "projected_points": 12.99,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036358": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 19,
+    "injury": [
+     {
+      "body_part": null,
+      "ingested_at": "2026-10-20T12:39:23.639982+00:00",
+      "practice": "Full Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": null,
+      "week": 6
+     }
+    ],
+    "last_game": {
+     "points": 16.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "projected_points": 18.06,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036900": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 19.7,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "projected_points": 17.93,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037228": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 9.8,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "projected_points": 16.59,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037744": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 12.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "projected_points": 17.33,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037834": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 15,
+    "injury": [],
+    "last_game": {
+     "points": 17.36,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "projected_points": 21.04,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0038542": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 7.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "projected_points": 20.6,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039075": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 20,
+    "injury": [],
+    "last_game": {
+     "points": 14.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "projected_points": 24.0,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039139": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 37.7,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "projected_points": 26.75,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039361": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 16,
+    "injury": [],
+    "last_game": {
+     "points": 6.9,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "projected_points": 13.53,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0040074": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 3.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "projected_points": 8.33,
+    "scoring": "ppr",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   }
+  },
+  "std": {
+   "00-0034857": {
+    "availability": {
+     "note": "BUF has no game in week 7",
+     "playable": false,
+     "status": "bye"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 18.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0034857",
+     "name": "Josh Allen",
+     "position": "QB",
+     "team": "BUF"
+    },
+    "projected_points": 0.0,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0035676": {
+    "availability": {
+     "observed_at": "2026-10-20T12:21:01.961449+00:00",
+     "playable": true,
+     "source": "sleeper",
+     "status": "Questionable"
+    },
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 17,
+    "injury": [
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "practice": "Limited Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": "Questionable",
+      "week": 6
+     },
+     {
+      "body_part": "Ankle",
+      "ingested_at": "2026-10-20T12:21:01.961449+00:00",
+      "practice": null,
+      "season": null,
+      "source": "sleeper",
+      "status": "Questionable",
+      "week": null
+     }
+    ],
+    "last_game": {
+     "points": 2.7,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0035676",
+     "name": "A.J. Brown",
+     "position": "WR",
+     "team": "NE"
+    },
+    "projected_points": 8.04,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036322": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 12.8,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "team": "MIN"
+    },
+    "projected_points": 8.27,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036358": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 19,
+    "injury": [
+     {
+      "body_part": null,
+      "ingested_at": "2026-10-20T12:39:23.639982+00:00",
+      "practice": "Full Participation in Practice",
+      "season": 2026,
+      "source": "nflverse",
+      "status": null,
+      "week": 6
+     }
+    ],
+    "last_game": {
+     "points": 7.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "team": "DAL"
+    },
+    "projected_points": 10.96,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0036900": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 21,
+    "injury": [],
+    "last_game": {
+     "points": 13.7,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0036900",
+     "name": "Ja'Marr Chase",
+     "position": "WR",
+     "team": "CIN"
+    },
+    "projected_points": 11.5,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037228": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 7.8,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037228",
+     "name": "Jaylen Warren",
+     "position": "RB",
+     "team": "PIT"
+    },
+    "projected_points": 13.48,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037744": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 5.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037744",
+     "name": "Trey McBride",
+     "position": "TE",
+     "team": "ARI"
+    },
+    "projected_points": 9.38,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0037834": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 15,
+    "injury": [],
+    "last_game": {
+     "points": 17.36,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0037834",
+     "name": "Brock Purdy",
+     "position": "QB",
+     "team": "SF"
+    },
+    "projected_points": 21.04,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0038542": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 5.3,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0038542",
+     "name": "Bijan Robinson",
+     "position": "RB",
+     "team": "ATL"
+    },
+    "projected_points": 17.05,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039075": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 20,
+    "injury": [],
+    "last_game": {
+     "points": 8.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039075",
+     "name": "Puka Nacua",
+     "position": "WR",
+     "team": "LA"
+    },
+    "projected_points": 15.24,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039139": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 22,
+    "injury": [],
+    "last_game": {
+     "points": 32.7,
+     "season": 2026,
+     "week": 5
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "team": "DET"
+    },
+    "projected_points": 21.68,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0039361": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 16,
+    "injury": [],
+    "last_game": {
+     "points": 4.9,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0039361",
+     "name": "Bucky Irving",
+     "position": "RB",
+     "team": "TB"
+    },
+    "projected_points": 11.08,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   },
+   "00-0040074": {
+    "availability": null,
+    "caveats": [
+     "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
+     "no prediction interval yet (Phase 8)"
+    ],
+    "games_used": 23,
+    "injury": [],
+    "last_game": {
+     "points": 3.0,
+     "season": 2026,
+     "week": 6
+    },
+    "model_version": "baseline-ewm-v1",
+    "player": {
+     "fantasy_positions": null,
+     "id": "00-0040074",
+     "name": "Tyler Loop",
+     "position": "K",
+     "team": "BAL"
+    },
+    "projected_points": 8.33,
+    "scoring": "std",
+    "season": 2026,
+    "unscored_rules": [],
+    "week": 7
+   }
+  }
+ },
+ "recorded_at": "2026-10-21T08:41:27.363961+00:00",
+ "status": {
+  "label": "Sample data from week 7, 2026, not live",
+  "latest_week": 6,
+  "next_week": 7,
+  "season": 2026,
+  "sources": {
+   "injuries": {
+    "age_hours": 6.0,
+    "last_ok": "2026-10-21T02:41:27.363961+00:00"
+   },
+   "news": {
+    "age_hours": 1.0,
+    "last_ok": "2026-10-21T07:41:27.363961+00:00"
+   },
+   "rosters": {
+    "age_hours": 6.0,
+    "last_ok": "2026-10-21T02:41:27.363961+00:00"
+   },
+   "stats": {
+    "age_hours": 6.0,
+    "last_ok": "2026-10-21T02:41:27.363961+00:00"
+   },
+   "transactions": {
+    "age_hours": 1.0,
+    "last_ok": "2026-10-21T07:41:27.363961+00:00"
+   }
+  }
+ },
+ "trending": {
+  "add": {
+   "attribution": "Trending data from Sleeper",
+   "kind": "add",
+   "players": [
+    {
+     "count": 4293328,
+     "full_name": "Omar Cooper Jr.",
+     "player_id": "00-0041511",
+     "position": "WR",
+     "team": "NYJ",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 1166247,
+     "full_name": "Konata Mumpfield",
+     "player_id": "00-0040590",
+     "position": "WR",
+     "team": "LA",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 827648,
+     "full_name": "Kyler Murray",
+     "player_id": "00-0035228",
+     "position": "QB",
+     "team": "MIN",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 651168,
+     "full_name": "C.J. Stroud",
+     "player_id": "00-0039163",
+     "position": "QB",
+     "team": "HOU",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 622224,
+     "full_name": "Michael Mayer",
+     "player_id": "00-0039066",
+     "position": "TE",
+     "team": "LV",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 534880,
+     "full_name": "Tank Dell",
+     "player_id": "00-0038977",
+     "position": "WR",
+     "team": "HOU",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 496896,
+     "full_name": "Roschon Johnson",
+     "player_id": "00-0039021",
+     "position": "RB",
+     "team": "CHI",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 482840,
+     "full_name": "Terrance Ferguson",
+     "player_id": "00-0040737",
+     "position": "TE",
+     "team": "LA",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 464830,
+     "full_name": "Tyrone Tracy Jr.",
+     "player_id": "00-0039384",
+     "position": "RB",
+     "team": "NYG",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    },
+    {
+     "count": 464592,
+     "full_name": "Chase McLaughlin",
+     "player_id": "00-0035358",
+     "position": "K",
+     "team": "TB",
+     "window_start": "2026-10-21T00:00:00+00:00"
+    }
+   ],
+   "window_start": "2026-10-21T00:00:00+00:00"
+  }
+ },
+ "waivers": {
+  "900:ALL": {
+   "availability_as_of": {
+    "applied": 0,
+    "missing_weeks": [],
+    "note": "Sample data: availability is illustrative.",
+    "reasons": [],
+    "status": "sample"
+   },
+   "candidates": [
+    {
+     "availability": null,
+     "fantasy_positions": null,
+     "games_used": 22,
+     "id": "00-0039139",
+     "name": "Jahmyr Gibbs",
+     "position": "RB",
+     "projected_points": 24.22,
+     "team": "DET",
+     "unscored_rules": [
+      "rec_0_4"
+     ]
+    },
+    {
+     "availability": null,
+     "fantasy_positions": null,
+     "games_used": 19,
+     "id": "00-0036358",
+     "name": "CeeDee Lamb",
+     "position": "WR",
+     "projected_points": 14.51,
+     "team": "DAL",
+     "unscored_rules": [
+      "rec_0_4"
+     ]
+    },
+    {
+     "availability": null,
+     "fantasy_positions": null,
+     "games_used": 21,
+     "id": "00-0036322",
+     "name": "Justin Jefferson",
+     "position": "WR",
+     "projected_points": 10.63,
+     "team": "MIN",
+     "unscored_rules": [
+      "rec_0_4"
+     ]
+    }
+   ],
+   "label": "Sample data from week 7, 2026, not live",
+   "league_id": 900,
+   "model_version": "baseline-ewm-v1",
+   "rostered_players_excluded": 10,
+   "rosters_as_of": {
+    "synced_at": "2026-10-21T08:41:27.363961+00:00",
+    "week": 7
+   },
+   "scoring": "Demo League rules (half PPR)",
+   "week": 7
+  }
+ }
+}

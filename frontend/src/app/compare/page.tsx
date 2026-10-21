@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SHOWN_STATS, api, scoringOf } from "@/lib/api";
 
+import { StartSitTable } from "../league/lineup-view";
+
 export default async function Compare({ searchParams }: PageProps<"/compare">) {
   const sp = await searchParams;
   const ids = (typeof sp.ids === "string" ? sp.ids.split(",") : []).filter(Boolean).slice(0, 4);
@@ -19,7 +21,10 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
     );
   }
 
-  const { players } = await api.compare(ids, scoring);
+  const [{ players }, projections] = await Promise.all([
+    api.compare(ids, scoring),
+    api.startSit(ids, null, scoring),
+  ]);
   const rows: [string, (p: (typeof players)[number]) => string | number][] = [
     ["Games", (p) => p.games],
     [`Total pts (${scoring.toUpperCase()})`, (p) => p.total_points],
@@ -45,6 +50,11 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
           ))}
         </div>
       </div>
+      <section className="space-y-2">
+        <h2 className="font-semibold">Next week&apos;s projections</h2>
+        <StartSitTable result={projections} />
+      </section>
+      <h2 className="font-semibold">Season stats</h2>
       <Table aria-label="Player comparison">
         <TableHeader>
           <TableRow>

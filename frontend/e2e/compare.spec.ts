@@ -15,7 +15,7 @@ test("compare two players with real stats", async ({ page, request }) => {
 
   // The page shows exactly the numbers the API computed.
   const ids = new URL(page.url()).searchParams.get("ids");
-  const api = await (await request.get(`http://localhost:8010/api/compare?ids=${ids}&scoring=ppr`)).json();
+  const api = await (await request.get(`http://localhost:8012/api/compare?ids=${ids}&scoring=ppr`)).json();
   const totals = table.getByRole("row", { name: /Total pts \(PPR\)/ });
   for (const p of api.players) {
     await expect(totals).toContainText(String(p.total_points));
@@ -54,5 +54,5 @@ test("Try again recovers once the API is back", async ({ page, request }) => {
     await request.get("http://localhost:8011/__up");
   }
   await page.getByRole("button", { name: "Try again" }).click();
-  await expect(page.getByText(/stats through week/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: /stats through week/ })).toBeVisible();
 });

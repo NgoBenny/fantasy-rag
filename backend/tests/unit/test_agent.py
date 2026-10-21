@@ -152,7 +152,12 @@ def test_an_answer_failing_twice_is_withheld(monkeypatch: pytest.MonkeyPatch) ->
     bad = _answer("99 points", Claim(text="99", source_ids=["r1"]), cites=["r1"])
     turn, _ = _turn(monkeypatch, [bad, bad.model_copy(deep=True)])
     assert turn.rejected is not None and turn.answer.answer_type == "no_data"
-    assert "99" not in turn.answer.answer and turn.answer.limitations == turn.problems
+    # The failed checks quote the draft ("99"); they stay internal, never in the answer.
+    assert turn.problems and any("99" in p for p in turn.problems)
+    shown = turn.answer.model_dump_json()
+    assert "99" not in shown and turn.answer.limitations == [
+        "The answer could not be verified against the data."
+    ]
 
 
 def test_tool_arguments_and_echoes_are_not_evidence() -> None:
@@ -377,3 +382,14 @@ def test_sync_times_from_tools_are_not_false_failures() -> None:
     assert problems(a, router.sources([news]), "") == []
     a.limitations = ["News last synced 2026-10-21 02:00:42 UTC."]  # a wrong second still fails
     assert problems(a, router.sources([news]), "") == ["limitations: 42 not in news:15"]
+
+
+def test_start_sit_order_puts_zero_above_negative_and_missing_last() -> None:
+    from fantasy_rag.agent.tools import rank_projections
+
+    proj = [{"player": {"name": n}, "projected_points": p}
+            for n, p in [("none", None), ("neg", -1.5), ("bye", 0.0), ("top", 12.0)]]  # fmt: skip
+    got = rank_projections(proj)
+    assert [p["player"]["name"] for p in got["ranked"]] == ["top", "bye", "neg", "none"]
+    assert got["higher_projection"] == "top"
+    assert rank_projections(proj[:1])["higher_projection"] is None  # nothing projected

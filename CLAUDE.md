@@ -33,12 +33,14 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-6):
+Exists now (Phases 0-7):
 
 ```
 CLAUDE.md
 docs/PLAN.md, docs/data_sources.md (generated)
-docker-compose.yml          # db only; api + worker added in Phases 7 and 9
+docker-compose.yml          # db; api (profile api) and api-demo (profile demo); worker in Phase 9
+backend/Dockerfile, .dockerignore  # API image; never contains .env, caches or logs
+data/demo/demo.json         # DEMO_MODE sample data (synthetic league, saved validated answers)
 .env.example
 data/id_overrides.csv       # human-confirmed (provider, external_id) -> GSIS pairs
 .github/workflows/ci.yml
@@ -50,6 +52,7 @@ backend/
   alembic/versions/0004_readonly_trgm.py  # fantasy_reader role, trigram name index
   alembic/versions/0006_fantasy_positions.py  # players.fantasy_positions (Sleeper slot eligibility)
   alembic/versions/0005_defense.py      # team_week_defense, player_week_special_teams (from pbp)
+  alembic/versions/0007_phase7.py       # league_transactions, league_fetches, query_log columns, fantasy_logger
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine; read-only engine for tools (SET ROLE fantasy_reader)
@@ -78,16 +81,22 @@ backend/
   src/fantasy_rag/agent/evaluate.py     # `eval answers`: 60-question golden set + no-support cases
   src/fantasy_rag/agent/grounding.py    # optional paid audit of saved answers; never runs in chat
   src/fantasy_rag/analytics/optimizer.py  # lineup optimizer (exact assignment, locks, empty slots)
-  src/fantasy_rag/api/main.py           # FastAPI read-only HTTP layer (port 8010)
+  src/fantasy_rag/api/main.py           # FastAPI HTTP layer (port 8010); every route also serves DEMO_MODE
+  src/fantasy_rag/api/chat.py           # POST /api/chat: SSE over the Phase 6 agent, insert-only logging
+  src/fantasy_rag/api/demo.py           # DEMO_MODE store + chat replay from data/demo/demo.json
+  src/fantasy_rag/agent/budget.py       # spending guard: counted-token reservations, overrun lockout
+  src/fantasy_rag/analytics/availability.py  # roster snapshot + Sleeper transactions -> availability
+  src/fantasy_rag/ingest/transactions.py  # `league sync-transactions` (hourly)
+  src/fantasy_rag/demo_record.py        # `demo record`: builds demo.json (free; reuses saved answers)
   tests/eval/golden.yaml                # golden stats questions (20)
   tests/eval/golden_news.yaml           # 20 labelled news questions (+15 bare-name queries)
   tests/eval/golden_answers.yaml        # 15 mixed + 5 out-of-scope questions on the user's rosters
   tests/eval/golden_fresh.yaml          # held-out cases, scored apart from the frozen 60
   tests/unit/, tests/integration/, tests/fixtures/phase1/ (recorded slices; record_phase1.py)
-frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; e2e/ Playwright
+frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; pages: /, players, compare, chat, league, model; e2e/ Playwright (live, demo, paid configs)
 ```
 
-Planned (phase in brackets): `ml/` features, train, predict [8]; API chat/SSE endpoints and query_log writes [7]; `jobs/scheduler.py` [9]; chat and My League pages [7].
+Planned (phase in brackets): `ml/` features, train, predict [8]; `jobs/scheduler.py` [9].
 
 ## Conventions
 
@@ -96,7 +105,7 @@ Planned (phase in brackets): `ml/` features, train, predict [8]; API chat/SSE en
 - Timestamps are `timestamptz` in UTC. nflverse `gameday` + `gametime` are US/Eastern local strings: convert with an explicit `America/New_York` zone.
 - Migrations are hand-written Alembic files, one per phase. No FK from an owned table to an nflverse-mirroring table.
 - Tools: inputs are Pydantic models in `agent/tools.py`; tools read through `get_readonly_engine()`. Player names resolve by trigram word similarity over fantasy positions; ties prefer players with stats this season; anything still ambiguous raises `AmbiguousPlayer` with candidates (never a guess). League rules are rebuilt from raw `scoring_settings` on every call.
-- Frontend: server components fetch the API (`src/lib/api.ts`); page state lives in the URL (search, compare picks, league/roster), so pages need no client JS. `cacheComponents` is off: every page shows live data. Next.js 16 differs from older versions; read `frontend/AGENTS.md` first.
+- Frontend: server components fetch the API (`src/lib/api.ts`); page state lives in the URL (search, compare picks, league/roster), so pages need no client JS (exceptions: chat, and the start/sit picker, which builds each click on its pending selection so quick clicks never drop a pick). `cacheComponents` is off: every page shows live data. Next.js 16 differs from older versions; read `frontend/AGENTS.md` first.
 - News: only title + summary (<= 500 chars) + link are stored, capped by `sources.storage_allowed`; feeds' full article text is ignored. Player tags come from ESPN athlete IDs, team-site editorial tags, and exact full-name mentions of current fantasy players; a full name shared by several players needs the story's team to decide, else it's reported as ambiguous. Embeddings: `BAAI/bge-small-en-v1.5` via fastembed (ONNX, CPU), cached in data/cache/fastembed; tests use a fake embedder.
 - Shared dev DB: sessions in other worktrees use the same Postgres. Coordinate migration numbers before applying, and never downgrade the dev DB.
 - Scoring: `ScoringRules.from_sleeper` keeps only non-zero keys (Sleeper ships unused keys at 0). Keys without a `DERIVE` entry are reported as unsupported; team DEF and special-teams `st_ff`/`st_fum_rec` need play-by-play and are not scored yet.
@@ -104,6 +113,10 @@ Planned (phase in brackets): `ml/` features, train, predict [8]; API chat/SSE en
 - Ingestion: every write goes through `ingest.base.upsert` (re-runs over identical data change 0 rows) inside `sync_run`. Players resolve by ID only (`nflverse.resolve`); unmatched rows go to `unresolved_players`. Name-based `candidates` are hints for a human, never applied.
 - httpx clients: User-Agent `fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)`, a timeout, and a rate limit.
 - pytest markers: `live` (network; deselected by default), `llm` (calls the paid Claude API; deselected by default) and `db` (needs Postgres; uses a throwaway `<db>_migtest` database, never the dev DB).
+- Chat (`api/chat.py`): events are progress* -> exactly one of answer | withheld | error -> done. Progress text comes only from fixed templates and resolved tool output (`router.tool_progress`), never model text; the validated answer and its sources arrive together in one event; a rejected draft never leaves the server (withheld answers carry a fixed message). The agent runs in a bounded thread pool that owns its connections; a client disconnect cancels before the next model or tool call. Each request writes one `query_log` row through `get_log_engine()` (role `fantasy_logger`: INSERT on query_log only; read the id with currval, not RETURNING).
+- Spending: `AnthropicLLM(budget=Budget(cap))` counts each request (`messages.count_tokens`), reserves input + max_tokens before calling, runs with SDK retries off, and locks on an overrun. A strong guard on our spending, not a guarantee about the provider's bill. `LLM_BUDGET_USD` caps an API process; paid tests run their own capped process.
+- Waiver availability (`analytics/availability.py`) is conditional on assumptions Sleeper doesn't document (listed in the module): roster snapshot + completed transactions replayed from 15 min before the snapshot's fetch, atomic per transaction; status `current` only when every week since the snapshot was fetched successfully within 2 h, else `stale` or `uncertain` (also `uncertain` when a replayed move involves a Sleeper ID we can't map, team DEFs excepted). `raw` transaction records hold Sleeper user IDs: never export them.
+- Demo mode (`DEMO_MODE=true`): no engine, LLM client or .env is used; `FANTASY_RAG_ENV_FILE` can point settings at another (or missing) env file.
 - Agent: the router sees tool schemas only; tool results reach the writer as JSON inside `<result id=...>` tags with `<` escaped, so retrieved text can't close the wrapper. Answers are checked in plain Python (`agent/answer.py`): every number must appear in a tool result, the question or the context; every citation must be a result ID from that turn.
 - Local Postgres listens on 5433 when another Postgres holds 5432 (set `DB_PORT` and `DATABASE_URL` in `.env`).
 
@@ -139,7 +152,10 @@ uv run fantasy-rag ask "bucky irving or jaylen warren?" --league-id 1   # one ci
 uv run fantasy-rag eval answers        # golden set through router + writer (~$1-2); --only mixed,a05; report in data/logs/
 uv run fantasy-rag eval answers --rescore ../data/logs/<report>.json   # re-grade a saved run under the current rubric (no API calls)
 uv run fantasy-rag eval grounding --report ../data/logs/<report>.json --only a09,a15   # advisory paid review of saved answers; never certifies grounding
-uv run pytest -m llm                   # Phase 6 checks: golden targets + prompt-injection fixture (Claude API)
+uv run pytest -m llm                   # Phase 6 checks: golden targets + prompt-injection fixture (Claude API; set LLM_TEST_BUDGET_USD)
+uv run fantasy-rag league sync-transactions   # Sleeper adds/drops/trades -> waiver availability (hourly task runs it)
+uv run fantasy-rag demo record --report ../data/logs/<eval report>.json   # rebuild data/demo/demo.json (free)
+uv run fantasy-rag demo record --report ... --record-question "..." --budget-usd 0.10   # add one live answer (paid, capped; kept in data/demo/recorded_chats.json)
 
 uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 is taken on this PC); --reload so Playwright never reuses stale code
 
@@ -148,7 +164,13 @@ npm run dev -- --port 3010             # web app; reads API_URL (default http://
 npm run lint                           # eslint
 npm test                               # Vitest unit tests
 npm run build                          # type-check + production build (no API needed)
-npx playwright test                    # browser tests; starts API + web if not running (real dev DB)
+npx playwright test                    # live browser tests, unpaid: own API (key blanked) on 8012 + proxy + web on 3010; stop your dev server first
+npx playwright test -c playwright.demo.config.ts   # demo mode, no DB/key/.env (CI runs this)
+LIVE_LLM=1 npx playwright test -c playwright.paid.config.ts   # one real chat question, API capped at $0.10 (opt-in, paid)
+
+# repo root: Docker
+docker compose --profile api up -d db api      # API in a container on 8010 (reads .env)
+docker compose --profile demo up api-demo      # demo API: sample data, no .env, database or key
 
 # repo root: daily snapshot collection (Windows Task Scheduler, current user)
 powershell -File scripts/register_daily_ingest.ps1   # daily 6pm + Wed-Sat 2pm/9pm; starts Docker; logs in data/logs/

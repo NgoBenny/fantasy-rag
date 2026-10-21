@@ -8,6 +8,7 @@ are written, because the repo is public.
 import importlib.metadata
 import json
 import re
+from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -333,6 +334,11 @@ def check_league_shapes(api: Sleeper, username: str, season: str, week: int) -> 
         league = api.get(f"/league/{lg['league_id']}")
         rosters = api.get(f"/league/{lg['league_id']}/rosters") or []
         matchups = api.get(f"/league/{lg['league_id']}/matchups/{week}") or []
+        txs = [
+            t
+            for w in (max(1, week - 1), week)
+            for t in api.get(f"/league/{lg['league_id']}/transactions/{w}") or []
+        ]
         scoring = {k: v for k, v in (league.get("scoring_settings") or {}).items() if v}
         out.append(
             {
@@ -348,6 +354,18 @@ def check_league_shapes(api: Sleeper, username: str, season: str, week: int) -> 
                 "nonzero_scoring": dict(sorted(scoring.items())),
                 "roster_fields": sorted({k for r in rosters for k in r}),
                 "matchup_fields": sorted({k for m in matchups for k in m}),
+                # Phase 7 (waiver availability): shape only; `creator`/`consenter_ids` are
+                # Sleeper user IDs and are never recorded.
+                "transaction_fields": sorted({k for t in txs for k in t}),
+                "transaction_types": dict(Counter(str(t.get("type")) for t in txs)),
+                "transaction_statuses": dict(Counter(str(t.get("status")) for t in txs)),
+                "transactions_with_null_adds_or_drops": sum(
+                    1 for t in txs if t.get("adds") is None or t.get("drops") is None
+                ),
+                "transaction_leg_is_an_int": all(isinstance(t.get("leg"), int) for t in txs),
+                "transaction_status_updated_unit": "ms"
+                if txs and all(int(t["status_updated"]) > 10**12 for t in txs)
+                else "unknown",
                 f"matchups_week_{week}_with_points": sum(
                     1 for m in matchups if m.get("points") is not None
                 ),

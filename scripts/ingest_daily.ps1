@@ -1,6 +1,6 @@
 # Runs one scheduled job and appends the result to data/logs.
 #   -Job daily (default): structured ingest (snapshots) + league import
-#   -Job news: news feeds -> documents, chunks, embeddings
+#   -Job news: news feeds -> documents, chunks, embeddings; Sleeper transactions
 # Invoked by the scheduled tasks that scripts/register_daily_ingest.ps1 creates.
 param([ValidateSet("daily", "news")] [string]$Job = "daily")
 $ErrorActionPreference = "Continue"
@@ -45,9 +45,13 @@ if ($Job -eq "news") {
         Remove-Item -Force $tmp -ErrorAction SilentlyContinue
     }
     Remove-Item -Force $err -ErrorAction SilentlyContinue
-    "exit=$newsExit report=$reportExit" | Out-File -Append -Encoding utf8 $log
-    # Task Scheduler must see a failure from either step.
+    # Sleeper adds/drops/trades since the last roster import (waiver availability).
+    uv run fantasy-rag league sync-transactions 2>&1 | Out-File -Append -Encoding utf8 $log
+    $txExit = $LASTEXITCODE
+    "exit=$newsExit report=$reportExit transactions=$txExit" | Out-File -Append -Encoding utf8 $log
+    # Task Scheduler must see a failure from any step.
     if ($newsExit -eq 0) { $newsExit = $reportExit }
+    if ($newsExit -eq 0) { $newsExit = $txExit }
     exit $newsExit
 }
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log

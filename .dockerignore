@@ -1,0 +1,13 @@
+# Never ship secrets, personal league data or local caches into an image.
+.env
+.env.*
+!.env.example
+**/.venv
+**/__pycache__
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+data/cache
+data/logs
+frontend
+.git

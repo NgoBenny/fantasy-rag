@@ -3,15 +3,20 @@
 import json
 import re
 import unicodedata
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Connection, text
 
+from fantasy_rag.analytics.availability import Availability, Fetch, Tx, reconcile
 from fantasy_rag.analytics.scoring import ScoringRules
+from fantasy_rag.ingest.news import TEAMS
+from fantasy_rag.ingest.pbp import SLEEPER_TEAM
 
 SKILL = ("QB", "RB", "WR", "TE", "K")
+# Sleeper's team-defense player IDs (team codes): never ranked, so an unmapped one is harmless.
+SLEEPER_DEFENSES = frozenset(SLEEPER_TEAM.get(t, t) for t in TEAMS)
 _OFFENSE = {
     "pass_yd": 0.04,
     "pass_td": 4,
@@ -218,21 +223,67 @@ def trending(conn: Connection, kind: str, limit: int) -> list[dict[str, Any]]:
     return [dict(r._mapping) for r in rows]
 
 
-def rostered(conn: Connection, league_id: int) -> tuple[set[str], int | None, datetime | None]:
-    """Players on any roster in the league's latest imported week, and when that was synced."""
-    row = conn.execute(
+def rostered(
+    conn: Connection, league_id: int, now: datetime | None = None
+) -> tuple[Availability, int | None, datetime | None]:
+    """Who is rostered now: the latest roster snapshot corrected by Sleeper transactions
+    (see analytics.availability for the assumptions). Returns (availability, snapshot
+    week, snapshot sync time)."""
+    snap = conn.execute(
         text(
-            """
-            SELECT array_agg(DISTINCT pid), max(week), max(ingested_at) FROM (
-                SELECT unnest(player_ids) AS pid, week, ingested_at FROM fantasy_rosters
-                WHERE league_id = :l
-                  AND week = (SELECT max(week) FROM fantasy_rosters WHERE league_id = :l)
-            ) x
-            """
+            "SELECT roster_id, player_ids, week, ingested_at FROM fantasy_rosters"
+            " WHERE league_id = :l"
+            " AND week = (SELECT max(week) FROM fantasy_rosters WHERE league_id = :l)"
         ),
         {"l": league_id},
-    ).one()
-    return set(row[0] or []), row[1], row[2]
+    ).fetchall()
+    if not snap:
+        return Availability({}), None, None
+    week, synced = snap[0].week, max(r.ingested_at for r in snap)
+    owner = {pid: r.roster_id for r in snap for pid in r.player_ids or []}
+    fetched = {
+        (r.kind, r.week): r
+        for r in conn.execute(
+            text("SELECT kind, week, fetched_at, ok FROM league_fetches WHERE league_id = :l"),
+            {"l": league_id},
+        )
+    }
+    boundary = fetched.get(("rosters", week))
+    txs = [
+        Tx(
+            r.transaction_id,
+            r.type,
+            r.status,
+            r.week,
+            r.status_updated,
+            r.adds,
+            r.drops,
+            frozenset(r.unresolved or ()),
+        )  # fmt: skip
+        for r in conn.execute(
+            text(
+                "SELECT transaction_id, type, status, week, status_updated, adds, drops,"
+                " unresolved"
+                " FROM league_transactions WHERE league_id = :l"
+            ),
+            {"l": league_id},
+        )
+    ]
+    fetches = [Fetch(w, r.fetched_at, r.ok) for (k, w), r in fetched.items() if k == "transactions"]
+    # Sleeper's current week = the newest week the sync fetched; if syncing stops, the
+    # fetch-age limit marks the result stale.
+    current = max([week, *(f.week for f in fetches)])
+    got = reconcile(
+        owner,
+        week,
+        boundary.fetched_at if boundary and boundary.ok else None,
+        current,
+        txs,
+        fetches,
+        now or datetime.now(UTC),
+        SLEEPER_DEFENSES,
+    )
+    return got, week, synced
 
 
 def players_by_id(conn: Connection, ids: list[str]) -> dict[str, PlayerRef]:
