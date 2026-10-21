@@ -293,9 +293,11 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                         "policy": p["policy"],
                         "range_80": p["range_80"],
                         "unscored_rules": p["unscored_rules"],
+                        "usage": {k: p["usage"][k] for k in ("window", "facts")},
                     }
                     for p in waiver_proj
                 ],
+                "usage_as_of": waiver_proj[0]["usage"]["as_of"],
                 "model_version": ranked[0]["model_version"],
             }
         },  # fmt: skip

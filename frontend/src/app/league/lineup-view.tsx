@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { UsageContext } from "@/components/usage";
 import type { Lineup, LineupPlayer, StartSit } from "@/lib/api";
 import { movesSummary, rostersLabel } from "@/lib/lineup";
 
@@ -33,6 +34,7 @@ export function StartSitTable({ result }: { result: StartSit }) {
             <TableHead className="text-right">Proj (wk {result.ranked[0]?.week})</TableHead>
             <TableHead className="text-right">80% range</TableHead>
             <TableHead className="text-right">Last game</TableHead>
+            <TableHead>Usage context (last 3 games)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -47,10 +49,14 @@ export function StartSitTable({ result }: { result: StartSit }) {
                 <Range r={r.range_80} />
               </TableCell>
               <TableCell className="text-right tabular-nums">{r.last_game?.points ?? "–"}</TableCell>
+              <TableCell className="max-w-sm whitespace-normal">
+                <UsageContext usage={r.usage} />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <p className="text-xs text-muted-foreground">Ranked by projection; usage is shown as context only.</p>
     </>
   );
 }

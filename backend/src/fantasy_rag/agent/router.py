@@ -163,6 +163,7 @@ TOOL_LABELS = {
     "optimize_lineup": "your best lineup",
     "search_news": "recent news",
     "rank_waivers": "waiver options",
+    "get_usage": "usage",
 }
 
 

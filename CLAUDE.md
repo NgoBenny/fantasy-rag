@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-9, local):
+Exists now (Phases 0-10, local):
 
 ```
 CLAUDE.md
@@ -56,6 +56,7 @@ backend/
   alembic/versions/0008_forward_log.py  # forward_runs/inputs, projections (insert-only), model_artifacts
   alembic/versions/0009_calibration.py  # calibration_errors (insert-only), projections.effective_policy
   alembic/versions/0010_calibration_fingerprint.py  # calibration errors keyed by scoring-rules fingerprint
+  alembic/versions/0011_usage.py        # player_week_pbp_usage (targets/carries/red zone), pbp_games (coverage)
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine; read-only engine for tools (SET ROLE fantasy_reader)
@@ -85,11 +86,13 @@ backend/
   src/fantasy_rag/ml/forward_results.py # forward results by scoring rules; Tuesday statuses; forward-check
   src/fantasy_rag/ingest/health.py, retry.py  # source health (fresh/stale/failing); transient-error retries
   src/fantasy_rag/jobs/locks.py, backup.py    # fixed-ID advisory locks; verified backups + restore drill
+  src/fantasy_rag/analytics/usage.py    # usage context: shares, red-zone looks, completed weeks, usage facts (batched)
+  src/fantasy_rag/analytics/usage_check.py  # `usage-check`: pbp usage vs nflverse stats; snap denominators
 README.md, docs/architecture.md, docs/demo.gif  # overview, data flow, demo recording (DEMO_MODE)
 scripts/notify.ps1, scripts/make_gif.py     # Windows toast on job failure; demo GIF assembly
 scripts/setup_runner.ps1    # the separate checkout of reviewed main that scheduled tasks run from
 scripts/pause_tasks.ps1     # disable tasks for an update window, restore states (test: scripts/tests/test_pause_tasks.ps1)
-  src/fantasy_rag/agent/tools.py        # 10 typed tools + run_tool (Pydantic-validated, no SQL)
+  src/fantasy_rag/agent/tools.py        # 11 typed tools (get_usage: Phase 10) + run_tool (Pydantic-validated, no SQL)
   src/fantasy_rag/agent/router.py       # haiku picks tools (<= 4 rounds) -> sonnet writes the answer
   src/fantasy_rag/agent/llm.py, prompts.py  # LLMClient protocol + Anthropic client; static prompts
   src/fantasy_rag/agent/answer.py       # answer contract; unsupported-number / citation checks
@@ -137,6 +140,7 @@ Deferred: hosted deployment (notes in docs/PLAN.md, Phase 9).
 - Local Postgres listens on 5433 when another Postgres holds 5432 (set `DB_PORT` and `DATABASE_URL` in `.env`).
 - Everything binds to 127.0.0.1 (compose ports, `next dev/start --hostname 127.0.0.1`, uvicorn's default). Use `127.0.0.1`, not `localhost`, in `DATABASE_URL`: on this PC `localhost` tries IPv6 first and stalls. Engines use a 10 s connect timeout.
 - Jobs (Phase 9): every CLI job takes one advisory lock in `cli.main` (`jobs/locks.py`: STRUCTURED for ingest/league import/predict/calibration-seed, NEWS, TRANSACTIONS, BACKUP); nothing underneath locks. A second copy exits "already running", except `predict`, which waits up to 15 min (`locks.PREDICT_WAIT`) and then exits 1 so the toast fires. `predict` writes nothing if an on-time run for the week exists; after week 18 (no upcoming regular-season week) `predict` skips and `forward-check` passes. Source health comes from `sync_runs` (`failing` = last 2 attempts failed); `FANTASY_RAG_FAIL_SOURCE=<source>` injects an outage for drills only. Failed scheduled jobs show a Windows toast; logs are in `data/logs/`.
+- Usage (Phase 10, `analytics/usage.py`): observations of completed games, never the reason for a ranking or a projection, and never fed to the models. Shares are percentages (1 decimal) so the answer check sees them; last-3 shares are totals over team totals; changes are percentage points; red-zone looks = targets + carries inside the 20 (goal-line carries a subset); a game missing from `pbp_games` has unknown looks (None), never 0. Completed weeks come from `schedules` (every game kicked off ≥ 4 h ago, and stats exist), not `latest_week`. Usage queries are batched per source, never per player. The play-by-play counting rules mirror nflverse's (kneels count as carries, scrambles too); `usage-check` must pass before red-zone numbers change.
 - Scheduled tasks run from a separate checkout of reviewed `main` (`scripts/setup_runner.ps1`, default `%USERPROFILE%antasy-rag-runner`) with its own ignored `.env`, `.venv`, `data/cache` and `data/logs`; it shares the database container (compose `name: fantasy-rag`). Scheduled runs never pull: after a merge, run `setup_runner.ps1` between jobs; it disables the tasks for the whole update (refusing if one is running) and restores their states, so a trigger in that window is skipped. Register tasks only from the runner (`-Register`); registering from a dev tree points the tasks back at code being edited. Both checkouts share one database, so schema changes still need coordination.
 
 ## Commands
@@ -170,6 +174,7 @@ uv run fantasy-rag benchmark            # Phase 8 frozen comparison (~25 min); s
 uv run fantasy-rag benchmark --predictions ../data/logs/<file>.pkl   # re-report without retraining
 uv run fantasy-rag predict              # forward run for the next week (the Tuesday task runs it)
 uv run fantasy-rag calibration-seed     # once: frozen range calibration (refused if already recorded)
+uv run fantasy-rag usage-check          # pbp targets/carries vs nflverse stats per position+season (exit 1 below the bars); report in data/logs/
 uv run fantasy-rag forward-check        # exit 1 if this week's on-time forward run is missing near/after the deadline
 uv run fantasy-rag backup               # verified dump + roles + manifest to %USERPROFILE%antasy-rag-backups (BACKUP_DIR)
 uv run fantasy-rag backup --verify-latest   # restore newest dump into a fresh container; compare with its manifest

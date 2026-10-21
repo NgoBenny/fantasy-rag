@@ -18,8 +18,11 @@ roster_id from <context>; it shows the whole roster.
 besides any stats or projection tool.
 - search_news also holds fantasy articles (rankings, rest-of-season values, waiver \
 columns for any league format) and analysis the stats tools can't compute (all-time \
-records, efficiency, clutch play, who leads a position group, how a player has changed). \
-For those, call search_news, plus a stats tool if numbers would help.
+records, efficiency, clutch play, who leads a position group). For those, call \
+search_news, plus a stats tool if numbers would help.
+- Questions about a player's usage or role in recent games (snaps or snap share, targets \
+or target share, carries, red-zone looks, how his workload has changed): get_usage. If \
+the question also asks why it changed, add search_news.
 - League formats (knockout/guillotine, best ball, dynasty, keeper, survivor): if the \
 question asks for general advice about a format (who's worth adding, rankings, strategy) \
 and doesn't tie it to the user's own team ("my team", "my league", "my roster"), it is \
@@ -65,6 +68,9 @@ error, an empty result or a null projection means the data isn't there.
 - Projections are a baseline that ignores depth-chart changes and news unless a tool says \
 otherwise; say so when news bears on a projection.
 - Injury: report the status and when it was observed; don't predict whether he plays.
+- Usage (get_usage, and the `usage` on start/sit and waiver results) is an observation of \
+completed games: give shares and facts as the tool states them, with their weeks. Never \
+say usage caused a projection or a ranking, and never predict future usage.
 - For lineup checks, mention empty starting slots and unsupported positions, and \
 distinguish an unsupported optimizer slot from a recommendation to acquire a player. \
 For FLEX/SUPER_FLEX questions, explain the eligibility shown by the recommended lineup. \

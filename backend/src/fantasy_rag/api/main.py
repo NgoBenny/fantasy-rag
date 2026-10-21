@@ -56,10 +56,17 @@ Scoring = Literal["ppr", "half", "std"]
 
 
 def _window(
-    season: int | None, last_n: int | None, scoring: Scoring, league_id: int | None
+    season: int | None,
+    last_n: int | None,
+    scoring: Scoring,
+    league_id: int | None,
+    start_week: int | None = None,
+    end_week: int | None = None,
 ) -> tools.StatsWindow:
     try:
-        return tools.StatsWindow(season=season, last_n=last_n, scoring=scoring, league_id=league_id)
+        return tools.StatsWindow(season=season, last_n=last_n, scoring=scoring,
+                                 league_id=league_id, start_week=start_week,
+                                 end_week=end_week)  # fmt: skip
     except ValueError as e:
         raise HTTPException(422, str(e)) from e
 
@@ -144,13 +151,15 @@ def player(
     last_n: Annotated[int | None, Query(ge=1, le=18)] = None,
     scoring: Scoring = "ppr",
     league_id: int | None = None,
+    start_week: Annotated[int | None, Query(ge=1, le=18)] = None,
+    end_week: Annotated[int | None, Query(ge=1, le=18)] = None,
 ) -> dict[str, Any]:
     if DEMO:
-        return demo.stats(player_id, scoring, season, last_n, league_id)
+        return demo.stats(player_id, scoring, season, last_n or start_week or end_week, league_id)
     ref = q.players_by_id(conn, [player_id]).get(player_id)
     if ref is None:
         raise HTTPException(404, f"no player {player_id}")
-    w = _window(season, last_n, scoring, league_id)
+    w = _window(season, last_n, scoring, league_id, start_week, end_week)
     return _guard(tools._player_block, conn, ref, w)
 
 
@@ -169,14 +178,17 @@ def compare(
     last_n: Annotated[int | None, Query(ge=1, le=18)] = None,
     scoring: Scoring = "ppr",
     league_id: int | None = None,
+    start_week: Annotated[int | None, Query(ge=1, le=18)] = None,
+    end_week: Annotated[int | None, Query(ge=1, le=18)] = None,
 ) -> dict[str, Any]:
     wanted = _ids(ids)
     if DEMO:
-        return {"players": [demo.stats(i, scoring, season, last_n, league_id) for i in wanted]}
+        window = last_n or start_week or end_week
+        return {"players": [demo.stats(i, scoring, season, window, league_id) for i in wanted]}
     refs = q.players_by_id(conn, wanted)
     if missing := [i for i in wanted if i not in refs]:
         raise HTTPException(422, f"unknown player IDs: {missing}")
-    w = _window(season, last_n, scoring, league_id)
+    w = _window(season, last_n, scoring, league_id, start_week, end_week)
     return {"players": [_guard(tools._player_block, conn, refs[i], w) for i in wanted]}
 
 

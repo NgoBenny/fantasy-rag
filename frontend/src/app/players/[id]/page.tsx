@@ -3,12 +3,16 @@ import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { UsageSection } from "@/components/usage";
 import { ApiError, SHOWN_STATS, api, scoringOf } from "@/lib/api";
+import { windowQuery } from "@/lib/usage";
 
 export default async function PlayerPage({ params, searchParams }: PageProps<"/players/[id]">) {
   const { id } = await params;
-  const scoring = scoringOf((await searchParams).scoring);
-  const stats = await api.player(id, scoring).catch((e: unknown) => {
+  const sp = await searchParams;
+  const scoring = scoringOf(sp.scoring);
+  const window = windowQuery(sp); // a cited window (e.g. from a chat answer) is kept
+  const stats = await api.player(id, scoring, window).catch((e: unknown) => {
     if (e instanceof ApiError && e.status === 404) notFound();
     throw e;
   });
@@ -27,7 +31,7 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
           {(["ppr", "half", "std"] as const).map((s) => (
             <Link
               key={s}
-              href={`/players/${id}?scoring=${s}`}
+              href={`/players/${id}?scoring=${s}${window}`}
               className={s === scoring ? "font-semibold underline" : "text-muted-foreground hover:underline"}
             >
               {s.toUpperCase()}
@@ -81,6 +85,11 @@ export default async function PlayerPage({ params, searchParams }: PageProps<"/p
               Not scored (unsupported): {stats.unscored_rules.join(", ")}
             </p>
           )}
+        </CardContent>
+      </Card>
+      <Card id="usage">
+        <CardContent className="pt-6">
+          <UsageSection usage={stats.usage} />
         </CardContent>
       </Card>
     </div>

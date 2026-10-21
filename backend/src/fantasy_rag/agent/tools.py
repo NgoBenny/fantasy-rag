@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import Connection
 
 from fantasy_rag.analytics import queries as q
+from fantasy_rag.analytics import usage as u
 from fantasy_rag.analytics.optimizer import Candidate, optimize
 from fantasy_rag.analytics.scoring import score
 from fantasy_rag.index.embedder import Embedder
@@ -90,6 +91,12 @@ class CompareStartSit(ScoringChoice):
     players: list[PlayerName] = Field(min_length=2, max_length=4)
 
 
+class GetUsage(BaseModel):
+    players: list[PlayerName] = Field(min_length=1, max_length=4)
+    season: int | None = Field(default=None, ge=2022, le=2030)
+    last_n: int = Field(default=4, ge=1, le=8, description="completed games to show")
+
+
 class RankWaivers(BaseModel):
     league_id: int
     position: Position | None = None
@@ -130,6 +137,32 @@ def _window(conn: Connection, w: WeekRange) -> tuple[int, int, int]:
     return season, w.start_week or 1, w.end_week or last
 
 
+def _usage(
+    conn: Connection, refs: list[q.PlayerRef], season: int | None = None, through: int | None = None
+) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    """Usage per player through the latest completed week (or `through`, if earlier), with
+    facts from the whole season to date, and one as_of for all. Batched queries."""
+    current, _ = q.latest_week(conn)
+    season = season or current
+    done = u.completed_through(conn, season, datetime.now(UTC)) if season == current else 18
+    if through is not None:
+        done = min(through, done) if done is not None else None
+    if done is None:
+        return {r.id: {"games": [], "window": None, "facts": []} for r in refs}, u.as_of(
+            conn, season, None
+        )
+    games = u.usage_for(conn, [r.id for r in refs], season, done)
+    out = {
+        r.id: {
+            "games": games[r.id],
+            "window": u.window(games[r.id]),
+            "facts": u.facts(games[r.id], r.position),
+        }
+        for r in refs
+    }
+    return out, u.as_of(conn, season, done)
+
+
 def _player_block(conn: Connection, ref: q.PlayerRef, args: Any) -> dict[str, Any]:
     season, w0, w1 = _window(conn, args)
     rules, label = q.rules_for(conn, args.league_id, args.scoring)
@@ -159,7 +192,18 @@ def _player_block(conn: Connection, ref: q.PlayerRef, args: Any) -> dict[str, An
         "totals": totals,
         "by_week": weeks,
         "unscored_rules": unscored,
+        "usage": _shown_usage(conn, ref, season, w0, w1),
     }
+
+
+def _shown_usage(
+    conn: Connection, ref: q.PlayerRef, season: int, w0: int, w1: int
+) -> dict[str, Any]:
+    """Usage for the weeks a stats window shows (completed games only); facts and the
+    last-3 window still read the season up to the window's end."""
+    got, when = _usage(conn, [ref], season, w1)
+    mine = got[ref.id]
+    return {**mine, "games": [g for g in mine["games"] if g["week"] >= w0], "as_of": when}
 
 
 def get_player_stats(conn: Connection, a: GetPlayerStats) -> dict[str, Any]:
@@ -272,8 +316,12 @@ def compare_start_sit(conn: Connection, a: CompareStartSit) -> dict[str, Any]:
 def rank_start_sit(conn: Connection, refs: list[q.PlayerRef], a: ScoringChoice) -> dict[str, Any]:
     """Rank already-resolved players by projection (the tool and the API share this)."""
     projections = [_projection(conn, r, a) for r in refs]
+    got, when = _usage(conn, refs)
     for p in projections:
         p["injury"] = q.injury_snapshots(conn, p["player"]["id"])
+        mine = got[p["player"]["id"]]
+        # Recent usage, shown beside the projection; never the reason for the ranking.
+        p["usage"] = {"window": mine["window"], "facts": mine["facts"], "as_of": when}
     return rank_projections(projections)
 
 
@@ -316,6 +364,8 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
         if s
     ]
     picks.sort(reverse=True)
+    picks = picks[: a.limit]
+    got, when = _usage(conn, [refs[pid] for _, _, pid in picks])
     return {
         "league_id": a.league_id,
         "scoring": label,
@@ -337,9 +387,11 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
                 "policy": served[pid].policy,  # type: ignore[union-attr]
                 "range_80": None if pts == 0.0 else served[pid].range_80,  # type: ignore[union-attr]
                 "unscored_rules": rules.unscored_for(refs[pid].position or ""),
+                "usage": {"window": got[pid]["window"], "facts": got[pid]["facts"]},
             }
-            for pts, n, pid in picks[: a.limit]
+            for pts, n, pid in picks
         ],
+        "usage_as_of": when,
         "model_version": _versions(served),
     }
 
@@ -492,6 +544,39 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     }
 
 
+def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
+    refs = [q.resolve_player(conn, **p.model_dump()) for p in a.players]
+    got, when = _usage(conn, refs, a.season)
+    shown = [g["week"] for r in refs for g in got[r.id]["games"][-a.last_n :]]
+    return {
+        "players": [
+            {
+                "player": r.model_dump(),
+                "games": got[r.id]["games"][-a.last_n :],
+                "last_3": got[r.id]["window"],
+                "facts": got[r.id]["facts"],
+            }
+            for r in refs
+        ],
+        "season": when["season"],
+        "last_n": a.last_n,
+        # The weeks the shown games span, so a page can show exactly this window.
+        "weeks": [min(shown), when["through_week"]] if shown else None,
+        "as_of": when,
+        "definitions": USAGE_DEFINITIONS,
+    }
+
+
+USAGE_DEFINITIONS = (
+    "Completed regular-season games only. Shares are percentages: target (carry) share = the "
+    "player's targets (carries) / the team's that game; last_3 shares are totals over those "
+    "games / team totals, not averages. Snap share is nflverse offense_pct (last_3: snaps / "
+    "team snaps; snap_pct_approx when a team total was estimated). Red-zone looks = targets + "
+    "carries inside the opponent's 20 (goal-line carries, inside the 5, are a subset); null "
+    "means no play-by-play for that game. Facts are observations, not causes."
+)
+
+
 TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, Any]], str]] = {
     "get_player_stats": (
         GetPlayerStats,
@@ -542,6 +627,12 @@ TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, An
         RankWaivers,
         rank_waivers,
         "Best unrostered players in a league by projection.",
+    ),
+    "get_usage": (
+        GetUsage,
+        get_usage,
+        "Recent usage for 1-4 players: snap share, target and carry share, red-zone looks per"
+        " completed game, last-3 totals, and observed usage facts.",
     ),
 }
 
