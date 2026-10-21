@@ -156,3 +156,38 @@ model has no prediction.
   intervals); range coverage and width; FantasyPros row; forward results.
 - New packages: scikit-learn, lightgbm.
 - Stop after the 2025 benchmark for review, before anything is promoted.
+
+## Amendment, Oct 21, 2026 (agreed with Codex before any training)
+
+The rules above stay frozen; these replace or tighten the named sections.
+
+- **Forward log: inputs saved, not just referenced.** Each forward prediction stores the
+  feature values it used, the cutoff, and the SHA-256 of the model artifact. All inputs
+  are read inside one REPEATABLE READ transaction. The snapshot time recorded is taken
+  from the database (`clock_timestamp()`) by the transaction's first query, which is what
+  fixes the snapshot. Model files live in `data/models/` (not in git) and are backed up
+  outside the repo. A hash identifies a file but can't recover a lost one.
+- **Timeliness by freeze time.** Ingestion finish, snapshot time and prediction finish
+  are stored separately. A run is on time when its snapshot was taken before the Tuesday
+  12:00 ET deadline, whenever the prediction itself finished. A later snapshot is stored
+  as late and left out of on-time forward results; a Tuesday with no run is reported as
+  missing. A scheduled task ingests and predicts on Tuesday mornings (10:30 ET).
+- **The real information cutoff is the snapshot time.** A 10:45 snapshot is reported as
+  "data as of 10:45, deadline Tuesday noon", never as everything available by noon.
+- **Ranges: explicit order statistics.** With calibration residuals r = actual − predicted
+  sorted ascending as r(1) ≤ … ≤ r(n) (one-based, no interpolation): lower = prediction +
+  r(⌊(n+1)·0.1⌋), upper = prediction + r(⌈(n+1)·0.9⌉). With n < 50, or when either index
+  falls outside 1..n, no range is shown. 80% is nominal coverage under exchangeability;
+  rolling retraining and a changing season break that assumption, so coverage and width
+  are measured, and those numbers, not the formula, decide whether a range ships.
+  Fantasy points can be negative.
+- **Training labels pass the same rule as features:** a game's stats are a training
+  label for cutoff c only if the game kicked off at least 12 hours before c ("earlier
+  week" alone misses postponed games).
+- **Calibration per policy:** each evaluated policy (baseline; Ridge with baseline
+  fallback; LightGBM with baseline fallback) calibrates on its own residuals only.
+- **FantasyPros:** every comparator, the baseline included, is scored on the same subset
+  of FantasyPros-ranked players and pairs.
+- **Rare components:** two-point conversions and return / fumble-recovery TDs are
+  projected by the player's exponentially weighted average, not a trained model (too few
+  events per position to fit).
