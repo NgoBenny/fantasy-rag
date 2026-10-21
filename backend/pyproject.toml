@@ -10,10 +10,12 @@ dependencies = [
     "fastembed>=0.9.0",
     "feedparser>=6.0.14",
     "httpx>=0.27",
+    "lightgbm>=4.7.0",
     "nflreadpy>=0.1.5,<0.2",
     "psycopg[binary]>=3.2",
     "pydantic-settings>=2",
     "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.1",
     "scipy>=1.18.1",
     "sqlalchemy>=2.0",
     "uvicorn>=0.54.0",
@@ -63,5 +65,5 @@ markers = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["nflreadpy", "nflreadpy.*", "feedparser", "fastembed"]
+module = ["nflreadpy", "nflreadpy.*", "feedparser", "fastembed", "sklearn", "sklearn.*"]
 ignore_missing_imports = true

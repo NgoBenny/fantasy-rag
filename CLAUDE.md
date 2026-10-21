@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-7):
+Exists now (Phases 0-8):
 
 ```
 CLAUDE.md
@@ -53,6 +53,9 @@ backend/
   alembic/versions/0006_fantasy_positions.py  # players.fantasy_positions (Sleeper slot eligibility)
   alembic/versions/0005_defense.py      # team_week_defense, player_week_special_teams (from pbp)
   alembic/versions/0007_phase7.py       # league_transactions, league_fetches, query_log columns, fantasy_logger
+  alembic/versions/0008_forward_log.py  # forward_runs/inputs, projections (insert-only), model_artifacts
+  alembic/versions/0009_calibration.py  # calibration_errors (insert-only), projections.effective_policy
+  alembic/versions/0010_calibration_fingerprint.py  # calibration errors keyed by scoring-rules fingerprint
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine; read-only engine for tools (SET ROLE fantasy_reader)
@@ -74,6 +77,11 @@ backend/
   src/fantasy_rag/analytics/queries.py  # parameterized queries, name resolution, scoring presets
   src/fantasy_rag/ml/baseline.py        # EWM-of-league-points baseline (tuned half-life)
   src/fantasy_rag/ml/backtest.py, tune.py  # rolling-origin backtest, `fantasy-rag backtest`
+  src/fantasy_rag/ml/features.py        # point-in-time features at each week's Tuesday 12:00 ET cutoff
+  src/fantasy_rag/ml/train.py, ranges.py  # Ridge/LightGBM per position+component; conformal ranges
+  src/fantasy_rag/ml/benchmark.py       # `fantasy-rag benchmark`: frozen comparison (docs/phase8_plan.md)
+  src/fantasy_rag/ml/predict.py         # `fantasy-rag predict`: Tuesday forward run (insert-only log)
+  src/fantasy_rag/ml/serve.py           # the one projection source for tools/API (ACTIVE policy per position)
   src/fantasy_rag/agent/tools.py        # 10 typed tools + run_tool (Pydantic-validated, no SQL)
   src/fantasy_rag/agent/router.py       # haiku picks tools (<= 4 rounds) -> sonnet writes the answer
   src/fantasy_rag/agent/llm.py, prompts.py  # LLMClient protocol + Anthropic client; static prompts
@@ -96,7 +104,7 @@ backend/
 frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; pages: /, players, compare, chat, league, model; e2e/ Playwright (live, demo, paid configs)
 ```
 
-Planned (phase in brackets): `ml/` features, train, predict [8]; `jobs/scheduler.py` [9].
+Planned (phase in brackets): `jobs/scheduler.py` [9].
 
 ## Conventions
 
@@ -116,6 +124,7 @@ Planned (phase in brackets): `ml/` features, train, predict [8]; `jobs/scheduler
 - Chat (`api/chat.py`): events are progress* -> exactly one of answer | withheld | error -> done. Progress text comes only from fixed templates and resolved tool output (`router.tool_progress`), never model text; the validated answer and its sources arrive together in one event; a rejected draft never leaves the server (withheld answers carry a fixed message). The agent runs in a bounded thread pool that owns its connections; a client disconnect cancels before the next model or tool call. Each request writes one `query_log` row through `get_log_engine()` (role `fantasy_logger`: INSERT on query_log only; read the id with currval, not RETURNING).
 - Spending: `AnthropicLLM(budget=Budget(cap))` counts each request (`messages.count_tokens`), reserves input + max_tokens before calling, runs with SDK retries off, and locks on an overrun. A strong guard on our spending, not a guarantee about the provider's bill. `LLM_BUDGET_USD` caps an API process; paid tests run their own capped process.
 - Waiver availability (`analytics/availability.py`) is conditional on assumptions Sleeper doesn't document (listed in the module): roster snapshot + completed transactions replayed from 15 min before the snapshot's fetch, atomic per transaction; status `current` only when every week since the snapshot was fetched successfully within 2 h, else `stale` or `uncertain` (also `uncertain` when a replayed move involves a Sleeper ID we can't map, team DEFs excepted). `raw` transaction records hold Sleeper user IDs: never export them.
+- Projections (Phase 8): every caller goes through `ml/serve.project`. `serve.ACTIVE` names the policy per position (empty = baseline everywhere; changing it is a reviewed code change). A non-baseline policy is read from the week's latest forward run when that run used the same scoring rules, else the baseline is served. Each projection carries `range_80` from its own policy's recorded errors in `calibration_errors` under the same scoring-rules fingerprint (frozen seed + finalized forward weeks; never rebuilt). A challenger's points are the baseline plus the change in the components it predicts, so league rules it doesn't model count as in the baseline; a challenger row with too little history has `effective_policy = 'baseline'` and is served as the baseline. Forward-log tables are insert-only (a trigger rejects UPDATE/DELETE); `predict` reads inside one REPEATABLE READ transaction and records the snapshot's database clock time; a run is `on_time` only if that snapshot precedes the Tuesday 12:00 ET deadline. The evaluation rules in `docs/phase8_plan.md` are frozen.
 - Demo mode (`DEMO_MODE=true`): no engine, LLM client or .env is used; `FANTASY_RAG_ENV_FILE` can point settings at another (or missing) env file.
 - Agent: the router sees tool schemas only; tool results reach the writer as JSON inside `<result id=...>` tags with `<` escaped, so retrieved text can't close the wrapper. Answers are checked in plain Python (`agent/answer.py`): every number must appear in a tool result, the question or the context; every citation must be a result ID from that turn.
 - Local Postgres listens on 5433 when another Postgres holds 5432 (set `DB_PORT` and `DATABASE_URL` in `.env`).
@@ -147,6 +156,10 @@ uv run fantasy-rag league import       # your Sleeper leagues (SLEEPER_USERNAME 
 uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-week (exit 1 on any miss)
 uv run fantasy-rag tool get_player_stats '{"player":{"name":"Amon-Ra"},"last_n":3}'  # any tool by hand
 uv run fantasy-rag backtest             # tune baseline on 2024, report 2025; writes model_runs
+uv run fantasy-rag benchmark            # Phase 8 frozen comparison (~25 min); saves predictions in data/logs/
+uv run fantasy-rag benchmark --predictions ../data/logs/<file>.pkl   # re-report without retraining
+uv run fantasy-rag predict              # forward run for the next week (the Tuesday task runs it)
+uv run fantasy-rag calibration-seed     # once: frozen range calibration (refused if already recorded)
 uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode (--rerank: 1 GB model)
 uv run fantasy-rag ask "bucky irving or jaylen warren?" --league-id 1   # one cited answer (Claude API, ~1-3 cents)
 uv run fantasy-rag eval answers        # golden set through router + writer (~$1-2); --only mixed,a05; report in data/logs/
@@ -176,4 +189,5 @@ docker compose --profile demo up api-demo      # demo API: sample data, no .env,
 powershell -File scripts/register_daily_ingest.ps1   # daily 6pm + Wed-Sat 2pm/9pm; starts Docker; logs in data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
 powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news"); refreshes data/logs/news_report.json
+powershell -File scripts/ingest_daily.ps1 -Job forward  # ingest + forward run (task "fantasy-rag forward", Tuesdays 10:30 ET)
 ```

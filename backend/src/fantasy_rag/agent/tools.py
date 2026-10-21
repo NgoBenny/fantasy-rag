@@ -17,7 +17,7 @@ from fantasy_rag.analytics import queries as q
 from fantasy_rag.analytics.optimizer import Candidate, optimize
 from fantasy_rag.analytics.scoring import score
 from fantasy_rag.index.embedder import Embedder
-from fantasy_rag.ml import baseline
+from fantasy_rag.ml import baseline, serve
 from fantasy_rag.retrieval.hybrid import Reranker
 
 Scoring = Literal["ppr", "half", "std"]
@@ -230,20 +230,24 @@ def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[st
     rules, label = q.rules_for(conn, a.league_id, a.scoring)
     rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
     games = baseline.scored_history(rows, rules).get(ref.id, [])
-    got = baseline.project(games, season, last + 1)
+    key = serve.scoring_key(a.league_id, a.scoring)
+    got = serve.project(conn, [ref], rules, key, season, last + 1)[ref.id]
     avail = q.availability(conn, [ref.id], season, last + 1).get(ref.id)
-    projected = got[0] if got else None
+    projected, rng = (got.points, got.range_80) if got else (None, None)
     if avail and not avail["playable"]:
-        projected = 0.0  # bye or ruled out: he won't score
+        projected, rng = 0.0, None  # bye or ruled out: he won't score
     return {
         "player": ref.model_dump(),
         "season": season,
         "week": last + 1,
         "scoring": label,
         "projected_points": projected,
-        "games_used": got[1] if got else 0,
+        "games_used": got.games_used if got else 0,
         "availability": avail,
-        "model_version": baseline.MODEL_VERSION,
+        "model_version": got.model_version if got else baseline.MODEL_VERSION,
+        "policy": got.policy if got else None,
+        # 80% range from this policy's own past errors (nominal; coverage is measured)
+        "range_80": rng,
         # league rules we can't compute for this position: the projection excludes them
         "unscored_rules": rules.unscored_for(ref.position or ""),
         "last_game": {"season": games[-1][0], "week": games[-1][1], "points": games[-1][2]}
@@ -252,7 +256,7 @@ def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[st
         "caveats": [
             "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not "
             "discounted; depth-chart changes are not in the baseline",
-            "no prediction interval yet (Phase 8)",
+            "range_80 is nominal: about 80% of past outcomes fell inside such ranges",
         ],
     }
 
@@ -302,18 +306,16 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
     ]
     # Only players active this season are candidates; last season only informs the average.
     active = {r["player_id"] for r in rows if r["season"] == season}
-    history = baseline.scored_history(rows, rules)
-    picks = []
-    for pid in active:
-        got = baseline.project(history[pid], season, last + 1)
-        if got:
-            picks.append((got[0], got[1], pid))
-    avail = q.availability(conn, [pid for _, _, pid in picks], season, last + 1)
+    refs = q.players_by_id(conn, sorted(active))
+    key = serve.scoring_key(a.league_id, None)
+    served = serve.project(conn, list(refs.values()), rules, key, season, last + 1)
+    avail = q.availability(conn, [p for p, s in served.items() if s], season, last + 1)
     picks = [
-        (0.0 if not avail.get(p, {}).get("playable", True) else pts, n, p) for pts, n, p in picks
+        (0.0 if not avail.get(p, {}).get("playable", True) else s.points, s.games_used, p)
+        for p, s in served.items()
+        if s
     ]
     picks.sort(reverse=True)
-    refs = q.players_by_id(conn, [pid for _, _, pid in picks[: a.limit]])
     return {
         "league_id": a.league_id,
         "scoring": label,
@@ -327,12 +329,20 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
                 "projected_points": pts,
                 "games_used": n,
                 "availability": avail.get(pid),
+                "policy": served[pid].policy,  # type: ignore[union-attr]
+                "range_80": None if pts == 0.0 else served[pid].range_80,  # type: ignore[union-attr]
                 "unscored_rules": rules.unscored_for(refs[pid].position or ""),
             }
             for pts, n, pid in picks[: a.limit]
         ],
-        "model_version": baseline.MODEL_VERSION,
+        "model_version": _versions(served),
     }
+
+
+def _versions(served: dict[str, serve.Served | None]) -> str:
+    return ", ".join(sorted({s.model_version for s in served.values() if s})) or (
+        baseline.MODEL_VERSION
+    )
 
 
 # Optional cross-encoder for search_news (retrieval.rerank.LocalBGEReranker). Off until
@@ -393,13 +403,15 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     slots: list[str] = roster["roster_positions"]
     ids: list[str] = roster["player_ids"]
     rules, label = q.rules_for(conn, a.league_id, None)
-    history = baseline.scored_history(q.weekly_rows(conn, ids, [season - 1, season]), rules)
     refs = q.players_by_id(conn, ids)
-    projected = {pid: baseline.project(history.get(pid, []), season, last + 1) for pid in ids}
+    key = serve.scoring_key(a.league_id, None)
+    projected = serve.project(conn, list(refs.values()), rules, key, season, last + 1)
     avail = q.availability(conn, ids, season, last + 1)
     # Players on bye or ruled out can't score this week, so they never start.
     candidates = [
-        Candidate(pid, refs[pid].position or "", got[0], tuple(refs[pid].fantasy_positions or ()))
+        Candidate(
+            pid, refs[pid].position or "", got.points, tuple(refs[pid].fantasy_positions or ())
+        )
         for pid, got in projected.items()
         if got and pid in refs and avail.get(pid, {}).get("playable", True)
     ]
@@ -427,10 +439,13 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     def named(pid: str | None) -> dict[str, Any] | None:
         if not pid:
             return None
+        s = projected.get(pid)
         return {
             **refs[pid].model_dump(),
             "projected_points": points.get(pid, 0.0 if pid in avail else None),
             "availability": avail.get(pid),
+            "policy": s.policy if s else None,
+            "range_80": s.range_80 if s and pid in points else None,
         }
 
     current_total = round(sum(points.get(g or "", 0.0) for g in current.values()), 2)
@@ -456,7 +471,7 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         "current_total": current_total,
         "gain": round(lineup.total - current_total, 2),
         "unhandled_slots": lineup.unhandled_slots,
-        "no_projection": [refs[p].name for p, got in projected.items() if not got and p in refs],
+        "no_projection": [refs[p].name for p, got in projected.items() if not got],
         # league rules we can't compute for these positions: totals exclude them
         "unscored_rules": sorted(
             {k for r in refs.values() for k in rules.unscored_for(r.position or "")}
@@ -464,7 +479,7 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         "unavailable": [
             {"name": refs[p].name, **v} for p, v in avail.items() if not v["playable"] and p in refs
         ],
-        "model_version": baseline.MODEL_VERSION,
+        "model_version": _versions(projected),
     }
 
 

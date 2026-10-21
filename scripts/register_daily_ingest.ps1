@@ -3,7 +3,7 @@
 # evenings are when this PC is usually on).
 # StartWhenAvailable runs a missed trigger as soon as the PC is back on.
 # Remove with: Unregister-ScheduledTask -TaskName "fantasy-rag ingest" -Confirm:$false
-#   (and "fantasy-rag news" for the hourly news task)
+#   (and "fantasy-rag news" for the hourly news task, "fantasy-rag forward" for Tuesdays)
 $script = Join-Path $PSScriptRoot "ingest_daily.ps1"
 $action = New-ScheduledTaskAction -Execute "powershell.exe" `
     -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
@@ -25,3 +25,17 @@ $newsSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstan
     -ExecutionTimeLimit (New-TimeSpan -Minutes 30)
 Register-ScheduledTask -TaskName "fantasy-rag news" -Action $newsAction -Trigger $hourly `
     -Settings $newsSettings -Description "fantasy-rag: hourly news ingest" -Force
+
+# Phase 8 forward run: Tuesdays 10:30 America/New_York, converted to this PC's zone, so the
+# snapshot lands before the noon ET deadline. A run the PC misses starts when it is back
+# on and is then recorded as late (or not at all): a missed Tuesday is reported missing.
+$eastern = [System.TimeZoneInfo]::FindSystemTimeZoneById("Eastern Standard Time")
+$today = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(10).AddMinutes(30), "Unspecified")
+$local = [System.TimeZoneInfo]::ConvertTime($today, $eastern, [System.TimeZoneInfo]::Local)
+$forwardAction = New-ScheduledTaskAction -Execute "powershell.exe" `
+    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job forward"
+$tuesday = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $local.ToString("HH:mm")
+$forwardSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -WakeToRun `
+    -ExecutionTimeLimit (New-TimeSpan -Hours 1)
+Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -Trigger $tuesday `
+    -Settings $forwardSettings -Description "fantasy-rag: Phase 8 Tuesday forward predictions" -Force

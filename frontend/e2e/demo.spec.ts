@@ -173,7 +173,15 @@ test("any 2-4 demo roster players can be compared, not just recorded pairs", asy
   await expect(page.getByText("Something went wrong")).toHaveCount(0);
 });
 
-test("model performance lists the backtest", async ({ page }) => {
+test("model performance shows the frozen benchmark, ranges, FantasyPros and the serving policy", async ({ page }) => {
   await page.goto("/model");
+  await expect(page.getByLabel("Serving policy")).toContainText("TE: Baseline");
+  await expect(page.getByLabel("Serving policy")).toContainText("Ridge qualified for TE");
+  const bench = page.getByRole("table", { name: "Benchmark" });
+  await expect(bench.getByRole("row")).toHaveCount(1 + 4 * 3); // header + 4 positions x 3 policies
+  await expect(page.getByLabel("Promotion")).toContainText("TE: Ridge qualifies");
+  await expect(page.getByRole("table", { name: "Range coverage" })).toContainText("pts wide");
+  await expect(page.getByRole("table", { name: "FantasyPros" })).toContainText("FantasyPros consensus");
+  await expect(page.getByText("captured on Fridays")).toBeVisible();
   await expect(page.getByRole("table", { name: "Model runs" })).toBeVisible();
 });

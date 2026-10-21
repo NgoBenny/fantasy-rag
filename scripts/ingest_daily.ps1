@@ -1,13 +1,15 @@
 # Runs one scheduled job and appends the result to data/logs.
 #   -Job daily (default): structured ingest (snapshots) + league import
 #   -Job news: news feeds -> documents, chunks, embeddings; Sleeper transactions
+#   -Job forward: Tuesday 10:30 ET: fresh stats, then the Phase 8 forward run (predict)
 # Invoked by the scheduled tasks that scripts/register_daily_ingest.ps1 creates.
-param([ValidateSet("daily", "news")] [string]$Job = "daily")
+param([ValidateSet("daily", "news", "forward")] [string]$Job = "daily")
 $ErrorActionPreference = "Continue"
 $repo = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path $repo "data\logs"
 New-Item -ItemType Directory -Force $logDir | Out-Null
-$log = Join-Path $logDir ("{0}_{1}.log" -f $(if ($Job -eq "news") { "news" } else { "ingest" }), (Get-Date -Format "yyyy-MM"))
+$name = @{ daily = "ingest"; news = "news"; forward = "forward" }[$Job]
+$log = Join-Path $logDir ("{0}_{1}.log" -f $name, (Get-Date -Format "yyyy-MM"))
 
 "=== $(Get-Date -Format o)" | Out-File -Append -Encoding utf8 $log
 Set-Location $repo
@@ -53,6 +55,17 @@ if ($Job -eq "news") {
     if ($newsExit -eq 0) { $newsExit = $reportExit }
     if ($newsExit -eq 0) { $newsExit = $txExit }
     exit $newsExit
+}
+if ($Job -eq "forward") {
+    uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
+    $ingestExit = $LASTEXITCODE
+    # Predict even if the ingest failed: the run records the data it had and when (its
+    # snapshot time), and is marked late if that is after Tuesday noon ET.
+    uv run fantasy-rag predict 2>&1 | Out-File -Append -Encoding utf8 $log
+    $predictExit = $LASTEXITCODE
+    "exit=$ingestExit predict=$predictExit" | Out-File -Append -Encoding utf8 $log
+    if ($predictExit -ne 0) { exit $predictExit }
+    exit $ingestExit
 }
 uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
 $ingestExit = $LASTEXITCODE

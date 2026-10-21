@@ -6,6 +6,8 @@ reported per player, never estimated. Team defenses score from `ingest.pbp.team_
 stats, which already use Sleeper's key names.
 """
 
+import hashlib
+import json
 import math
 import re
 from collections.abc import Callable, Mapping
@@ -139,6 +141,8 @@ DERIVE: dict[str, Callable[[Stats, str], float]] = {
     "st_ff": _col("st_ff"),
     "st_fum_rec": _col("st_fum_rec"),
 }
+# Per-game threshold bonuses: not linear in the stats, so a point estimate can't score them.
+THRESHOLD_KEYS = frozenset(k for k in DERIVE if k.startswith("bonus_") and k[-1].isdigit())
 
 
 def _band(key: str, lo: float, hi: float | None) -> Callable[[Stats, str], float]:
@@ -195,6 +199,11 @@ class ScoringRules(BaseModel):
                 k: v for k, v in nonzero.items() if k not in DERIVE and k not in DEF_DERIVE
             },
         )
+
+    def fingerprint(self) -> str:
+        """Stable ID of the rules we score (same weights -> same ID, any league)."""
+        body = json.dumps(sorted((k, round(v, 6)) for k, v in self.weights.items()))
+        return hashlib.sha256(body.encode()).hexdigest()[:16]
 
     def unscored_for(self, position: str) -> list[str]:
         """Unsupported keys that could change this position's total."""

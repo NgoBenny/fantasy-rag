@@ -739,7 +739,7 @@
  "freshness": [
   {
    "age_hours": 0.0,
-   "last_ok": "2026-10-21T08:41:27.363961+00:00",
+   "last_ok": "2026-10-21T11:52:43.878989+00:00",
    "source": "sample data"
   }
  ],
@@ -784,8 +784,10 @@
      "fantasy_positions": null,
      "id": "00-0034857",
      "name": "Josh Allen",
+     "policy": "baseline",
      "position": "QB",
      "projected_points": 0.0,
+     "range_80": null,
      "team": "BUF"
     },
     {
@@ -798,8 +800,13 @@
      "fantasy_positions": null,
      "id": "00-0035676",
      "name": "A.J. Brown",
+     "policy": "baseline",
      "position": "WR",
      "projected_points": 10.51,
+     "range_80": [
+      4.58,
+      17.57
+     ],
      "team": "NE"
     }
    ],
@@ -820,8 +827,13 @@
       "fantasy_positions": null,
       "id": "00-0037834",
       "name": "Brock Purdy",
+      "policy": "baseline",
       "position": "QB",
       "projected_points": 21.04,
+      "range_80": [
+       11.0,
+       31.93
+      ],
       "team": "SF"
      },
      "player": {
@@ -829,8 +841,13 @@
       "fantasy_positions": null,
       "id": "00-0037834",
       "name": "Brock Purdy",
+      "policy": "baseline",
       "position": "QB",
       "projected_points": 21.04,
+      "range_80": [
+       11.0,
+       31.93
+      ],
       "team": "SF"
      },
      "slot": "QB"
@@ -841,8 +858,13 @@
       "fantasy_positions": null,
       "id": "00-0037228",
       "name": "Jaylen Warren",
+      "policy": "baseline",
       "position": "RB",
       "projected_points": 15.03,
+      "range_80": [
+       8.73,
+       22.37
+      ],
       "team": "PIT"
      },
      "player": {
@@ -850,8 +872,13 @@
       "fantasy_positions": null,
       "id": "00-0037228",
       "name": "Jaylen Warren",
+      "policy": "baseline",
       "position": "RB",
       "projected_points": 15.03,
+      "range_80": [
+       8.73,
+       22.37
+      ],
       "team": "PIT"
      },
      "slot": "RB"
@@ -862,8 +889,13 @@
       "fantasy_positions": null,
       "id": "00-0039361",
       "name": "Bucky Irving",
+      "policy": "baseline",
       "position": "RB",
       "projected_points": 12.31,
+      "range_80": [
+       6.01,
+       19.65
+      ],
       "team": "TB"
      },
      "player": {
@@ -871,8 +903,13 @@
       "fantasy_positions": null,
       "id": "00-0039361",
       "name": "Bucky Irving",
+      "policy": "baseline",
       "position": "RB",
       "projected_points": 12.31,
+      "range_80": [
+       6.01,
+       19.65
+      ],
       "team": "TB"
      },
      "slot": "RB"
@@ -883,8 +920,13 @@
       "fantasy_positions": null,
       "id": "00-0039075",
       "name": "Puka Nacua",
+      "policy": "baseline",
       "position": "WR",
       "projected_points": 19.62,
+      "range_80": [
+       13.69,
+       26.68
+      ],
       "team": "LA"
      },
      "player": {
@@ -892,8 +934,13 @@
       "fantasy_positions": null,
       "id": "00-0039075",
       "name": "Puka Nacua",
+      "policy": "baseline",
       "position": "WR",
       "projected_points": 19.62,
+      "range_80": [
+       13.69,
+       26.68
+      ],
       "team": "LA"
      },
      "slot": "WR"
@@ -904,8 +951,13 @@
       "fantasy_positions": null,
       "id": "00-0036900",
       "name": "Ja'Marr Chase",
+      "policy": "baseline",
       "position": "WR",
       "projected_points": 14.71,
+      "range_80": [
+       8.78,
+       21.77
+      ],
       "team": "CIN"
      },
      "player": {
@@ -913,8 +965,13 @@
       "fantasy_positions": null,
       "id": "00-0036900",
       "name": "Ja'Marr Chase",
+      "policy": "baseline",
       "position": "WR",
       "projected_points": 14.71,
+      "range_80": [
+       8.78,
+       21.77
+      ],
       "team": "CIN"
      },
      "slot": "WR"
@@ -925,8 +982,13 @@
       "fantasy_positions": null,
       "id": "00-0037744",
       "name": "Trey McBride",
+      "policy": "baseline",
       "position": "TE",
       "projected_points": 13.36,
+      "range_80": [
+       8.78,
+       19.21
+      ],
       "team": "ARI"
      },
      "player": {
@@ -934,8 +996,13 @@
       "fantasy_positions": null,
       "id": "00-0037744",
       "name": "Trey McBride",
+      "policy": "baseline",
       "position": "TE",
       "projected_points": 13.36,
+      "range_80": [
+       8.78,
+       19.21
+      ],
       "team": "ARI"
      },
      "slot": "TE"
@@ -946,8 +1013,13 @@
       "fantasy_positions": null,
       "id": "00-0038542",
       "name": "Bijan Robinson",
+      "policy": "baseline",
       "position": "RB",
       "projected_points": 18.83,
+      "range_80": [
+       12.53,
+       26.17
+      ],
       "team": "ATL"
      },
      "player": {
@@ -955,8 +1027,13 @@
       "fantasy_positions": null,
       "id": "00-0038542",
       "name": "Bijan Robinson",
+      "policy": "baseline",
       "position": "RB",
       "projected_points": 18.83,
+      "range_80": [
+       12.53,
+       26.17
+      ],
       "team": "ATL"
      },
      "slot": "FLEX"
@@ -967,8 +1044,10 @@
       "fantasy_positions": null,
       "id": "00-0040074",
       "name": "Tyler Loop",
+      "policy": "baseline",
       "position": "K",
       "projected_points": 8.33,
+      "range_80": null,
       "team": "BAL"
      },
      "player": {
@@ -976,8 +1055,10 @@
       "fantasy_positions": null,
       "id": "00-0040074",
       "name": "Tyler Loop",
+      "policy": "baseline",
       "position": "K",
       "projected_points": 8.33,
+      "range_80": null,
       "team": "BAL"
      },
      "slot": "K"
@@ -986,7 +1067,7 @@
    "recommended_total": 123.23,
    "roster_id": 1,
    "rosters_as_of": {
-    "synced_at": "2026-10-21T08:41:27.363961+00:00",
+    "synced_at": "2026-10-21T11:52:43.878989+00:00",
     "week": 7
    },
    "scoring": "Demo League rules (half PPR)",
@@ -1006,6 +1087,1359 @@
   }
  },
  "model_runs": [
+  {
+   "created_at": "2026-10-21T11:51:58.445785+00:00",
+   "features": [
+    "per-component ewm/last3/season means",
+    "snap share",
+    "target/carry share",
+    "opponent PPR allowed",
+    "home",
+    "baseline_ppr"
+   ],
+   "metrics": {
+    "fantasypros": {
+     "baseline": {
+      "spearman": 0.5777,
+      "spearman_groups": 64,
+      "start_sit": 0.6525,
+      "start_sit_pairs": 54494
+     },
+     "fantasypros": {
+      "spearman": 0.6433,
+      "spearman_groups": 64,
+      "start_sit": 0.6804,
+      "start_sit_pairs": 54494
+     },
+     "lgbm": {
+      "spearman": 0.5783,
+      "spearman_groups": 64,
+      "start_sit": 0.6462,
+      "start_sit_pairs": 54494
+     },
+     "of": 5884,
+     "ridge": {
+      "spearman": 0.5861,
+      "spearman_groups": 64,
+      "start_sit": 0.6522,
+      "start_sit_pairs": 54494
+     },
+     "rows": 5051
+    },
+    "half": {
+     "baseline": {
+      "all": {
+       "mae": 4.0709,
+       "n": 5884,
+       "spearman": 0.5837,
+       "spearman_groups": 72,
+       "start_sit": 0.6429,
+       "start_sit_pairs": 61805
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.7015,
+        "n": 646,
+        "spearman": 0.4125,
+        "spearman_groups": 18,
+        "start_sit": 0.5874,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.1848,
+        "n": 1539,
+        "spearman": 0.7134,
+        "spearman_groups": 18,
+        "start_sit": 0.6842,
+        "start_sit_pairs": 20234
+       },
+       "TE": {
+        "mae": 3.1061,
+        "n": 1256,
+        "spearman": 0.5886,
+        "spearman_groups": 18,
+        "start_sit": 0.5921,
+        "start_sit_pairs": 4931
+       },
+       "WR": {
+        "mae": 3.7997,
+        "n": 2443,
+        "spearman": 0.6204,
+        "spearman_groups": 18,
+        "start_sit": 0.6331,
+        "start_sit_pairs": 31673
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7833,
+        "n": 646,
+        "no_range": 0,
+        "width": 21.0603
+       },
+       "RB": {
+        "coverage": 0.7914,
+        "n": 1539,
+        "no_range": 0,
+        "width": 13.5433
+       },
+       "TE": {
+        "coverage": 0.7803,
+        "n": 1256,
+        "no_range": 0,
+        "width": 10.1065
+       },
+       "WR": {
+        "coverage": 0.8129,
+        "n": 2443,
+        "no_range": 0,
+        "width": 13.1905
+       }
+      }
+     },
+     "lgbm": {
+      "all": {
+       "mae": 4.0631,
+       "n": 5884,
+       "spearman": 0.5895,
+       "spearman_groups": 72,
+       "start_sit": 0.6386,
+       "start_sit_pairs": 61805
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.6702,
+        "n": 646,
+        "spearman": 0.4154,
+        "spearman_groups": 18,
+        "start_sit": 0.5805,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.2463,
+        "n": 1539,
+        "spearman": 0.7151,
+        "spearman_groups": 18,
+        "start_sit": 0.6734,
+        "start_sit_pairs": 20234
+       },
+       "TE": {
+        "mae": 3.0943,
+        "n": 1256,
+        "spearman": 0.5979,
+        "spearman_groups": 18,
+        "start_sit": 0.5921,
+        "start_sit_pairs": 4931
+       },
+       "WR": {
+        "mae": 3.7563,
+        "n": 2443,
+        "spearman": 0.6296,
+        "spearman_groups": 18,
+        "start_sit": 0.6327,
+        "start_sit_pairs": 31673
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7709,
+        "n": 646,
+        "no_range": 0,
+        "width": 20.5188
+       },
+       "RB": {
+        "coverage": 0.7973,
+        "n": 1539,
+        "no_range": 0,
+        "width": 13.4944
+       },
+       "TE": {
+        "coverage": 0.7922,
+        "n": 1256,
+        "no_range": 0,
+        "width": 9.891
+       },
+       "WR": {
+        "coverage": 0.8105,
+        "n": 2443,
+        "no_range": 0,
+        "width": 12.782
+       }
+      },
+      "vs_baseline_ci": {
+       "QB": {
+        "mae": [
+         -0.1666,
+         0.1215
+        ],
+        "spearman": [
+         -0.028,
+         0.037
+        ],
+        "start_sit": [
+         -0.0259,
+         0.0137
+        ]
+       },
+       "RB": {
+        "mae": [
+         -0.0352,
+         0.1489
+        ],
+        "spearman": [
+         -0.0093,
+         0.013
+        ],
+        "start_sit": [
+         -0.0219,
+         0.0011
+        ]
+       },
+       "TE": {
+        "mae": [
+         -0.0731,
+         0.0559
+        ],
+        "spearman": [
+         0.0,
+         0.0184
+        ],
+        "start_sit": [
+         -0.0271,
+         0.0273
+        ]
+       },
+       "WR": {
+        "mae": [
+         -0.1223,
+         0.0138
+        ],
+        "spearman": [
+         0.0029,
+         0.0155
+        ],
+        "start_sit": [
+         -0.0108,
+         0.009
+        ]
+       }
+      }
+     }
+    },
+    "ppr": {
+     "baseline": {
+      "all": {
+       "mae": 4.4653,
+       "n": 5884,
+       "spearman": 0.594,
+       "spearman_groups": 72,
+       "start_sit": 0.6488,
+       "start_sit_pairs": 61802
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.7059,
+        "n": 646,
+        "spearman": 0.4127,
+        "spearman_groups": 18,
+        "start_sit": 0.5878,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.421,
+        "n": 1539,
+        "spearman": 0.7181,
+        "spearman_groups": 18,
+        "start_sit": 0.6869,
+        "start_sit_pairs": 20230
+       },
+       "TE": {
+        "mae": 3.6107,
+        "n": 1256,
+        "spearman": 0.6051,
+        "spearman_groups": 18,
+        "start_sit": 0.5935,
+        "start_sit_pairs": 4937
+       },
+       "WR": {
+        "mae": 4.3402,
+        "n": 2443,
+        "spearman": 0.64,
+        "spearman_groups": 18,
+        "start_sit": 0.6426,
+        "start_sit_pairs": 31668
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7833,
+        "n": 646,
+        "no_range": 0,
+        "width": 21.0598
+       },
+       "RB": {
+        "coverage": 0.7849,
+        "n": 1539,
+        "no_range": 0,
+        "width": 14.1088
+       },
+       "TE": {
+        "coverage": 0.7866,
+        "n": 1256,
+        "no_range": 0,
+        "width": 11.8944
+       },
+       "WR": {
+        "coverage": 0.8125,
+        "n": 2443,
+        "no_range": 0,
+        "width": 14.8964
+       }
+      }
+     },
+     "lgbm": {
+      "all": {
+       "mae": 4.4595,
+       "n": 5884,
+       "spearman": 0.5984,
+       "spearman_groups": 72,
+       "start_sit": 0.6445,
+       "start_sit_pairs": 61802
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.6749,
+        "n": 646,
+        "spearman": 0.4153,
+        "spearman_groups": 18,
+        "start_sit": 0.5805,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.4946,
+        "n": 1539,
+        "spearman": 0.7203,
+        "spearman_groups": 18,
+        "start_sit": 0.6788,
+        "start_sit_pairs": 20230
+       },
+       "TE": {
+        "mae": 3.5984,
+        "n": 1256,
+        "spearman": 0.6117,
+        "spearman_groups": 18,
+        "start_sit": 0.599,
+        "start_sit_pairs": 4937
+       },
+       "WR": {
+        "mae": 4.2944,
+        "n": 2443,
+        "spearman": 0.6464,
+        "spearman_groups": 18,
+        "start_sit": 0.6398,
+        "start_sit_pairs": 31668
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7709,
+        "n": 646,
+        "no_range": 0,
+        "width": 20.5466
+       },
+       "RB": {
+        "coverage": 0.7979,
+        "n": 1539,
+        "no_range": 0,
+        "width": 14.1187
+       },
+       "TE": {
+        "coverage": 0.7962,
+        "n": 1256,
+        "no_range": 0,
+        "width": 11.5862
+       },
+       "WR": {
+        "coverage": 0.8109,
+        "n": 2443,
+        "no_range": 0,
+        "width": 14.5166
+       }
+      },
+      "vs_baseline_ci": {
+       "QB": {
+        "mae": [
+         -0.1663,
+         0.122
+        ],
+        "spearman": [
+         -0.0279,
+         0.0362
+        ],
+        "start_sit": [
+         -0.0269,
+         0.0137
+        ]
+       },
+       "RB": {
+        "mae": [
+         -0.0338,
+         0.1691
+        ],
+        "spearman": [
+         -0.0084,
+         0.0131
+        ],
+        "start_sit": [
+         -0.0185,
+         0.0032
+        ]
+       },
+       "TE": {
+        "mae": [
+         -0.0781,
+         0.0603
+        ],
+        "spearman": [
+         -0.002,
+         0.0161
+        ],
+        "start_sit": [
+         -0.0199,
+         0.0339
+        ]
+       },
+       "WR": {
+        "mae": [
+         -0.1309,
+         0.0181
+        ],
+        "spearman": [
+         0.0009,
+         0.0118
+        ],
+        "start_sit": [
+         -0.0127,
+         0.0052
+        ]
+       }
+      }
+     }
+    },
+    "promotion": {
+     "QB": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [],
+      "winner": null
+     },
+     "RB": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [],
+      "winner": null
+     },
+     "TE": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [
+       "ridge"
+      ],
+      "winner": "ridge"
+     },
+     "WR": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [],
+      "winner": null
+     }
+    },
+    "std": {
+     "baseline": {
+      "all": {
+       "mae": 3.7223,
+       "n": 5884,
+       "spearman": 0.5635,
+       "spearman_groups": 72,
+       "start_sit": 0.6342,
+       "start_sit_pairs": 61707
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.697,
+        "n": 646,
+        "spearman": 0.4129,
+        "spearman_groups": 18,
+        "start_sit": 0.5874,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.0018,
+        "n": 1539,
+        "spearman": 0.7002,
+        "spearman_groups": 18,
+        "start_sit": 0.6772,
+        "start_sit_pairs": 20206
+       },
+       "TE": {
+        "mae": 2.6535,
+        "n": 1256,
+        "spearman": 0.5519,
+        "spearman_groups": 18,
+        "start_sit": 0.5815,
+        "start_sit_pairs": 4922
+       },
+       "WR": {
+        "mae": 3.3092,
+        "n": 2443,
+        "spearman": 0.5889,
+        "spearman_groups": 18,
+        "start_sit": 0.6223,
+        "start_sit_pairs": 31612
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7833,
+        "n": 646,
+        "no_range": 0,
+        "width": 21.0565
+       },
+       "RB": {
+        "coverage": 0.7921,
+        "n": 1539,
+        "no_range": 0,
+        "width": 12.935
+       },
+       "TE": {
+        "coverage": 0.7779,
+        "n": 1256,
+        "no_range": 0,
+        "width": 8.6947
+       },
+       "WR": {
+        "coverage": 0.8178,
+        "n": 2443,
+        "no_range": 0,
+        "width": 11.5643
+       }
+      }
+     },
+     "lgbm": {
+      "all": {
+       "mae": 3.7114,
+       "n": 5884,
+       "spearman": 0.5705,
+       "spearman_groups": 72,
+       "start_sit": 0.6298,
+       "start_sit_pairs": 61707
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.6657,
+        "n": 646,
+        "spearman": 0.4163,
+        "spearman_groups": 18,
+        "start_sit": 0.581,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.0498,
+        "n": 1539,
+        "spearman": 0.699,
+        "spearman_groups": 18,
+        "start_sit": 0.6654,
+        "start_sit_pairs": 20206
+       },
+       "TE": {
+        "mae": 2.6346,
+        "n": 1256,
+        "spearman": 0.5648,
+        "spearman_groups": 18,
+        "start_sit": 0.5787,
+        "start_sit_pairs": 4922
+       },
+       "WR": {
+        "mae": 3.2708,
+        "n": 2443,
+        "spearman": 0.6018,
+        "spearman_groups": 18,
+        "start_sit": 0.6227,
+        "start_sit_pairs": 31612
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7724,
+        "n": 646,
+        "no_range": 0,
+        "width": 20.5162
+       },
+       "RB": {
+        "coverage": 0.7914,
+        "n": 1539,
+        "no_range": 0,
+        "width": 12.8854
+       },
+       "TE": {
+        "coverage": 0.7795,
+        "n": 1256,
+        "no_range": 0,
+        "width": 8.5978
+       },
+       "WR": {
+        "coverage": 0.8117,
+        "n": 2443,
+        "no_range": 0,
+        "width": 11.3502
+       }
+      },
+      "vs_baseline_ci": {
+       "QB": {
+        "mae": [
+         -0.1666,
+         0.1213
+        ],
+        "spearman": [
+         -0.0269,
+         0.0372
+        ],
+        "start_sit": [
+         -0.0258,
+         0.0145
+        ]
+       },
+       "RB": {
+        "mae": [
+         -0.0407,
+         0.1251
+        ],
+        "spearman": [
+         -0.0138,
+         0.0114
+        ],
+        "start_sit": [
+         -0.0239,
+         0.0014
+        ]
+       },
+       "TE": {
+        "mae": [
+         -0.0765,
+         0.0399
+        ],
+        "spearman": [
+         0.0018,
+         0.0254
+        ],
+        "start_sit": [
+         -0.031,
+         0.0234
+        ]
+       },
+       "WR": {
+        "mae": [
+         -0.1123,
+         0.0147
+        ],
+        "spearman": [
+         0.0037,
+         0.0227
+        ],
+        "start_sit": [
+         -0.0108,
+         0.0107
+        ]
+       }
+      }
+     }
+    }
+   },
+   "model_version": "lgbm-components-v1",
+   "training_window": {
+    "benchmark": 2025,
+    "calibrate": 2024,
+    "cutoff": "Tuesday 12:00 ET",
+    "params": {
+     "learning_rate": 0.05,
+     "min_child_samples": 100,
+     "n_estimators": 300,
+     "num_leaves": 7
+    },
+    "tune": 2023
+   }
+  },
+  {
+   "created_at": "2026-10-21T11:51:58.445785+00:00",
+   "features": [
+    "per-component ewm/last3/season means",
+    "snap share",
+    "target/carry share",
+    "opponent PPR allowed",
+    "home",
+    "baseline_ppr"
+   ],
+   "metrics": {
+    "fantasypros": {
+     "baseline": {
+      "spearman": 0.5777,
+      "spearman_groups": 64,
+      "start_sit": 0.6525,
+      "start_sit_pairs": 54494
+     },
+     "fantasypros": {
+      "spearman": 0.6433,
+      "spearman_groups": 64,
+      "start_sit": 0.6804,
+      "start_sit_pairs": 54494
+     },
+     "lgbm": {
+      "spearman": 0.5783,
+      "spearman_groups": 64,
+      "start_sit": 0.6462,
+      "start_sit_pairs": 54494
+     },
+     "of": 5884,
+     "ridge": {
+      "spearman": 0.5861,
+      "spearman_groups": 64,
+      "start_sit": 0.6522,
+      "start_sit_pairs": 54494
+     },
+     "rows": 5051
+    },
+    "half": {
+     "baseline": {
+      "all": {
+       "mae": 4.0709,
+       "n": 5884,
+       "spearman": 0.5837,
+       "spearman_groups": 72,
+       "start_sit": 0.6429,
+       "start_sit_pairs": 61805
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.7015,
+        "n": 646,
+        "spearman": 0.4125,
+        "spearman_groups": 18,
+        "start_sit": 0.5874,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.1848,
+        "n": 1539,
+        "spearman": 0.7134,
+        "spearman_groups": 18,
+        "start_sit": 0.6842,
+        "start_sit_pairs": 20234
+       },
+       "TE": {
+        "mae": 3.1061,
+        "n": 1256,
+        "spearman": 0.5886,
+        "spearman_groups": 18,
+        "start_sit": 0.5921,
+        "start_sit_pairs": 4931
+       },
+       "WR": {
+        "mae": 3.7997,
+        "n": 2443,
+        "spearman": 0.6204,
+        "spearman_groups": 18,
+        "start_sit": 0.6331,
+        "start_sit_pairs": 31673
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7833,
+        "n": 646,
+        "no_range": 0,
+        "width": 21.0603
+       },
+       "RB": {
+        "coverage": 0.7914,
+        "n": 1539,
+        "no_range": 0,
+        "width": 13.5433
+       },
+       "TE": {
+        "coverage": 0.7803,
+        "n": 1256,
+        "no_range": 0,
+        "width": 10.1065
+       },
+       "WR": {
+        "coverage": 0.8129,
+        "n": 2443,
+        "no_range": 0,
+        "width": 13.1905
+       }
+      }
+     },
+     "ridge": {
+      "all": {
+       "mae": 4.0253,
+       "n": 5884,
+       "spearman": 0.5958,
+       "spearman_groups": 72,
+       "start_sit": 0.6462,
+       "start_sit_pairs": 61805
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.6573,
+        "n": 646,
+        "spearman": 0.4156,
+        "spearman_groups": 18,
+        "start_sit": 0.5857,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.1692,
+        "n": 1539,
+        "spearman": 0.7236,
+        "spearman_groups": 18,
+        "start_sit": 0.685,
+        "start_sit_pairs": 20234
+       },
+       "TE": {
+        "mae": 3.0303,
+        "n": 1256,
+        "spearman": 0.6109,
+        "spearman_groups": 18,
+        "start_sit": 0.6045,
+        "start_sit_pairs": 4931
+       },
+       "WR": {
+        "mae": 3.7503,
+        "n": 2443,
+        "spearman": 0.6332,
+        "spearman_groups": 18,
+        "start_sit": 0.6374,
+        "start_sit_pairs": 31673
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7802,
+        "n": 646,
+        "no_range": 0,
+        "width": 20.6003
+       },
+       "RB": {
+        "coverage": 0.8012,
+        "n": 1539,
+        "no_range": 0,
+        "width": 13.4997
+       },
+       "TE": {
+        "coverage": 0.7866,
+        "n": 1256,
+        "no_range": 0,
+        "width": 9.8644
+       },
+       "WR": {
+        "coverage": 0.8056,
+        "n": 2443,
+        "no_range": 0,
+        "width": 12.8027
+       }
+      },
+      "vs_baseline_ci": {
+       "QB": {
+        "mae": [
+         -0.1939,
+         0.0985
+        ],
+        "spearman": [
+         -0.0189,
+         0.0277
+        ],
+        "start_sit": [
+         -0.0184,
+         0.0145
+        ]
+       },
+       "RB": {
+        "mae": [
+         -0.0872,
+         0.0515
+        ],
+        "spearman": [
+         0.0014,
+         0.0193
+        ],
+        "start_sit": [
+         -0.0079,
+         0.01
+        ]
+       },
+       "TE": {
+        "mae": [
+         -0.1388,
+         -0.0161
+        ],
+        "spearman": [
+         0.0077,
+         0.0368
+        ],
+        "start_sit": [
+         -0.0099,
+         0.0373
+        ]
+       },
+       "WR": {
+        "mae": [
+         -0.1075,
+         0.0022
+        ],
+        "spearman": [
+         0.0052,
+         0.0213
+        ],
+        "start_sit": [
+         -0.0055,
+         0.0138
+        ]
+       }
+      }
+     }
+    },
+    "ppr": {
+     "baseline": {
+      "all": {
+       "mae": 4.4653,
+       "n": 5884,
+       "spearman": 0.594,
+       "spearman_groups": 72,
+       "start_sit": 0.6488,
+       "start_sit_pairs": 61802
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.7059,
+        "n": 646,
+        "spearman": 0.4127,
+        "spearman_groups": 18,
+        "start_sit": 0.5878,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.421,
+        "n": 1539,
+        "spearman": 0.7181,
+        "spearman_groups": 18,
+        "start_sit": 0.6869,
+        "start_sit_pairs": 20230
+       },
+       "TE": {
+        "mae": 3.6107,
+        "n": 1256,
+        "spearman": 0.6051,
+        "spearman_groups": 18,
+        "start_sit": 0.5935,
+        "start_sit_pairs": 4937
+       },
+       "WR": {
+        "mae": 4.3402,
+        "n": 2443,
+        "spearman": 0.64,
+        "spearman_groups": 18,
+        "start_sit": 0.6426,
+        "start_sit_pairs": 31668
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7833,
+        "n": 646,
+        "no_range": 0,
+        "width": 21.0598
+       },
+       "RB": {
+        "coverage": 0.7849,
+        "n": 1539,
+        "no_range": 0,
+        "width": 14.1088
+       },
+       "TE": {
+        "coverage": 0.7866,
+        "n": 1256,
+        "no_range": 0,
+        "width": 11.8944
+       },
+       "WR": {
+        "coverage": 0.8125,
+        "n": 2443,
+        "no_range": 0,
+        "width": 14.8964
+       }
+      }
+     },
+     "ridge": {
+      "all": {
+       "mae": 4.419,
+       "n": 5884,
+       "spearman": 0.604,
+       "spearman_groups": 72,
+       "start_sit": 0.6506,
+       "start_sit_pairs": 61802
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.6611,
+        "n": 646,
+        "spearman": 0.4154,
+        "spearman_groups": 18,
+        "start_sit": 0.5855,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.4157,
+        "n": 1539,
+        "spearman": 0.7277,
+        "spearman_groups": 18,
+        "start_sit": 0.688,
+        "start_sit_pairs": 20230
+       },
+       "TE": {
+        "mae": 3.5247,
+        "n": 1256,
+        "spearman": 0.6232,
+        "spearman_groups": 18,
+        "start_sit": 0.6063,
+        "start_sit_pairs": 4937
+       },
+       "WR": {
+        "mae": 4.288,
+        "n": 2443,
+        "spearman": 0.6496,
+        "spearman_groups": 18,
+        "start_sit": 0.6438,
+        "start_sit_pairs": 31668
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7802,
+        "n": 646,
+        "no_range": 0,
+        "width": 20.6094
+       },
+       "RB": {
+        "coverage": 0.7947,
+        "n": 1539,
+        "no_range": 0,
+        "width": 14.1173
+       },
+       "TE": {
+        "coverage": 0.7874,
+        "n": 1256,
+        "no_range": 0,
+        "width": 11.5446
+       },
+       "WR": {
+        "coverage": 0.8097,
+        "n": 2443,
+        "no_range": 0,
+        "width": 14.6782
+       }
+      },
+      "vs_baseline_ci": {
+       "QB": {
+        "mae": [
+         -0.1939,
+         0.0979
+        ],
+        "spearman": [
+         -0.0192,
+         0.0269
+        ],
+        "start_sit": [
+         -0.0195,
+         0.0142
+        ]
+       },
+       "RB": {
+        "mae": [
+         -0.0873,
+         0.0718
+        ],
+        "spearman": [
+         0.0003,
+         0.0186
+        ],
+        "start_sit": [
+         -0.0087,
+         0.0123
+        ]
+       },
+       "TE": {
+        "mae": [
+         -0.1584,
+         -0.0157
+        ],
+        "spearman": [
+         0.0052,
+         0.0309
+        ],
+        "start_sit": [
+         -0.0101,
+         0.0386
+        ]
+       },
+       "WR": {
+        "mae": [
+         -0.1173,
+         0.0022
+        ],
+        "spearman": [
+         0.0028,
+         0.0169
+        ],
+        "start_sit": [
+         -0.0082,
+         0.0106
+        ]
+       }
+      }
+     }
+    },
+    "promotion": {
+     "QB": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [],
+      "winner": null
+     },
+     "RB": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [],
+      "winner": null
+     },
+     "TE": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [
+       "ridge"
+      ],
+      "winner": "ridge"
+     },
+     "WR": {
+      "blocked_by_formats": [],
+      "ppr_qualified": [],
+      "winner": null
+     }
+    },
+    "std": {
+     "baseline": {
+      "all": {
+       "mae": 3.7223,
+       "n": 5884,
+       "spearman": 0.5635,
+       "spearman_groups": 72,
+       "start_sit": 0.6342,
+       "start_sit_pairs": 61707
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.697,
+        "n": 646,
+        "spearman": 0.4129,
+        "spearman_groups": 18,
+        "start_sit": 0.5874,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 4.0018,
+        "n": 1539,
+        "spearman": 0.7002,
+        "spearman_groups": 18,
+        "start_sit": 0.6772,
+        "start_sit_pairs": 20206
+       },
+       "TE": {
+        "mae": 2.6535,
+        "n": 1256,
+        "spearman": 0.5519,
+        "spearman_groups": 18,
+        "start_sit": 0.5815,
+        "start_sit_pairs": 4922
+       },
+       "WR": {
+        "mae": 3.3092,
+        "n": 2443,
+        "spearman": 0.5889,
+        "spearman_groups": 18,
+        "start_sit": 0.6223,
+        "start_sit_pairs": 31612
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7833,
+        "n": 646,
+        "no_range": 0,
+        "width": 21.0565
+       },
+       "RB": {
+        "coverage": 0.7921,
+        "n": 1539,
+        "no_range": 0,
+        "width": 12.935
+       },
+       "TE": {
+        "coverage": 0.7779,
+        "n": 1256,
+        "no_range": 0,
+        "width": 8.6947
+       },
+       "WR": {
+        "coverage": 0.8178,
+        "n": 2443,
+        "no_range": 0,
+        "width": 11.5643
+       }
+      }
+     },
+     "ridge": {
+      "all": {
+       "mae": 3.6803,
+       "n": 5884,
+       "spearman": 0.5784,
+       "spearman_groups": 72,
+       "start_sit": 0.6387,
+       "start_sit_pairs": 61707
+      },
+      "by_position": {
+       "QB": {
+        "mae": 6.6534,
+        "n": 646,
+        "spearman": 0.4159,
+        "spearman_groups": 18,
+        "start_sit": 0.5853,
+        "start_sit_pairs": 4967
+       },
+       "RB": {
+        "mae": 3.9792,
+        "n": 1539,
+        "spearman": 0.7094,
+        "spearman_groups": 18,
+        "start_sit": 0.6784,
+        "start_sit_pairs": 20206
+       },
+       "TE": {
+        "mae": 2.5857,
+        "n": 1256,
+        "spearman": 0.5818,
+        "spearman_groups": 18,
+        "start_sit": 0.5988,
+        "start_sit_pairs": 4922
+       },
+       "WR": {
+        "mae": 3.2687,
+        "n": 2443,
+        "spearman": 0.6066,
+        "spearman_groups": 18,
+        "start_sit": 0.628,
+        "start_sit_pairs": 31612
+       }
+      },
+      "ranges": {
+       "QB": {
+        "coverage": 0.7817,
+        "n": 646,
+        "no_range": 0,
+        "width": 20.5981
+       },
+       "RB": {
+        "coverage": 0.7947,
+        "n": 1539,
+        "no_range": 0,
+        "width": 12.8164
+       },
+       "TE": {
+        "coverage": 0.7811,
+        "n": 1256,
+        "no_range": 0,
+        "width": 8.2905
+       },
+       "WR": {
+        "coverage": 0.8019,
+        "n": 2443,
+        "no_range": 0,
+        "width": 11.1607
+       }
+      },
+      "vs_baseline_ci": {
+       "QB": {
+        "mae": [
+         -0.1939,
+         0.099
+        ],
+        "spearman": [
+         -0.0192,
+         0.0273
+        ],
+        "start_sit": [
+         -0.0187,
+         0.0148
+        ]
+       },
+       "RB": {
+        "mae": [
+         -0.0853,
+         0.0334
+        ],
+        "spearman": [
+         -0.001,
+         0.0193
+        ],
+        "start_sit": [
+         -0.0075,
+         0.0106
+        ]
+       },
+       "TE": {
+        "mae": [
+         -0.123,
+         -0.0153
+        ],
+        "spearman": [
+         0.0094,
+         0.0495
+        ],
+        "start_sit": [
+         -0.0036,
+         0.0428
+        ]
+       },
+       "WR": {
+        "mae": [
+         -0.0924,
+         0.0073
+        ],
+        "spearman": [
+         0.0075,
+         0.0287
+        ],
+        "start_sit": [
+         -0.0072,
+         0.0181
+        ]
+       }
+      }
+     }
+    }
+   },
+   "model_version": "ridge-components-v1",
+   "training_window": {
+    "benchmark": 2025,
+    "calibrate": 2024,
+    "cutoff": "Tuesday 12:00 ET",
+    "params": {
+     "alpha": 100.0
+    },
+    "tune": 2023
+   }
+  },
   {
    "created_at": "2026-10-20T13:25:34.599680+00:00",
    "features": [
@@ -4360,7 +5794,7 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -4377,7 +5811,9 @@
      "position": "QB",
      "team": "BUF"
     },
+    "policy": "baseline",
     "projected_points": 0.0,
+    "range_80": null,
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4392,18 +5828,18 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 17,
     "injury": [
      {
-      "body_part": "Ankle",
-      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "body_part": null,
+      "ingested_at": "2026-10-21T11:49:32.424359+00:00",
       "practice": "Limited Participation in Practice",
       "season": 2026,
       "source": "nflverse",
-      "status": "Questionable",
-      "week": 6
+      "status": null,
+      "week": 7
      },
      {
       "body_part": "Ankle",
@@ -4428,7 +5864,12 @@
      "position": "WR",
      "team": "NE"
     },
+    "policy": "baseline",
     "projected_points": 10.51,
+    "range_80": [
+     4.58,
+     17.57
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4438,7 +5879,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -4455,7 +5896,12 @@
      "position": "WR",
      "team": "MIN"
     },
+    "policy": "baseline",
     "projected_points": 10.63,
+    "range_80": [
+     4.7,
+     17.69
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4465,7 +5911,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 19,
     "injury": [
@@ -4492,7 +5938,12 @@
      "position": "WR",
      "team": "DAL"
     },
+    "policy": "baseline",
     "projected_points": 14.51,
+    "range_80": [
+     8.58,
+     21.57
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4502,7 +5953,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -4519,7 +5970,12 @@
      "position": "WR",
      "team": "CIN"
     },
+    "policy": "baseline",
     "projected_points": 14.71,
+    "range_80": [
+     8.78,
+     21.77
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4529,7 +5985,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -4546,7 +6002,12 @@
      "position": "RB",
      "team": "PIT"
     },
+    "policy": "baseline",
     "projected_points": 15.03,
+    "range_80": [
+     8.73,
+     22.37
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4556,7 +6017,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -4573,7 +6034,12 @@
      "position": "TE",
      "team": "ARI"
     },
+    "policy": "baseline",
     "projected_points": 13.36,
+    "range_80": [
+     8.78,
+     19.21
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4583,7 +6049,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 15,
     "injury": [],
@@ -4600,7 +6066,12 @@
      "position": "QB",
      "team": "SF"
     },
+    "policy": "baseline",
     "projected_points": 21.04,
+    "range_80": [
+     11.0,
+     31.93
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4610,7 +6081,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -4627,7 +6098,12 @@
      "position": "RB",
      "team": "ATL"
     },
+    "policy": "baseline",
     "projected_points": 18.83,
+    "range_80": [
+     12.53,
+     26.17
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4637,7 +6113,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 20,
     "injury": [],
@@ -4654,7 +6130,12 @@
      "position": "WR",
      "team": "LA"
     },
+    "policy": "baseline",
     "projected_points": 19.62,
+    "range_80": [
+     13.69,
+     26.68
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4664,7 +6145,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -4681,7 +6162,12 @@
      "position": "RB",
      "team": "DET"
     },
+    "policy": "baseline",
     "projected_points": 24.22,
+    "range_80": [
+     17.92,
+     31.56
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4691,7 +6177,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 16,
     "injury": [],
@@ -4708,7 +6194,12 @@
      "position": "RB",
      "team": "TB"
     },
+    "policy": "baseline",
     "projected_points": 12.31,
+    "range_80": [
+     6.01,
+     19.65
+    ],
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4718,7 +6209,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -4735,7 +6226,9 @@
      "position": "K",
      "team": "BAL"
     },
+    "policy": "baseline",
     "projected_points": 8.33,
+    "range_80": null,
     "scoring": "half",
     "season": 2026,
     "unscored_rules": [],
@@ -4751,7 +6244,7 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -4768,7 +6261,9 @@
      "position": "QB",
      "team": "BUF"
     },
+    "policy": "baseline",
     "projected_points": 0.0,
+    "range_80": null,
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4785,18 +6280,18 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 17,
     "injury": [
      {
-      "body_part": "Ankle",
-      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "body_part": null,
+      "ingested_at": "2026-10-21T11:49:32.424359+00:00",
       "practice": "Limited Participation in Practice",
       "season": 2026,
       "source": "nflverse",
-      "status": "Questionable",
-      "week": 6
+      "status": null,
+      "week": 7
      },
      {
       "body_part": "Ankle",
@@ -4821,7 +6316,12 @@
      "position": "WR",
      "team": "NE"
     },
+    "policy": "baseline",
     "projected_points": 10.51,
+    "range_80": [
+     4.58,
+     17.57
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4833,7 +6333,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -4850,7 +6350,12 @@
      "position": "WR",
      "team": "MIN"
     },
+    "policy": "baseline",
     "projected_points": 10.63,
+    "range_80": [
+     4.7,
+     17.69
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4862,7 +6367,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 19,
     "injury": [
@@ -4889,7 +6394,12 @@
      "position": "WR",
      "team": "DAL"
     },
+    "policy": "baseline",
     "projected_points": 14.51,
+    "range_80": [
+     8.58,
+     21.57
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4901,7 +6411,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -4918,7 +6428,12 @@
      "position": "WR",
      "team": "CIN"
     },
+    "policy": "baseline",
     "projected_points": 14.71,
+    "range_80": [
+     8.78,
+     21.77
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4930,7 +6445,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -4947,7 +6462,12 @@
      "position": "RB",
      "team": "PIT"
     },
+    "policy": "baseline",
     "projected_points": 15.03,
+    "range_80": [
+     8.73,
+     22.37
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4959,7 +6479,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -4976,7 +6496,12 @@
      "position": "TE",
      "team": "ARI"
     },
+    "policy": "baseline",
     "projected_points": 13.36,
+    "range_80": [
+     8.78,
+     19.21
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -4988,7 +6513,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 15,
     "injury": [],
@@ -5005,7 +6530,12 @@
      "position": "QB",
      "team": "SF"
     },
+    "policy": "baseline",
     "projected_points": 21.04,
+    "range_80": [
+     11.0,
+     31.93
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -5017,7 +6547,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5034,7 +6564,12 @@
      "position": "RB",
      "team": "ATL"
     },
+    "policy": "baseline",
     "projected_points": 18.83,
+    "range_80": [
+     12.53,
+     26.17
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -5046,7 +6581,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 20,
     "injury": [],
@@ -5063,7 +6598,12 @@
      "position": "WR",
      "team": "LA"
     },
+    "policy": "baseline",
     "projected_points": 19.62,
+    "range_80": [
+     13.69,
+     26.68
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -5075,7 +6615,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5092,7 +6632,12 @@
      "position": "RB",
      "team": "DET"
     },
+    "policy": "baseline",
     "projected_points": 24.22,
+    "range_80": [
+     17.92,
+     31.56
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -5104,7 +6649,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 16,
     "injury": [],
@@ -5121,7 +6666,12 @@
      "position": "RB",
      "team": "TB"
     },
+    "policy": "baseline",
     "projected_points": 12.31,
+    "range_80": [
+     6.01,
+     19.65
+    ],
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -5133,7 +6683,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5150,7 +6700,9 @@
      "position": "K",
      "team": "BAL"
     },
+    "policy": "baseline",
     "projected_points": 8.33,
+    "range_80": null,
     "scoring": "Demo League rules (half PPR)",
     "season": 2026,
     "unscored_rules": [
@@ -5168,7 +6720,7 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5185,7 +6737,9 @@
      "position": "QB",
      "team": "BUF"
     },
+    "policy": "baseline",
     "projected_points": 0.0,
+    "range_80": null,
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5200,18 +6754,18 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 17,
     "injury": [
      {
-      "body_part": "Ankle",
-      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "body_part": null,
+      "ingested_at": "2026-10-21T11:49:32.424359+00:00",
       "practice": "Limited Participation in Practice",
       "season": 2026,
       "source": "nflverse",
-      "status": "Questionable",
-      "week": 6
+      "status": null,
+      "week": 7
      },
      {
       "body_part": "Ankle",
@@ -5236,7 +6790,12 @@
      "position": "WR",
      "team": "NE"
     },
+    "policy": "baseline",
     "projected_points": 12.98,
+    "range_80": [
+     6.19,
+     20.92
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5246,7 +6805,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -5263,7 +6822,12 @@
      "position": "WR",
      "team": "MIN"
     },
+    "policy": "baseline",
     "projected_points": 12.99,
+    "range_80": [
+     6.2,
+     20.93
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5273,7 +6837,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 19,
     "injury": [
@@ -5300,7 +6864,12 @@
      "position": "WR",
      "team": "DAL"
     },
+    "policy": "baseline",
     "projected_points": 18.06,
+    "range_80": [
+     11.27,
+     26.0
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5310,7 +6879,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -5327,7 +6896,12 @@
      "position": "WR",
      "team": "CIN"
     },
+    "policy": "baseline",
     "projected_points": 17.93,
+    "range_80": [
+     11.14,
+     25.87
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5337,7 +6911,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5354,7 +6928,12 @@
      "position": "RB",
      "team": "PIT"
     },
+    "policy": "baseline",
     "projected_points": 16.59,
+    "range_80": [
+     9.93,
+     24.42
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5364,7 +6943,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5381,7 +6960,12 @@
      "position": "TE",
      "team": "ARI"
     },
+    "policy": "baseline",
     "projected_points": 17.33,
+    "range_80": [
+     11.94,
+     24.02
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5391,7 +6975,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 15,
     "injury": [],
@@ -5408,7 +6992,12 @@
      "position": "QB",
      "team": "SF"
     },
+    "policy": "baseline",
     "projected_points": 21.04,
+    "range_80": [
+     11.0,
+     31.97
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5418,7 +7007,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5435,7 +7024,12 @@
      "position": "RB",
      "team": "ATL"
     },
+    "policy": "baseline",
     "projected_points": 20.6,
+    "range_80": [
+     13.94,
+     28.43
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5445,7 +7039,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 20,
     "injury": [],
@@ -5462,7 +7056,12 @@
      "position": "WR",
      "team": "LA"
     },
+    "policy": "baseline",
     "projected_points": 24.0,
+    "range_80": [
+     17.21,
+     31.94
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5472,7 +7071,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5489,7 +7088,12 @@
      "position": "RB",
      "team": "DET"
     },
+    "policy": "baseline",
     "projected_points": 26.75,
+    "range_80": [
+     20.09,
+     34.58
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5499,7 +7103,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 16,
     "injury": [],
@@ -5516,7 +7120,12 @@
      "position": "RB",
      "team": "TB"
     },
+    "policy": "baseline",
     "projected_points": 13.53,
+    "range_80": [
+     6.87,
+     21.36
+    ],
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5526,7 +7135,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5543,7 +7152,9 @@
      "position": "K",
      "team": "BAL"
     },
+    "policy": "baseline",
     "projected_points": 8.33,
+    "range_80": null,
     "scoring": "ppr",
     "season": 2026,
     "unscored_rules": [],
@@ -5559,7 +7170,7 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5576,7 +7187,9 @@
      "position": "QB",
      "team": "BUF"
     },
+    "policy": "baseline",
     "projected_points": 0.0,
+    "range_80": null,
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5591,18 +7204,18 @@
     },
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 17,
     "injury": [
      {
-      "body_part": "Ankle",
-      "ingested_at": "2026-10-20T12:21:01.752424+00:00",
+      "body_part": null,
+      "ingested_at": "2026-10-21T11:49:32.424359+00:00",
       "practice": "Limited Participation in Practice",
       "season": 2026,
       "source": "nflverse",
-      "status": "Questionable",
-      "week": 6
+      "status": null,
+      "week": 7
      },
      {
       "body_part": "Ankle",
@@ -5627,7 +7240,12 @@
      "position": "WR",
      "team": "NE"
     },
+    "policy": "baseline",
     "projected_points": 8.04,
+    "range_80": [
+     2.93,
+     14.24
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5637,7 +7255,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -5654,7 +7272,12 @@
      "position": "WR",
      "team": "MIN"
     },
+    "policy": "baseline",
     "projected_points": 8.27,
+    "range_80": [
+     3.16,
+     14.47
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5664,7 +7287,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 19,
     "injury": [
@@ -5691,7 +7314,12 @@
      "position": "WR",
      "team": "DAL"
     },
+    "policy": "baseline",
     "projected_points": 10.96,
+    "range_80": [
+     5.85,
+     17.16
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5701,7 +7329,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 21,
     "injury": [],
@@ -5718,7 +7346,12 @@
      "position": "WR",
      "team": "CIN"
     },
+    "policy": "baseline",
     "projected_points": 11.5,
+    "range_80": [
+     6.39,
+     17.7
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5728,7 +7361,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5745,7 +7378,12 @@
      "position": "RB",
      "team": "PIT"
     },
+    "policy": "baseline",
     "projected_points": 13.48,
+    "range_80": [
+     7.47,
+     20.53
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5755,7 +7393,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5772,7 +7410,12 @@
      "position": "TE",
      "team": "ARI"
     },
+    "policy": "baseline",
     "projected_points": 9.38,
+    "range_80": [
+     5.52,
+     14.62
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5782,7 +7425,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 15,
     "injury": [],
@@ -5799,7 +7442,12 @@
      "position": "QB",
      "team": "SF"
     },
+    "policy": "baseline",
     "projected_points": 21.04,
+    "range_80": [
+     10.82,
+     32.0
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5809,7 +7457,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5826,7 +7474,12 @@
      "position": "RB",
      "team": "ATL"
     },
+    "policy": "baseline",
     "projected_points": 17.05,
+    "range_80": [
+     11.04,
+     24.1
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5836,7 +7489,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 20,
     "injury": [],
@@ -5853,7 +7506,12 @@
      "position": "WR",
      "team": "LA"
     },
+    "policy": "baseline",
     "projected_points": 15.24,
+    "range_80": [
+     10.13,
+     21.44
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5863,7 +7521,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 22,
     "injury": [],
@@ -5880,7 +7538,12 @@
      "position": "RB",
      "team": "DET"
     },
+    "policy": "baseline",
     "projected_points": 21.68,
+    "range_80": [
+     15.67,
+     28.73
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5890,7 +7553,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 16,
     "injury": [],
@@ -5907,7 +7570,12 @@
      "position": "RB",
      "team": "TB"
     },
+    "policy": "baseline",
     "projected_points": 11.08,
+    "range_80": [
+     5.07,
+     18.13
+    ],
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5917,7 +7585,7 @@
     "availability": null,
     "caveats": [
      "0 when on bye or ruled out (Out/IR); Questionable/Doubtful are flagged, not discounted; depth-chart changes are not in the baseline",
-     "no prediction interval yet (Phase 8)"
+     "range_80 is nominal: about 80% of past outcomes fell inside such ranges"
     ],
     "games_used": 23,
     "injury": [],
@@ -5934,7 +7602,9 @@
      "position": "K",
      "team": "BAL"
     },
+    "policy": "baseline",
     "projected_points": 8.33,
+    "range_80": null,
     "scoring": "std",
     "season": 2026,
     "unscored_rules": [],
@@ -5942,7 +7612,7 @@
    }
   }
  },
- "recorded_at": "2026-10-21T08:41:27.363961+00:00",
+ "recorded_at": "2026-10-21T11:52:43.878989+00:00",
  "status": {
   "label": "Sample data from week 7, 2026, not live",
   "latest_week": 6,
@@ -5951,23 +7621,23 @@
   "sources": {
    "injuries": {
     "age_hours": 6.0,
-    "last_ok": "2026-10-21T02:41:27.363961+00:00"
+    "last_ok": "2026-10-21T05:52:43.878989+00:00"
    },
    "news": {
     "age_hours": 1.0,
-    "last_ok": "2026-10-21T07:41:27.363961+00:00"
+    "last_ok": "2026-10-21T10:52:43.878989+00:00"
    },
    "rosters": {
     "age_hours": 6.0,
-    "last_ok": "2026-10-21T02:41:27.363961+00:00"
+    "last_ok": "2026-10-21T05:52:43.878989+00:00"
    },
    "stats": {
     "age_hours": 6.0,
-    "last_ok": "2026-10-21T02:41:27.363961+00:00"
+    "last_ok": "2026-10-21T05:52:43.878989+00:00"
    },
    "transactions": {
     "age_hours": 1.0,
-    "last_ok": "2026-10-21T07:41:27.363961+00:00"
+    "last_ok": "2026-10-21T10:52:43.878989+00:00"
    }
   }
  },
@@ -5977,87 +7647,87 @@
    "kind": "add",
    "players": [
     {
-     "count": 4293328,
+     "count": 4998224,
      "full_name": "Omar Cooper Jr.",
      "player_id": "00-0041511",
      "position": "WR",
      "team": "NYJ",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 1166247,
+     "count": 1528893,
      "full_name": "Konata Mumpfield",
      "player_id": "00-0040590",
      "position": "WR",
      "team": "LA",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 827648,
+     "count": 941424,
      "full_name": "Kyler Murray",
      "player_id": "00-0035228",
      "position": "QB",
      "team": "MIN",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 651168,
-     "full_name": "C.J. Stroud",
-     "player_id": "00-0039163",
-     "position": "QB",
-     "team": "HOU",
-     "window_start": "2026-10-21T00:00:00+00:00"
-    },
-    {
-     "count": 622224,
+     "count": 771039,
      "full_name": "Michael Mayer",
      "player_id": "00-0039066",
      "position": "TE",
      "team": "LV",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 534880,
-     "full_name": "Tank Dell",
-     "player_id": "00-0038977",
-     "position": "WR",
+     "count": 718172,
+     "full_name": "C.J. Stroud",
+     "player_id": "00-0039163",
+     "position": "QB",
      "team": "HOU",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 496896,
+     "count": 682872,
      "full_name": "Roschon Johnson",
      "player_id": "00-0039021",
      "position": "RB",
      "team": "CHI",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 482840,
-     "full_name": "Terrance Ferguson",
-     "player_id": "00-0040737",
-     "position": "TE",
-     "team": "LA",
-     "window_start": "2026-10-21T00:00:00+00:00"
-    },
-    {
-     "count": 464830,
+     "count": 616322,
      "full_name": "Tyrone Tracy Jr.",
      "player_id": "00-0039384",
      "position": "RB",
      "team": "NYG",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
     },
     {
-     "count": 464592,
+     "count": 577072,
      "full_name": "Chase McLaughlin",
      "player_id": "00-0035358",
      "position": "K",
      "team": "TB",
-     "window_start": "2026-10-21T00:00:00+00:00"
+     "window_start": "2026-10-21T06:00:00+00:00"
+    },
+    {
+     "count": 549760,
+     "full_name": "Terrance Ferguson",
+     "player_id": "00-0040737",
+     "position": "TE",
+     "team": "LA",
+     "window_start": "2026-10-21T06:00:00+00:00"
+    },
+    {
+     "count": 544144,
+     "full_name": "Jake Bates",
+     "player_id": "00-0039172",
+     "position": "K",
+     "team": "DET",
+     "window_start": "2026-10-21T06:00:00+00:00"
     }
    ],
-   "window_start": "2026-10-21T00:00:00+00:00"
+   "window_start": "2026-10-21T06:00:00+00:00"
   }
  },
  "waivers": {
@@ -6076,8 +7746,13 @@
      "games_used": 22,
      "id": "00-0039139",
      "name": "Jahmyr Gibbs",
+     "policy": "baseline",
      "position": "RB",
      "projected_points": 24.22,
+     "range_80": [
+      17.92,
+      31.56
+     ],
      "team": "DET",
      "unscored_rules": [
       "rec_0_4"
@@ -6089,8 +7764,13 @@
      "games_used": 19,
      "id": "00-0036358",
      "name": "CeeDee Lamb",
+     "policy": "baseline",
      "position": "WR",
      "projected_points": 14.51,
+     "range_80": [
+      8.58,
+      21.57
+     ],
      "team": "DAL",
      "unscored_rules": [
       "rec_0_4"
@@ -6102,8 +7782,13 @@
      "games_used": 21,
      "id": "00-0036322",
      "name": "Justin Jefferson",
+     "policy": "baseline",
      "position": "WR",
      "projected_points": 10.63,
+     "range_80": [
+      4.7,
+      17.69
+     ],
      "team": "MIN",
      "unscored_rules": [
       "rec_0_4"
@@ -6115,7 +7800,7 @@
    "model_version": "baseline-ewm-v1",
    "rostered_players_excluded": 10,
    "rosters_as_of": {
-    "synced_at": "2026-10-21T08:41:27.363961+00:00",
+    "synced_at": "2026-10-21T11:52:43.878989+00:00",
     "week": 7
    },
    "scoring": "Demo League rules (half PPR)",

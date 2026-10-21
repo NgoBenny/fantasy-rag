@@ -23,6 +23,10 @@ def main(argv: list[str] | None = None) -> None:
     bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
     bt.add_argument("--tune-season", type=int, default=2024)
     bt.add_argument("--test-season", type=int, default=2025)
+    sub.add_parser("calibration-seed", help="Phase 8: record the frozen range calibration, once")
+    sub.add_parser("predict", help="Phase 8 forward run: log baseline + TE Ridge (Tuesdays)")
+    bm = sub.add_parser("benchmark", help="Phase 8: baseline vs Ridge vs LightGBM, frozen rules")
+    bm.add_argument("--predictions", help="re-report a saved predictions file (no retraining)")
     ask = sub.add_parser("ask", help="answer a question with cited tool results (Claude API)")
     ask.add_argument("question")
     ask.add_argument("--league-id", type=int, help="the league the question is about")
@@ -84,6 +88,15 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "calibration-seed":
+        from fantasy_rag.db import get_engine
+        from fantasy_rag.ml.predict import seed
+
+        print(f"recorded {seed(get_engine())} calibration errors (seed; never rebuilt)")
+    elif args.command == "predict":
+        _predict()
+    elif args.command == "benchmark":
+        _benchmark(args.predictions)
     elif args.command == "demo":
         from pathlib import Path
 
@@ -230,6 +243,52 @@ def _eval_grounding(report_path: str, only: str | None) -> None:
         or (summary["mean_groundedness"] or 0) < 4.5
     ):
         sys.exit(1)
+
+
+def _predict() -> None:
+    from fantasy_rag.db import get_engine
+    from fantasy_rag.ml.predict import run
+
+    r = run(get_engine())
+    print(
+        f"forward run {r['run_id']}: {r['season']} week {r['week']} {r['status'].upper()}"
+        f" (data as of {r['snapshot_at']:%Y-%m-%d %H:%M %Z},"
+        f" deadline {r['cutoff']:%Y-%m-%d %H:%M %Z},"
+        f" newest game {r['newest_game']}); {r['players']} players"
+    )
+    print(f"models: {r['models']}")
+    print(f"calibration errors: {r['calibration_errors']} ({r['finalized_errors']} added from"
+          " finalized forward weeks)")  # fmt: skip
+    if not r["calibration_errors"]:
+        print("no calibration errors recorded: no ranges (run `fantasy-rag calibration-seed`)")
+
+
+def _benchmark(saved: str | None) -> None:
+    import json
+    import pickle
+    from datetime import UTC, datetime
+    from pathlib import Path
+
+    from fantasy_rag.config import REPO_ROOT
+    from fantasy_rag.db import get_engine
+    from fantasy_rag.ml.benchmark import predict_all, report, write_runs
+
+    logs = REPO_ROOT / "data" / "logs"
+    stamp = f"{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
+    log = lambda m: print(m, flush=True)  # noqa: E731
+    if saved:  # our own file from an earlier run (pickle: never load one from elsewhere)
+        rows, preds, params = pickle.loads(Path(saved).read_bytes())
+    else:
+        rows, preds, params = predict_all(get_engine(), log)
+        kept = logs / f"benchmark_predictions_{stamp}.pkl"
+        kept.write_bytes(pickle.dumps((rows, preds, params)))
+        print(f"predictions: {kept}")
+    result = report(get_engine(), rows, preds, params, log)
+    out = logs / f"benchmark_{stamp}.json"
+    out.write_text(json.dumps(result, indent=1), encoding="utf-8")
+    write_runs(get_engine(), result)
+    print(f"promotion (frozen rule): {result['promotion']}")
+    print(f"report: {out}")
 
 
 def _backtest(tune: int, test: int) -> None:
