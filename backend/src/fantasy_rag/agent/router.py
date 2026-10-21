@@ -191,13 +191,21 @@ def sources(calls: list[ToolCall]) -> dict[str, str]:
     quote the input) are not evidence, so a number the router typed can't support a claim."""
     out: dict[str, str] = {}
     for c in calls:
+        if c.result is None:  # a failed call holds no evidence (see failed_ids)
+            continue
         echoed = ECHOED_INPUTS.get(c.name, ())
-        data = {k: v for k, v in (c.result or {}).items() if k not in echoed}
-        out[c.result_id] = _as_data(data) if c.result is not None else ""
+        out[c.result_id] = _as_data({k: v for k, v in c.result.items() if k not in echoed})
         for r in (c.result or {}).get("results", []):
-            if isinstance(r, dict) and "result_id" in r:
-                out[r["result_id"]] = _as_data(r)
+            if isinstance(r, dict) and "result_id" in r:  # a story carries its search's sync time
+                out[r["result_id"]] = _as_data(
+                    {**r, "last_news_sync": c.result.get("last_news_sync")}
+                )
     return out
+
+
+def failed_ids(calls: list[ToolCall]) -> set[str]:
+    """Calls that errored: citable only by a clarification, never as evidence."""
+    return {c.result_id for c in calls if c.result is None}
 
 
 def _repair_input(content: str, answer: Answer, found: list[str]) -> str:
@@ -236,14 +244,14 @@ def ask(
     context = context_block(conn, leagues or [], selected)
     calls, capped = route(conn, llm, question, context)
     content = writer_input(question, context, calls)
-    srcs = sources(calls)
+    srcs, failed = sources(calls), failed_ids(calls)
     answer = llm.structured(WRITER_SYSTEM, content, Answer)
-    first = problems(answer, srcs, context)
+    first = problems(answer, srcs, context, failed)
     first_draft = answer.model_copy(deep=True) if first else None
     found = first
     if first:
         answer = llm.structured(WRITER_SYSTEM, _repair_input(content, answer, first), Answer)
-        found = problems(answer, srcs, context)
+        found = problems(answer, srcs, context, failed)
     rejected = None
     if found:
         rejected, answer = answer, _withheld(found)

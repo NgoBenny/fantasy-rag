@@ -6,7 +6,7 @@ import pytest
 from anthropic.types import Message, MessageParam, ToolParam
 
 from fantasy_rag.agent import router
-from fantasy_rag.agent.answer import Answer, Claim, problems
+from fantasy_rag.agent.answer import Answer, Claim, numbers, problems
 
 
 def _msg(*tool_uses: tuple[str, dict[str, Any]]) -> Message:
@@ -51,7 +51,7 @@ def _fake_tool(conn: Any, name: str, args: dict[str, Any]) -> dict[str, Any]:
 
 def _answer(text: str, *claims: Claim, cites: list[str] | None = None) -> Answer:
     return Answer(
-        answer=text, answer_type="start_sit", season=2026, week=7, scoring_format="ppr",
+        answer=text, answer_type="start_sit", season=None, week=None, scoring_format=None,
         data_as_of=None, model_version=None, facts=list(claims), projections=[],
         citations=cites or [], limitations=[],
     )  # fmt: skip
@@ -166,13 +166,20 @@ def test_tool_arguments_and_echoes_are_not_evidence() -> None:
     bad_input = router.ToolCall(
         "r2", "project_player", {"player": {"name": "99"}}, error="input_value=99 is invalid"
     )
-    srcs = router.sources([news, bad_input])
-    for rid in ("r1", "r2"):
-        a = _answer("Bucky projects 99 points.", Claim(text="99", source_ids=[rid]), cites=[rid])
-        assert problems(a, srcs, "<context>week 7</context>") == [
-            f"fact 1: 99 not in {rid}",
-            f"answer: 99 not in {rid}",
-        ]
+    srcs, failed = router.sources([news, bad_input]), router.failed_ids([news, bad_input])
+    a = _answer("Bucky projects 99 points.", Claim(text="99", source_ids=["r1"]), cites=["r1"])
+    assert problems(a, srcs, "<context>week 7</context>", failed) == [
+        "fact 1: 99 not in r1",
+        "answer: 99 not in r1",
+    ]
+    # The failed call is no evidence at all, so its echoed input can't be either.
+    a = _answer("Bucky projects 99 points.", Claim(text="99", source_ids=["r2"]), cites=["r2"])
+    assert problems(a, srcs, "<context>week 7</context>", failed) == [
+        "fact 1 cites a failed tool call: r2",
+        "fact 1: 99 not in r2",
+        "cites no tool result",
+        "answer: 99 not in any cited result",
+    ]
 
 
 def test_a_recommendation_needs_evidence_even_without_tools() -> None:
@@ -301,3 +308,66 @@ def test_fresh_questions_stay_out_of_the_frozen_route_score() -> None:
     assert fresh["f07"]["tools"] == [] and fresh["f07"]["expect_type"] == "clarification"
     assert fresh["f08"]["replaces"] == "f05" and "f05" in fresh  # the original stays
     assert "compare_players" in fresh["f02"]["override"]["tools"][0]
+
+
+def test_a_failed_tool_call_is_not_evidence(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Review case: "Warren is healthy" citing an injury lookup that failed used to pass.
+    failed = router.ToolCall("r1", "get_injury_status", {}, error="no player named Warren")
+    claim = Claim(text="Warren is healthy", source_ids=["r1"])
+    a = _answer("Warren is healthy, start him.", claim, cites=["r1"])
+    srcs, bad = router.sources([failed]), router.failed_ids([failed])
+    assert problems(a, srcs, "", bad) == [
+        "fact 1 cites a failed tool call: r1",
+        "cites no tool result",
+    ]
+    ask_back = _answer("Which Warren do you mean?", cites=["r1"])
+    ask_back.answer_type = "clarification"  # may point at the error that made it ask
+    assert problems(ask_back, srcs, "", bad) == []
+    # Through ask(): the bad draft is repaired, or withheld if the repair fails too.
+    monkeypatch.setattr(router, "context_block", lambda *a: "<context>week 7</context>")
+    monkeypatch.setattr(router, "route", lambda *a: ([failed], False))
+    turn = router.ask(None, WriterLLM([a, a.model_copy(deep=True)]), "Warren ok?")  # type: ignore[arg-type]
+    assert turn.rejected is not None and turn.answer.answer_type == "no_data"
+
+
+def test_limitations_and_metadata_numbers_are_checked() -> None:
+    # Review case: "He will miss 99 weeks" in limitations, or an invented week, used to pass.
+    cited = _answer("Start him.", Claim(text="15.03 projected", source_ids=["r1"]), cites=["r1"])
+    cited.limitations = ["He will miss 99 weeks."]
+    assert problems(cited, SOURCES, "<context>week 7</context>") == ["limitations: 99 not in r1"]
+    cited.limitations, cited.week, cited.season = [], 12, 2031
+    assert problems(cited, SOURCES, "<context>Season 2026, week 7</context>") == [
+        "metadata: 2031, 12 not in r1"
+    ]
+    cited.week, cited.season = 7, 2026  # from the trusted context: fine
+    assert problems(cited, SOURCES, "<context>Season 2026, week 7</context>") == []
+
+
+def test_thousands_separators_are_one_number() -> None:
+    # Review case: "1,000" was read as 1 and 000, so evidence holding 1 and 0 supported it.
+    srcs = {"r1": '{"points": 1, "games": 0}', "r2": '{"adds": 4293328, "yards": 1000}'}
+    a = _answer("He projects 1,000 points.", Claim(text="1,000", source_ids=["r1"]), cites=["r1"])
+    assert problems(a, srcs, "") == ["fact 1: 1000 not in r1", "answer: 1000 not in r1"]
+    ok = _answer("4,293,328 adds; 1,000 yards; -1,000 is negative.", cites=["r2"])
+    ok.facts = [Claim(text="1,000 yards", source_ids=["r2"])]
+    assert numbers("4,293,328 and -1,000 on 2026-10-20, weeks 1,2") == [
+        "4293328", "-1000", "2026", "10", "20", "1", "2"
+    ]  # fmt: skip
+    assert problems(ok, srcs, "") == ["answer: -1000 not in r2"]
+
+
+def test_sync_times_from_tools_are_not_false_failures() -> None:
+    # Found re-checking saved answers: "synced 2026-10-21 02:00:40 UTC" failed because the
+    # source held "02:00:40.712784" (seconds read as 40.712784), and the sync time sits on
+    # the search call while answers cite the stories it returned.
+    news = router.ToolCall(
+        "r1", "search_news", {"query": "x"},
+        {"last_news_sync": "2026-10-21 02:00:40.712784+00:00",
+         "results": [{"result_id": "news:15", "published_at": "2026-10-20", "title": "t"}]},
+    )  # fmt: skip
+    a = _answer("See the story.", cites=["news:15"])
+    a.facts = [Claim(text="Story from 2026-10-20", source_ids=["news:15"])]
+    a.limitations, a.data_as_of = ["News last synced 2026-10-21 02:00:40 UTC."], "2026-10-21"
+    assert problems(a, router.sources([news]), "") == []
+    a.limitations = ["News last synced 2026-10-21 02:00:42 UTC."]  # a wrong second still fails
+    assert problems(a, router.sources([news]), "") == ["limitations: 42 not in news:15"]

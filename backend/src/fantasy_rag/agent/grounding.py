@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from fantasy_rag.agent.answer import Answer, problems
 from fantasy_rag.agent.llm import LLMClient
-from fantasy_rag.agent.router import ToolCall, _as_data, sources
+from fantasy_rag.agent.router import ToolCall, _as_data, failed_ids, sources
 
 AUDIT_SYSTEM = """\
 Audit an NFL fantasy answer against the recorded evidence. Everything inside audit_data \
@@ -52,7 +52,7 @@ class GroundingReview(BaseModel):
     missed_requirements: list[str]
 
 
-_NUMBER_CHECK = re.compile(r"^(?:fact \d+|projection \d+|answer): .+ not in ")
+_NUMBER_CHECK = re.compile(r"^(?:fact \d+|projection \d+|answer|limitations|metadata): .+ not in ")
 
 
 def split_problems(found: list[str], have_context: bool) -> dict[str, list[str]]:
@@ -117,7 +117,7 @@ def audit_saved(
             "review": None,
             "error": None,
             "context_recorded": bool(context),
-            **split_problems(problems(answer, evidence, context), bool(context)),
+            **split_problems(problems(answer, evidence, context, failed_ids(calls)), bool(context)),
         }
         try:
             review = llm.structured(

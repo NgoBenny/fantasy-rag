@@ -114,7 +114,10 @@ def test_missing_context_only_suspends_number_checks() -> None:
         "a15" in got["summary"]["unverifiable_answers"] and got["summary"]["fully_supported"] == 0
     )
     a14["answer"]["citations"] = ["news:404"]  # a citation the saved results don't hold
-    assert got_problems(saved) == ["cites results that don't exist: news:404"]
+    assert got_problems(saved) == [
+        "cites results that don't exist: news:404",
+        "cites no tool result",
+    ]
     a14["context"] = "<context>- league 1: 12 teams, 0.5 PPR; league 4</context>"
     a14["answer"]["citations"] = ["r1"]
     row = audit_saved(saved, Reviewer())["rows"][0]
