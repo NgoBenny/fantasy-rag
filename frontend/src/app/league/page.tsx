@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { type AvailabilityAsOf, type Lineup, type LineupPlayer, api } from "@/lib/api";
 
 import { LineupView, StartSitTable, Status, UnscoredNote } from "./lineup-view";
+import { RosterPicker } from "./roster-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -56,24 +57,17 @@ async function StartSit({
   // Without a team (a chat source link), show the linked players as they are.
   const picked = (lineup ? ids.filter((id) => roster.some((p) => p.id === id)) : ids).slice(0, 4);
   const result = picked.length >= 2 ? await api.startSit(picked, leagueId) : null;
-  const toggle = (id: string) => (picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id]);
   if (lineup && roster.length === 0) return <p className="text-sm text-muted-foreground">This team has no players.</p>;
   return (
     <div className="space-y-3">
       {lineup ? (
         <>
           <p className="text-sm text-muted-foreground">Pick 2–4 of your players to compare next week&apos;s projections.</p>
-          <div className="flex flex-wrap gap-2 text-sm" aria-label="Roster players">
-            {roster.map((p) => (
-              <Link
-                key={p.id}
-                href={href({ league: leagueId, roster: rosterId, view: "startsit", ids: toggle(p.id) })}
-                className={`rounded border px-2 py-1 ${picked.includes(p.id) ? "bg-muted font-semibold" : ""}`}
-              >
-                {p.name}
-              </Link>
-            ))}
-          </div>
+          <RosterPicker
+            players={roster}
+            picked={picked}
+            base={href({ league: leagueId, roster: rosterId, view: "startsit" })}
+          />
         </>
       ) : (
         !result && <p className="text-sm text-muted-foreground">Pick a team.</p>

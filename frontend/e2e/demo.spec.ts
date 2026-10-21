@@ -158,6 +158,11 @@ test("league selection, lineup with bye badge, start/sit projections and waivers
 
 test("any 2-4 demo roster players can be compared, not just recorded pairs", async ({ page }) => {
   await page.goto("/league?league=900&roster=1&view=startsit");
+  // Slow every later page load, so each click lands while the previous one is still loading.
+  await page.route("**/league?**", async (route) => {
+    await new Promise((r) => setTimeout(r, 800));
+    await route.continue();
+  });
   for (const name of ["Brock Purdy", "Josh Allen", "Trey McBride"])
     await page.getByLabel("Roster players").getByRole("link", { name }).click();
   await expect(page).toHaveURL(/ids=[^&]+(,|%2C)[^&]+(,|%2C)[^&]+/);
