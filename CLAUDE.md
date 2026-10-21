@@ -88,6 +88,7 @@ backend/
 README.md, docs/architecture.md, docs/demo.gif  # overview, data flow, demo recording (DEMO_MODE)
 scripts/notify.ps1, scripts/make_gif.py     # Windows toast on job failure; demo GIF assembly
 scripts/setup_runner.ps1    # the separate checkout of reviewed main that scheduled tasks run from
+scripts/pause_tasks.ps1     # disable tasks for an update window, restore states (test: scripts/tests/test_pause_tasks.ps1)
   src/fantasy_rag/agent/tools.py        # 10 typed tools + run_tool (Pydantic-validated, no SQL)
   src/fantasy_rag/agent/router.py       # haiku picks tools (<= 4 rounds) -> sonnet writes the answer
   src/fantasy_rag/agent/llm.py, prompts.py  # LLMClient protocol + Anthropic client; static prompts
@@ -136,7 +137,7 @@ Deferred: hosted deployment (notes in docs/PLAN.md, Phase 9).
 - Local Postgres listens on 5433 when another Postgres holds 5432 (set `DB_PORT` and `DATABASE_URL` in `.env`).
 - Everything binds to 127.0.0.1 (compose ports, `next dev/start --hostname 127.0.0.1`, uvicorn's default). Use `127.0.0.1`, not `localhost`, in `DATABASE_URL`: on this PC `localhost` tries IPv6 first and stalls. Engines use a 10 s connect timeout.
 - Jobs (Phase 9): every CLI job takes one advisory lock in `cli.main` (`jobs/locks.py`: STRUCTURED for ingest/league import/predict/calibration-seed, NEWS, TRANSACTIONS, BACKUP); nothing underneath locks. A second copy exits "already running". `predict` writes nothing if an on-time run for the week exists. Source health comes from `sync_runs` (`failing` = last 2 attempts failed); `FANTASY_RAG_FAIL_SOURCE=<source>` injects an outage for drills only. Failed scheduled jobs show a Windows toast; logs are in `data/logs/`.
-- Scheduled tasks run from a separate checkout of reviewed `main` (`scripts/setup_runner.ps1`, default `%USERPROFILE%antasy-rag-runner`) with its own ignored `.env`, `.venv`, `data/cache` and `data/logs`; it shares the database container (compose `name: fantasy-rag`). Scheduled runs never pull: after a merge, run `setup_runner.ps1` between jobs. Register tasks only from the runner (`-Register`); registering from a dev tree points the tasks back at code being edited. Both checkouts share one database, so schema changes still need coordination.
+- Scheduled tasks run from a separate checkout of reviewed `main` (`scripts/setup_runner.ps1`, default `%USERPROFILE%antasy-rag-runner`) with its own ignored `.env`, `.venv`, `data/cache` and `data/logs`; it shares the database container (compose `name: fantasy-rag`). Scheduled runs never pull: after a merge, run `setup_runner.ps1` between jobs; it disables the tasks for the whole update (refusing if one is running) and restores their states, so a trigger in that window is skipped. Register tasks only from the runner (`-Register`); registering from a dev tree points the tasks back at code being edited. Both checkouts share one database, so schema changes still need coordination.
 
 ## Commands
 
@@ -200,6 +201,7 @@ docker compose --profile demo up api-demo      # demo API: sample data, no .env,
 # repo root: daily snapshot collection (Windows Task Scheduler, current user)
 powershell -File scripts/setup_runner.ps1           # create/update the runner checkout (reviewed main); refuses while a task runs
 powershell -File scripts/setup_runner.ps1 -Register # same, then (re-)register every task to run from it
+powershell -File scripts/tests/test_pause_tasks.ps1  # update-window regression test (throwaway tasks; Windows only)
 powershell -File scripts/register_daily_ingest.ps1   # registers tasks for the checkout it's run from; daily 6pm + Wed-Sat 2pm/9pm; logs in that checkout's data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
 powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news"); refreshes data/logs/news_report.json
