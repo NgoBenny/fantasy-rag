@@ -53,6 +53,17 @@ class FakeSleeper:
         }[path]
 
 
+def _as_of(engine: Any) -> tuple[Any, Any]:
+    from fantasy_rag.analytics.queries import roster_checked_at
+
+    with engine.connect() as conn:
+        league = conn.execute(text("SELECT id FROM fantasy_leagues")).scalar_one()
+        changed = conn.execute(
+            text("SELECT ingested_at FROM fantasy_rosters WHERE roster_id = 1")
+        ).scalar_one()
+        return roster_checked_at(conn, league, 1), changed
+
+
 def test_import_and_scoring_check(scratch_db_url: str) -> None:
     cfg = Config(str(ALEMBIC_INI))
     cfg.set_main_option("sqlalchemy.url", scratch_db_url.replace("%", "%%"))
@@ -104,7 +115,12 @@ def test_import_and_scoring_check(scratch_db_url: str) -> None:
 
     first = import_leagues(engine, FakeSleeper(), "someone", None)
     assert first[0]["unresolved"] == 1 and first[0]["unsupported_scoring"] == ["idp_sack"]
+    checked_1, changed_1 = _as_of(engine)
     assert import_leagues(engine, FakeSleeper(), "someone", None)[0]["changed"] == 0
+    # A re-check of unchanged rosters moves "checked", never "last changed".
+    checked_2, changed_2 = _as_of(engine)
+    assert checked_1 is not None and checked_2 is not None
+    assert checked_2 > checked_1 and changed_2 == changed_1
 
     with engine.connect() as conn:
         row = conn.execute(

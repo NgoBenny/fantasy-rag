@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type AvailabilityAsOf, type Lineup, type LineupPlayer, api } from "@/lib/api";
+import { rostersLabel } from "@/lib/lineup";
 
 import { LineupView, Range, StartSitTable, Status, UnscoredNote } from "./lineup-view";
 import { RosterPicker } from "./roster-picker";
@@ -83,7 +84,7 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
     <div className="space-y-3">
       <AvailabilityNote as_of={w.availability_as_of} />
       <p className="text-sm">
-        Week {w.week} · {w.scoring} · rosters synced {new Date(w.rosters_as_of.synced_at).toLocaleString()}
+        Week {w.week} · {w.scoring} · {rostersLabel(w.rosters_as_of)}
       </p>
       <UnscoredNote items={w.candidates} />
       <Table aria-label="Waivers">

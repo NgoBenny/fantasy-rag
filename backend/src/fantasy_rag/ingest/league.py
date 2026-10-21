@@ -44,6 +44,30 @@ def league_row(league: dict[str, Any]) -> pl.DataFrame:
     )
 
 
+def live_week_entries(
+    matchups: list[dict[str, Any]], rosters: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """The live week's entry per roster. Players come from /rosters: the live matchup entry
+    can omit roster moves (seen: empty `players`). Starters come from the matchup when it
+    names some and all are still on the roster: /rosters `starters` can lag lineup changes
+    (seen 2026-10-21: it still held a week-5 lineup while the week-7 matchup and Sleeper's
+    app showed the new one). An all-"0" lineup is a real (empty) lineup when the matchup
+    lists players; with no players and no named starters the entry isn't filled in yet.
+    Otherwise /rosters starters are used."""
+    by_id = {int(m["roster_id"]): m for m in matchups}
+    out = []
+    for r in rosters:
+        m = by_id.get(int(r["roster_id"]), {"roster_id": r["roster_id"]})
+        players = r.get("players") or []
+        slots = [str(p) for p in m.get("starters") or []]
+        named = [p for p in slots if p != "0"]
+        filled_in = bool(named) or bool(slots and m.get("players"))
+        current = filled_in and set(named) <= {str(p) for p in players}
+        starters = m["starters"] if current else r.get("starters") or []
+        out.append({**m, "players": players, "starters": starters})
+    return out
+
+
 def roster_rows(
     league_pk: int,
     week: int,
@@ -145,17 +169,7 @@ def _import_one(run: Run, api: Any, lid: str, state: dict[str, Any]) -> dict[str
     for week in range(1, last_week + 1):
         matchups = api.get(f"/league/{lid}/matchups/{week}") or []
         if week == live_week:
-            # The live week's matchup entry can lag or omit roster moves (seen: empty
-            # `players`); /rosters is Sleeper's current roster, so it wins for this week.
-            by_id = {int(m["roster_id"]): m for m in matchups}
-            matchups = [
-                {
-                    **by_id.get(int(r["roster_id"]), {"roster_id": r["roster_id"]}),
-                    "players": r.get("players") or [],
-                    "starters": r.get("starters") or [],
-                }
-                for r in rosters
-            ]
+            matchups = live_week_entries(matchups, rosters)
         rows, misses = roster_rows(league_pk, week, matchups, owners, idmap, known)
         if rows.height:  # weeks without matchups (e.g. past the season) add nothing
             all_rows.append(rows)

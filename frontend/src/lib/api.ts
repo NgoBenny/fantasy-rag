@@ -1,4 +1,6 @@
 // Typed client for the fantasy-rag FastAPI backend (server-side fetches only).
+import type { RostersAsOf } from "./lineup";
+
 const API_URL = process.env.API_URL ?? "http://localhost:8010";
 
 export class ApiError extends Error {
@@ -82,7 +84,7 @@ export interface LineupSlot {
 export interface Lineup {
   week: number;
   scoring: string;
-  rosters_as_of: { week: number; synced_at: string };
+  rosters_as_of: RostersAsOf;
   recommended: LineupSlot[];
   bench: LineupPlayer[];
   changes: { start: string[]; sit: string[] };
@@ -146,7 +148,7 @@ export interface Waivers {
   league_id: number;
   scoring: string;
   week: number;
-  rosters_as_of: { week: number; synced_at: string };
+  rosters_as_of: RostersAsOf;
   availability_as_of: AvailabilityAsOf;
   candidates: (LineupPlayer & { games_used: number; unscored_rules: string[] })[];
   model_version: string;
