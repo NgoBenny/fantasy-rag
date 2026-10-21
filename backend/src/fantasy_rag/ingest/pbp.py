@@ -24,7 +24,10 @@ COLUMNS = [
     *(f"forced_fumble_player_{i}_{c}" for i in (1, 2) for c in ("team", "player_id")),
     *(f"fumble_recovery_{i}_{c}" for i in (1, 2) for c in ("team", "player_id")),
     "fumbled_1_team", "fumbled_2_team",
+    # usage (Phase 10): who was targeted or carried, and where
+    "yardline_100", "receiver_player_id", "rusher_player_id", "two_point_attempt",
 ]  # fmt: skip
+RED_ZONE, GOAL_LINE = 20, 5  # yards from the opponent's end zone (yardline_100)
 
 
 def _n(col: str) -> pl.Expr:
@@ -206,6 +209,62 @@ def special_teams(pbp: pl.DataFrame) -> pl.DataFrame:
         )
         .sort(KEYS + ["player_id"])
     )
+
+
+def usage(pbp: pl.DataFrame) -> pl.DataFrame:
+    """Per player-game targets and carries, all-field and inside the 20 / the 5.
+
+    Counted as nflverse player stats count them (checked against them for 2025, exact):
+    a target is a pass play with a receiver; a carry is a run play (scrambles included) or
+    a kneel. Two-point tries and plays wiped out by penalty (play_type "no_play") count
+    for nothing. Red-zone and goal-line carries leave kneels out (not an opportunity), and
+    goal-line carries are a subset of red-zone carries. A counted play with no yard line
+    goes to rz_unknown instead of being read as outside the red zone.
+    """
+    p = _prepare(pbp).filter(_n("two_point_attempt") == 0)
+    yl = pl.col("yardline_100")
+    plays = pl.concat(
+        [
+            p.filter(
+                (pl.col("play_type") == "pass") & pl.col("receiver_player_id").is_not_null()
+            ).select(
+                *KEYS,
+                "yardline_100",
+                pl.col("receiver_player_id").alias("player_id"),
+                kind=pl.lit("target"),
+                kneel=pl.lit(False),
+            ),
+            p.filter(
+                pl.col("play_type").is_in(["run", "qb_kneel"])
+                & pl.col("rusher_player_id").is_not_null()
+            ).select(
+                *KEYS,
+                "yardline_100",
+                pl.col("rusher_player_id").alias("player_id"),
+                kind=pl.lit("carry"),
+                kneel=pl.col("play_type") == "qb_kneel",
+            ),
+        ]
+    )
+    target, carry, kneel = pl.col("kind") == "target", pl.col("kind") == "carry", pl.col("kneel")
+    return (
+        plays.group_by(*KEYS, "player_id")
+        .agg(
+            targets_pbp=_count(target),
+            carries_pbp=_count(carry),
+            rz_targets=_count(target & (yl <= RED_ZONE)),
+            rz_carries=_count(carry & ~kneel & (yl <= RED_ZONE)),
+            gl_carries=_count(carry & ~kneel & (yl <= GOAL_LINE)),
+            rz_unknown=_count(yl.is_null() & ~kneel),
+        )
+        .sort(KEYS + ["player_id"])
+    )
+
+
+def games(pbp: pl.DataFrame) -> pl.DataFrame:
+    """One row per game whose play-by-play was loaded: coverage, so a player with no
+    usage row in a covered game is a known zero, never a missing value."""
+    return pbp.group_by(KEYS).agg(plays=pl.len()).sort(KEYS)
 
 
 def packed(df: pl.DataFrame, ids: list[str]) -> pl.DataFrame:

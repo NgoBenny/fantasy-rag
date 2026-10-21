@@ -109,7 +109,7 @@ def test_start_sit_endpoint_matches_the_tool_with_bye_injury_and_league_scoring(
 def test_status_waivers_and_model_runs(client: TestClient) -> None:
     s = client.get("/api/status").json()
     assert s["demo"] is False and s["next_week"] == s["latest_week"] + 1 == 3
-    assert set(s["sources"]) == {"stats", "injuries", "news", "rosters", "transactions"}
+    assert set(s["sources"]) == {"stats", "injuries", "news", "rosters", "transactions", "usage"}
     w = client.get("/api/leagues/1/waivers", params={"position": "WR"}).json()
     assert w["availability_as_of"]["status"] == "uncertain"  # no roster fetch recorded
     assert "00-1" not in {c["id"] for c in w["candidates"]}  # rostered

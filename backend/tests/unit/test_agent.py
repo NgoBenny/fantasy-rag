@@ -393,3 +393,17 @@ def test_start_sit_order_puts_zero_above_negative_and_missing_last() -> None:
     assert [p["player"]["name"] for p in got["ranked"]] == ["top", "bye", "neg", "none"]
     assert got["higher_projection"] == "top"
     assert rank_projections(proj[:1])["higher_projection"] is None  # nothing projected
+
+
+def test_usage_progress_names_players_and_a_computed_share_is_rejected() -> None:
+    result = {"players": [{"player": {"id": "00-1", "name": "Xavier Worthy"}, "games": [],
+                           "last_3": {"target_share_pct": 20.3}, "facts": []}]}  # fmt: skip
+    call = router.ToolCall("r1", "get_usage", {"players": [{"name": "Worthy"}]}, result)
+    assert router.tool_progress(call).message == "Looked up usage for Xavier Worthy"
+    usage = {"r1": '{"targets": 16, "team_targets": 79, "target_share_pct": 20.3}'}
+    copied = _answer("Worthy's target share was 20.3%.", Claim(text="20.3%", source_ids=["r1"]))
+    assert problems(copied, usage, "") == []
+    # A share the tool never gave (16 / 79 worked out by hand) is a new number: rejected.
+    counts = {"r1": '{"targets": 16, "team_targets": 79}'}
+    computed = _answer("Worthy saw 20.3% of targets.", Claim(text="20.3%", source_ids=["r1"]))
+    assert "answer: 20.3 not in r1" in problems(computed, counts, "")

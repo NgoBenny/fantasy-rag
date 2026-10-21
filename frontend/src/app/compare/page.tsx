@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { UsageSection } from "@/components/usage";
 import { SHOWN_STATS, api, scoringOf } from "@/lib/api";
+import { windowQuery } from "@/lib/usage";
 
 import { StartSitTable } from "../league/lineup-view";
 
@@ -9,6 +11,7 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
   const sp = await searchParams;
   const ids = (typeof sp.ids === "string" ? sp.ids.split(",") : []).filter(Boolean).slice(0, 4);
   const scoring = scoringOf(sp.scoring);
+  const window = windowQuery(sp);
 
   if (ids.length < 2) {
     return (
@@ -22,7 +25,7 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
   }
 
   const [{ players }, projections] = await Promise.all([
-    api.compare(ids, scoring),
+    api.compare(ids, scoring, window),
     api.startSit(ids, null, scoring),
   ]);
   const rows: [string, (p: (typeof players)[number]) => string | number][] = [
@@ -42,7 +45,7 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
           {(["ppr", "half", "std"] as const).map((s) => (
             <Link
               key={s}
-              href={`/compare?ids=${ids.join(",")}&scoring=${s}`}
+              href={`/compare?ids=${ids.join(",")}&scoring=${s}${window}`}
               className={s === scoring ? "font-semibold underline" : "text-muted-foreground hover:underline"}
             >
               {s.toUpperCase()}
@@ -54,7 +57,9 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
         <h2 className="font-semibold">Next week&apos;s projections</h2>
         <StartSitTable result={projections} />
       </section>
-      <h2 className="font-semibold">Season stats</h2>
+      <h2 className="font-semibold">
+        Stats · {players[0].season} weeks {players[0].weeks[0]}–{players[0].weeks[1]}
+      </h2>
       <Table aria-label="Player comparison">
         <TableHeader>
           <TableRow>
@@ -84,6 +89,12 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
           ))}
         </TableBody>
       </Table>
+      <section id="usage" className="space-y-4">
+        <h2 className="font-semibold">Usage</h2>
+        {players.map((p) => (
+          <UsageSection key={p.player.id} usage={p.usage} title={p.player.name} />
+        ))}
+      </section>
     </div>
   );
 }

@@ -187,3 +187,29 @@ test("model performance shows the frozen benchmark, ranges, FantasyPros and the 
   // Forward results: honest empty state until a forward week is final.
   await expect(page.getByLabel("Forward results")).toContainText("No finalized weeks yet");
 });
+
+test("usage context: start/sit and waivers show it beside the projection, players have a usage section", async ({ page, request }) => {
+  await page.goto("/league?league=900&roster=1&view=startsit");
+  await page.getByLabel("Roster players").getByRole("link", { name: "A.J. Brown" }).click();
+  await page.getByLabel("Roster players").getByRole("link", { name: "Puka Nacua" }).click();
+  const table = page.getByRole("table", { name: "Start/sit" });
+  await expect(table.getByRole("columnheader", { name: "Usage context (last 3 games)" })).toBeVisible();
+  await expect(table).toContainText(/snaps .*%/);
+  await expect(page.getByText("Ranked by projection; usage is shown as context only.")).toBeVisible();
+
+  await page.goto("/league?league=900&view=waivers");
+  const waivers = page.getByRole("table", { name: "Waivers" });
+  await expect(waivers.getByRole("columnheader", { name: "Usage context (last 3 games)" })).toBeVisible();
+  await expect(page.getByText("How usage is measured")).toBeVisible();
+
+  const players: { id: string; name: string }[] = await (await request.get(`${PROXY}/api/players?q=gibbs`)).json();
+  const gibbs = players.find((p) => p.name === "Jahmyr Gibbs")!;
+  const stats = await (await request.get(`${PROXY}/api/players/${gibbs.id}?scoring=ppr`)).json();
+  await page.goto(`/players/${gibbs.id}#usage`);
+  const usage = page.getByRole("table", { name: "Usage by game" });
+  await expect(usage).toBeVisible();
+  // The page shows the API's own numbers: the latest game's target share.
+  const last = stats.usage.games.at(-1);
+  await expect(usage.getByRole("row").last()).toContainText(`${last.target_share_pct.toFixed(1)}%`);
+  await expect(page.getByText(/completed games through week \d+/)).toBeVisible();
+});

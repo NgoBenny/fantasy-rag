@@ -66,7 +66,7 @@ def _attempt(eng: Engine, source: str, ok: bool, at: datetime) -> None:
 
 
 def test_health_needs_two_failures_to_say_failing_and_clears_on_recovery(eng: Engine) -> None:
-    for source in [s for s, _ in h.SOURCES.values()] + ["news.embed"]:
+    for source in [s for s, _ in h.SOURCES.values()] + [x for v in h.ALSO.values() for x in v]:
         _attempt(eng, source, True, NOW - timedelta(minutes=30))
     with eng.connect() as c:
         assert {v["state"] for v in h.health(c, NOW).values()} == {"fresh"}
@@ -300,3 +300,20 @@ def test_predict_fails_loudly_when_the_lock_wait_runs_out(
     assert exit_.value.code == 1 and _count(eng) == before
     with eng.connect() as c:  # the wait's timeout never leaks into pooled connections
         assert c.execute(text("SHOW lock_timeout")).scalar() == "0"
+
+
+def test_usage_is_failing_when_snaps_or_play_by_play_usage_fail(eng: Engine) -> None:
+    from fantasy_rag.analytics import usage
+
+    for source in ("nflverse.player_stats", "nflverse.snap_counts", "nflverse.pbp_usage"):
+        _attempt(eng, source, True, NOW - timedelta(hours=1))
+    _attempt(eng, "nflverse.pbp_usage", False, NOW - timedelta(minutes=20))
+    _attempt(eng, "nflverse.pbp_usage", False, NOW - timedelta(minutes=10))
+    with eng.connect() as c:
+        got = h.health(c, NOW)["usage"]
+        stamp = usage.as_of(c, 2026, 6)
+    assert (got["state"], got["source"]) == ("failing", "nflverse.pbp_usage")
+    # Usage is as fresh as its oldest input, and every input's time is shown.
+    assert stamp["updated_at"] == min(stamp["stats_updated_at"], stamp["snaps_updated_at"],
+                                      stamp["pbp_updated_at"])  # fmt: skip
+    assert stamp["snaps_updated_at"] is not None

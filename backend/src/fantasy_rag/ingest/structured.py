@@ -308,7 +308,7 @@ def run_structured(
     )
 
     def team_defense(run: Run, res: Result) -> None:
-        defense, special, full = [], [], []
+        defense, special, usage, games, full = [], [], [], [], []
         for s in seasons:  # one season of play-by-play at a time keeps memory down
             raw = nfl.load_pbp([s])
             if raw.is_empty():  # not started yet: nothing to refresh or prune
@@ -316,10 +316,14 @@ def run_structured(
             full.append(s)
             defense.append(pb.team_defense(raw))
             special.append(pb.special_teams(raw))
+            usage.append(pb.usage(raw))
+            games.append(pb.games(raw))
         # Each loaded season is the complete truth for that season, so rows a corrected
         # play-by-play no longer produces are pruned in the same transaction.
         loaded["pbp_seasons"] = full
         loaded["special_teams"] = pl.concat(special) if special else None
+        loaded["usage"] = pl.concat(usage) if usage else None
+        loaded["games"] = pl.concat(games) if games else None
         ids = ["season", "week", "season_type", "team", "game_id", "opponent"]
         keys = ["season", "week", "season_type", "team"]
         frame = pb.packed(pl.concat(defense), ids) if defense else None
@@ -347,6 +351,30 @@ def run_structured(
         )  # fmt: skip
 
     _step(engine, report, "nflverse.pbp_special_teams", special_teams)
+
+    def pbp_usage(run: Run, res: Result) -> None:
+        """Targets, carries and red-zone looks per player-game, plus which games' play-by-play
+        was loaded (coverage: no row in a covered game is a known zero)."""
+        if "pbp_seasons" not in loaded:
+            raise RuntimeError("play-by-play did not load; usage left unchanged")
+        full = loaded["pbp_seasons"]
+        if loaded["games"] is not None:
+            game_keys = ["season", "week", "season_type", "game_id"]
+            res.changed += upsert(run.conn, "pbp_games", loaded["games"], game_keys, run.id)
+            res.changed += prune(run.conn, "pbp_games", loaded["games"], game_keys, "season", full)
+        if loaded["usage"] is None:
+            return
+        keys = ["season", "week", "season_type", "player_id"]
+        packed = pb.packed(
+            loaded["usage"], ["season", "week", "season_type", "game_id", "player_id"]
+        )
+        resolved = _load_and_upsert(
+            run, res, "player_week_pbp_usage", keys, packed, [("player_id", "gsis")],
+            idmap, known, "nflverse.pbp_usage",
+        )  # fmt: skip
+        res.changed += prune(run.conn, "player_week_pbp_usage", resolved, keys, "season", full)
+
+    _step(engine, report, "nflverse.pbp_usage", pbp_usage)
 
     def nflverse_snapshot(run: Run, res: Result) -> None:
         inj = nv.injuries(nfl.load_injuries([season]))

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type AvailabilityAsOf, type Lineup, type LineupPlayer, api } from "@/lib/api";
+import { UsageAsOfLine, UsageContext, UsageNote } from "@/components/usage";
 import { rostersLabel } from "@/lib/lineup";
 
 import { LineupView, Range, StartSitTable, Status, UnscoredNote } from "./lineup-view";
@@ -87,6 +88,7 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
         Week {w.week} · {w.scoring} · {rostersLabel(w.rosters_as_of)}
       </p>
       <UnscoredNote items={w.candidates} />
+      {w.usage_as_of && <UsageAsOfLine usage={{ window: null, facts: [], as_of: w.usage_as_of }} />}
       <Table aria-label="Waivers">
         <TableHeader>
           <TableRow>
@@ -94,6 +96,7 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
             <TableHead>Pos</TableHead>
             <TableHead className="text-right">Proj</TableHead>
             <TableHead className="text-right">80% range</TableHead>
+            <TableHead>Usage context (last 3 games)</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -108,10 +111,15 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
               <TableCell className="text-right tabular-nums text-muted-foreground">
                 <Range r={c.range_80} />
               </TableCell>
+              <TableCell className="max-w-sm whitespace-normal">
+                <UsageContext usage={c.usage} />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <p className="text-xs text-muted-foreground">Ranked by projection; usage is shown as context only.</p>
+      <UsageNote />
     </div>
   );
 }

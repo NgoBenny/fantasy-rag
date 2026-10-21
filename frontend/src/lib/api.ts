@@ -1,5 +1,6 @@
 // Typed client for the fantasy-rag FastAPI backend (server-side fetches only).
 import type { RostersAsOf } from "./lineup";
+import type { Usage, UsageAsOf } from "./usage";
 
 const API_URL = process.env.API_URL ?? "http://localhost:8010";
 
@@ -58,6 +59,7 @@ export interface PlayerStats {
   totals: Record<string, number>;
   by_week: WeekRow[];
   unscored_rules: string[];
+  usage?: Usage;
 }
 
 export interface Availability {
@@ -142,6 +144,7 @@ export interface Projection {
   policy?: string | null;
   range_80?: [number, number] | null;
   injury?: { source: string; status: string | null; body_part: string | null }[];
+  usage?: Usage;
 }
 
 export interface Waivers {
@@ -150,7 +153,8 @@ export interface Waivers {
   week: number;
   rosters_as_of: RostersAsOf;
   availability_as_of: AvailabilityAsOf;
-  candidates: (LineupPlayer & { games_used: number; unscored_rules: string[] })[];
+  candidates: (LineupPlayer & { games_used: number; unscored_rules: string[]; usage?: Usage })[];
+  usage_as_of?: UsageAsOf;
   model_version: string;
 }
 
@@ -242,10 +246,13 @@ export const api = {
     ),
   search: (q: string, position?: string) =>
     call<SearchHit[]>(`/api/players?${new URLSearchParams({ q, ...(position ? { position } : {}) })}`),
-  player: (id: string, scoring: Scoring) =>
-    call<PlayerStats>(`/api/players/${encodeURIComponent(id)}?scoring=${scoring}`),
-  compare: (ids: string[], scoring: Scoring) =>
-    call<{ players: PlayerStats[] }>(`/api/compare?ids=${ids.map(encodeURIComponent).join(",")}&scoring=${scoring}`),
+  // window: "&season=..&start_week=..&end_week=.." from windowQuery, or "" for the season
+  player: (id: string, scoring: Scoring, window = "") =>
+    call<PlayerStats>(`/api/players/${encodeURIComponent(id)}?scoring=${scoring}${window}`),
+  compare: (ids: string[], scoring: Scoring, window = "") =>
+    call<{ players: PlayerStats[] }>(
+      `/api/compare?ids=${ids.map(encodeURIComponent).join(",")}&scoring=${scoring}${window}`,
+    ),
   leagues: () => call<League[]>("/api/leagues"),
   lineup: (leagueId: number, rosterId: number) =>
     call<Lineup>(`/api/leagues/${leagueId}/lineup`, {

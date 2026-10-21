@@ -20,9 +20,10 @@ SOURCES: dict[str, tuple[str, timedelta]] = {
     "news": ("news", timedelta(hours=3)),
     "rosters": ("sleeper.league", timedelta(hours=30)),
     "transactions": ("sleeper.transactions", timedelta(hours=3)),
+    "usage": ("nflverse.snap_counts", timedelta(hours=48)),
 }
 # Further sources a kind depends on, same age limit: stories without vectors can't be found.
-ALSO = {"news": ["news.embed"]}
+ALSO = {"news": ["news.embed"], "usage": ["nflverse.pbp_usage"]}
 RANK = {"fresh": 0, "stale": 1, "failing": 2}
 
 

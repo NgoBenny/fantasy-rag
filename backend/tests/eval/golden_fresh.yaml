@@ -103,6 +103,81 @@ fresh:
     fail_if:
       - says no changes are needed
 
+# Phase 10 usage questions (Oct 21, 2026), held out: written before any paid run, never
+# used to tune prompts. Run with `--only u01,...,u08,o05` (o05, the SQL snap-share
+# question in golden_answers.yaml, must still call no tools).
+  - id: u01
+    category: usage
+    question: what's jahmyr gibbs' snap share been lately?
+    context: {leagues: mine, selected: null}
+    tools: [get_usage]
+    require: [{tool: get_usage, players: [Jahmyr Gibbs]}]
+    correct_if: [gives snap shares copied from get_usage, with their weeks]
+    fail_if: [computes a share or a change the tool didn't give]
+
+  - id: u02
+    category: usage
+    question: how many targets has xavier worthy been getting the last few games?
+    context: {leagues: mine, selected: null}
+    tools: [get_usage]
+    require: [{tool: get_usage, players: [Xavier Worthy]}]
+    correct_if: [lists targets per game with weeks from get_usage]
+    fail_if: [predicts future targets]
+
+  - id: u03
+    category: usage
+    question: is tyler higbee's role growing?
+    context: {leagues: mine, selected: null}
+    tools: [get_usage]
+    require: [{tool: get_usage, players: [Tyler Higbee]}]
+    correct_if: [states the usage facts get_usage gives as observations]
+    fail_if: [says the usage change will continue, or gives a reason no tool states]
+
+  - id: u04
+    category: usage
+    question: who gets more red zone work, gibbs or rhamondre stevenson?
+    context: {leagues: mine, selected: null}
+    tools: [get_usage]
+    require: [{tool: get_usage, players: [Jahmyr Gibbs, Rhamondre Stevenson]}]
+    correct_if: [compares red-zone looks copied from get_usage over the same games]
+    fail_if: [adds the looks up or computes a difference]
+
+  - id: u05
+    category: usage
+    question: puka nacua target share vs garrett wilson
+    context: {leagues: mine, selected: null}
+    tools: [get_usage]
+    require: [{tool: get_usage, players: [Puka Nacua, Garrett Wilson]}]
+    correct_if: [gives both players' target shares as the tool states them]
+    fail_if: [computes a new percentage]
+
+  - id: u06
+    category: usage
+    question: has bijan robinson's workload changed recently?
+    context: {leagues: mine, selected: null}
+    tools: [get_usage]
+    require: [{tool: get_usage, players: [Bijan Robinson]}]
+    correct_if: [uses carries, carry share or snap share from get_usage]
+    fail_if: [explains why the workload changed without a cited source]
+
+  - id: u07
+    category: usage
+    question: devaughn vele snaps and targets this season
+    context: {leagues: mine, selected: null}
+    tools: [get_usage|get_player_stats]
+    require: [{tool: get_usage|get_player_stats, players: [Devaughn Vele]}]
+    correct_if: [snap share and targets copied from the tool, with weeks]
+    fail_if: [states a number no tool gave]
+
+  - id: u08
+    category: usage
+    question: why did gibbs get fewer targets last week?
+    context: {leagues: mine, selected: null}
+    tools: [get_usage, search_news]
+    require: [{tool: get_usage, players: [Jahmyr Gibbs]}]
+    correct_if: [reports the targets from get_usage, and gives a reason only if a cited story states one]
+    fail_if: [invents a reason, or presents the usage change itself as the cause]
+
 # Router evaluation only, as in golden_answers.yaml: scores are reported under the
 # original and the revised rubric.
 route_overrides:

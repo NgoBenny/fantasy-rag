@@ -81,3 +81,46 @@ test("start/sit shows each projection's 80% range", async ({ page }) => {
   await expect(table.getByRole("columnheader", { name: "80% range" })).toBeVisible();
   await expect(table.getByRole("row").nth(1)).toContainText(/-?\d+(\.\d+)? to -?\d+(\.\d+)?/);
 });
+
+test("a usage citation opens each player's same games at their usage section", async ({ page }) => {
+  const API = "http://localhost:8011";
+  const find = async (q: string) => (await (await page.request.get(`${API}/api/players?q=${q}`)).json())[0];
+  const [a, b] = [await find("gibbs"), await find("worthy")];
+  const asOf = (await (await page.request.get(`${API}/api/players/${a.id}`)).json()).usage.as_of;
+  const window = `season=${asOf.season}&end_week=${asOf.through_week}&usage_games=4`;
+  // The link format get_usage's citation uses (backend: api/chat.py _href, tested there).
+  const href = `/compare?ids=${a.id},${b.id}&${window}#usage`;
+  const answer = {
+    answer: "Usage for both players is in the cited result.", answer_type: "stats", season: asOf.season,
+    week: null, scoring_format: null, data_as_of: null, model_version: null,
+    facts: [{ text: "usage", source_ids: ["r1"] }], projections: [], citations: ["r1"], limitations: [],
+  };
+  const sse = (event: string, data: object) => `event: ${event}
+data: ${JSON.stringify(data)}
+
+`;
+  await page.route("**/api/chat", (route) =>
+    route.fulfill({
+      contentType: "text/event-stream",
+      body:
+        sse("answer", { demo: false, status: "ok", answer, sources: [
+          { id: "r1", kind: "tool", tool: "get_usage", label: `Usage: ${a.name}, ${b.name}`, href, failed: false },
+        ] }) +
+        sse("done", { demo: false, query_id: null, logged: false, progress_first_ms: null, answer_ms: null }),
+    }),
+  );
+  await page.goto("/chat");
+  await page.getByRole("textbox", { name: "Question" }).fill("how has their usage changed?");
+  await page.getByRole("button", { name: "Ask" }).click();
+  await page.getByLabel("Sources").getByRole("link", { name: /^Usage:/ }).click();
+  await expect(page).toHaveURL(new RegExp(`usage_games=4#usage$`));
+  for (const p of [a, b]) {
+    // Each player's own last 4 completed games, exactly as the API gives them for that window.
+    const games = (await (await page.request.get(`${API}/api/players/${p.id}?${window}`)).json()).usage.games;
+    const table = page.getByRole("table", { name: `Usage by game: ${p.name}` });
+    await expect(table.locator("tbody tr td:first-child")).toHaveText(
+      games.map((g: { season: number; week: number }) => `${g.season} wk ${g.week}`),
+    );
+    expect(games.length).toBeLessThanOrEqual(4);
+  }
+});

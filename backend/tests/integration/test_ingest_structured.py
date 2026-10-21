@@ -267,6 +267,10 @@ def test_corrected_play_by_play_removes_stale_rows(
     nfl.pbp = None  # a failed load deletes nothing
     report = structured.run_structured(engine, FakeSleeper(), now, season=2026)
     failed = {r.source for r in report.results if r.error}
-    assert failed == {"nflverse.pbp_team_defense", "nflverse.pbp_special_teams"}
+    pbp_steps = ["pbp_team_defense", "pbp_special_teams", "pbp_usage"]
+    assert failed == {f"nflverse.{s}" for s in pbp_steps}
     assert state() == ([(a, 1)], [7])
+    with engine.connect() as conn:  # usage and coverage survive the failed load too
+        assert conn.execute(text("SELECT DISTINCT week FROM pbp_games")).scalars().all() == [7]
+        assert conn.execute(text("SELECT count(*) FROM player_week_pbp_usage")).scalar_one() > 0
     engine.dispose()
