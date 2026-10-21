@@ -19,6 +19,12 @@ def test_roster_players_win_when_the_matchup_omits_them() -> None:
     assert got["players"] == ROSTER["players"] and got["starters"] == ["11", "33"]
 
 
+def test_an_explicitly_empty_lineup_is_kept_not_replaced_by_old_starters() -> None:
+    # Everyone benched: a filled-in matchup (players listed) with zero-filled starter slots.
+    benched = {"roster_id": 1, "players": ["11", "22", "33", "44"], "starters": ["0", "0"]}
+    assert live_week_entries([benched], [ROSTER])[0]["starters"] == ["0", "0"]
+
+
 def test_roster_starters_when_the_matchup_has_none_or_names_a_dropped_player() -> None:
     empty = {"roster_id": 1, "players": [], "starters": ["0", "0"]}
     assert live_week_entries([empty], [ROSTER])[0]["starters"] == ["11", "22"]

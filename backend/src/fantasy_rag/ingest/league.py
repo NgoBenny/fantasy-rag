@@ -51,14 +51,18 @@ def live_week_entries(
     can omit roster moves (seen: empty `players`). Starters come from the matchup when it
     names some and all are still on the roster: /rosters `starters` can lag lineup changes
     (seen 2026-10-21: it still held a week-5 lineup while the week-7 matchup and Sleeper's
-    app showed the new one). Otherwise /rosters starters are used."""
+    app showed the new one). An all-"0" lineup is a real (empty) lineup when the matchup
+    lists players; with no players and no named starters the entry isn't filled in yet.
+    Otherwise /rosters starters are used."""
     by_id = {int(m["roster_id"]): m for m in matchups}
     out = []
     for r in rosters:
         m = by_id.get(int(r["roster_id"]), {"roster_id": r["roster_id"]})
         players = r.get("players") or []
-        named = [str(p) for p in m.get("starters") or [] if str(p) != "0"]
-        current = bool(named) and set(named) <= {str(p) for p in players}
+        slots = [str(p) for p in m.get("starters") or []]
+        named = [p for p in slots if p != "0"]
+        filled_in = bool(named) or bool(slots and m.get("players"))
+        current = filled_in and set(named) <= {str(p) for p in players}
         starters = m["starters"] if current else r.get("starters") or []
         out.append({**m, "players": players, "starters": starters})
     return out
