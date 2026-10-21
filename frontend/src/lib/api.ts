@@ -111,6 +111,10 @@ export interface Status {
   latest_week: number;
   next_week: number;
   sources: Record<string, { last_ok: string; age_hours: number } | null>;
+  health?: Record<
+    string,
+    { state: "fresh" | "stale" | "failing"; source: string; last_ok: string | null; last_error_at: string | null; error: string | null }
+  >;
 }
 
 export interface AvailabilityAsOf {
@@ -201,6 +205,22 @@ export interface StartSit {
   higher_projection: string | null;
 }
 
+export interface ForwardResults {
+  scoring: string;
+  rows: {
+    season: number;
+    week: number;
+    position: string;
+    n: number;
+    baseline_mae: number | null;
+    matched_n: number;
+    matched_baseline_mae: number | null;
+    matched_ridge_mae: number | null;
+  }[];
+  matched_total: { n: number; baseline_mae?: number | null; ridge_mae?: number | null };
+  tuesdays: { season: number; week: number; deadline: string; status: "on_time" | "late" | "early_only" | "missing" }[];
+}
+
 export const api = {
   status: () => call<Status>("/api/status"),
   startSit: (ids: string[], leagueId: number | null, scoring: Scoring = "ppr") =>
@@ -210,6 +230,7 @@ export const api = {
   waivers: (leagueId: number) => call<Waivers>(`/api/leagues/${leagueId}/waivers`),
   modelRuns: () => call<ModelRun[]>("/api/model-runs"),
   forwardRuns: () => call<ForwardRuns>("/api/forward-runs"),
+  forwardResults: (scoring: Scoring) => call<ForwardResults>(`/api/forward-results?scoring=${scoring}`),
   chatSamples: () => call<{ question: string; scenario: boolean }[]>("/api/chat/samples"),
   health: () => call<{ ok: boolean; season: number; latest_week: number }>("/api/health"),
   freshness: () => call<{ source: string; last_ok: string; age_hours: number }[]>("/api/freshness"),

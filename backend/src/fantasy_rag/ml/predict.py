@@ -56,6 +56,10 @@ class Forecast:
     artifacts: dict[str, bytes] = field(default_factory=dict)  # policy -> pickled model
 
 
+class NoUpcomingWeek(LookupError):
+    """No regular-season game left to kick off: after week 18, until the next schedule."""
+
+
 def target_week(sched: list[dict[str, Any]], snapshot: datetime) -> tuple[int, int]:
     """The week whose first game is the next one to kick off after the snapshot."""
     first: dict[tuple[int, int], datetime] = {}
@@ -63,7 +67,10 @@ def target_week(sched: list[dict[str, Any]], snapshot: datetime) -> tuple[int, i
         if g["game_type"] == "REG" and g["kickoff_at"] is not None:
             k = (g["season"], g["week"])
             first[k] = min(first.get(k, g["kickoff_at"]), g["kickoff_at"])
-    return min(k for k, kick in first.items() if kick > snapshot)
+    upcoming = [k for k, kick in first.items() if kick > snapshot]
+    if not upcoming:
+        raise NoUpcomingWeek("no upcoming regular-season week")
+    return min(upcoming)
 
 
 def status_of(sched: list[dict[str, Any]], season: int, week: int, snapshot: datetime) -> str:
@@ -266,13 +273,31 @@ def scoring_rules(conn: Connection) -> tuple[dict[str, ScoringRules], dict[str, 
     return {k: ScoringRules.from_sleeper(v) for k, v in raw.items()}, raw
 
 
+def _has_on_time(conn: Connection, season: int, week: int) -> bool:
+    found = conn.execute(
+        text("SELECT 1 FROM forward_runs WHERE season = :s AND week = :w AND status = 'on_time'"),
+        {"s": season, "w": week},
+    ).first()
+    return found is not None
+
+
 def run(engine: Engine) -> dict[str, Any]:
+    """The Tuesday forward run. Caller must hold the STRUCTURED job lock (cli does)."""
     finalized = record_final(engine)
     conn = engine.connect().execution_options(isolation_level="REPEATABLE READ")
     with conn, conn.begin():
         # The first statement fixes the snapshot; its clock time is the information cutoff.
         snapshot = conn.execute(text("SELECT clock_timestamp()")).scalar_one()
         games, sched = load(conn)
+        try:
+            season, week = target_week(sched, snapshot)
+        except NoUpcomingWeek as none_left:  # offseason: nothing to predict, not a failure
+            return {"skipped": str(none_left)}
+        if status_of(sched, season, week, snapshot) == "on_time" and _has_on_time(
+            conn, season, week
+        ):
+            # Caller holds the STRUCTURED lock, so no other predict can be between check and insert.
+            return {"skipped": f"an on-time run for {season} week {week} is already recorded"}
         formats, raw = scoring_rules(conn)
         sync = {r.source: {"id": r.id, "finished_at": r.finished_at} for r in conn.execute(text(
             "SELECT DISTINCT ON (source) source, id, finished_at FROM sync_runs"
@@ -286,6 +311,8 @@ def run(engine: Engine) -> dict[str, Any]:
     f = forecast(games, sched, formats, snapshot, errors)
     stats_run = sync.get("nflverse.player_stats", {})
     with engine.begin() as w:
+        if f.status == "on_time" and _has_on_time(w, f.season, f.week):  # checked again at write
+            return {"skipped": f"an on-time run for {f.season} week {f.week} is already recorded"}
         shas = {}
         for policy, body in f.artifacts.items():
             shas[policy] = hashlib.sha256(body).hexdigest()

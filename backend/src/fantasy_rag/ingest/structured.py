@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-import nflreadpy as nfl
+import nflreadpy
 import polars as pl
 from nflreadpy.config import update_config
 from sqlalchemy import Connection, Engine, text
@@ -15,6 +15,9 @@ from fantasy_rag.ingest import nflverse as nv
 from fantasy_rag.ingest import pbp as pb
 from fantasy_rag.ingest import sleeper as sl
 from fantasy_rag.ingest.base import Run, prune, record_unresolved, stage, sync_run, upsert
+from fantasy_rag.ingest.retry import Retrying
+
+nfl = Retrying(nflreadpy)  # every load_* download retried on transient errors
 
 FIRST_SEASON = 2022
 OVERRIDES = REPO_ROOT / "data" / "id_overrides.csv"

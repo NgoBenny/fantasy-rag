@@ -1,6 +1,7 @@
 """Shared ingestion adapter: validate, upsert, record sync_runs and unresolved players."""
 
 import io
+import os
 import re
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
@@ -46,6 +47,18 @@ class Run:
     rows: int = 0
 
 
+class SourceUnavailable(RuntimeError):
+    pass
+
+
+def _maybe_fail(source: str) -> None:
+    """Outage drills only: FANTASY_RAG_FAIL_SOURCE=news (comma-separated sync_runs source
+    names) makes that source fail exactly as a real outage would, recorded as failed."""
+    injected = {s.strip() for s in os.environ.get("FANTASY_RAG_FAIL_SOURCE", "").split(",")}
+    if source in injected:
+        raise SourceUnavailable(f"injected outage for {source} (FANTASY_RAG_FAIL_SOURCE)")
+
+
 @contextmanager
 def sync_run(engine: Engine, source: str) -> Iterator[Run]:
     """One transaction per source; the sync_runs row survives a failure to record it."""
@@ -55,6 +68,7 @@ def sync_run(engine: Engine, source: str) -> Iterator[Run]:
             {"s": source},
         ).scalar_one()
     try:
+        _maybe_fail(source)
         with engine.begin() as conn:
             run = Run(run_id, conn)
             yield run

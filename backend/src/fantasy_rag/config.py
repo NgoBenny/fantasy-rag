@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         env_file=os.environ.get("FANTASY_RAG_ENV_FILE") or REPO_ROOT / ".env", extra="ignore"
     )
 
-    database_url: str = "postgresql+psycopg://fantasy:fantasy@localhost:5432/fantasy"
+    database_url: str = "postgresql+psycopg://fantasy:fantasy@127.0.0.1:5432/fantasy"
     demo_mode: bool = False
     sleeper_username: str = ""
     anthropic_api_key: SecretStr = SecretStr("")

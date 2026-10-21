@@ -1,6 +1,9 @@
 # db: Postgres 16 + pgvector. api (Phase 7): `docker compose up -d db api`, reads .env.
 # api-demo: `docker compose --profile demo up api-demo`, sample data with no .env,
 # database or API key. A worker arrives in Phase 9. Plain `uv run uvicorn` still works.
+# Fixed project name: the scheduled-task checkout (scripts/setup_runner.ps1) lives in another
+# folder but must use this same database container and volume, never start its own.
+name: fantasy-rag
 services:
   db:
     image: pgvector/pgvector:0.8.7-pg16
@@ -9,7 +12,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fantasy}
       POSTGRES_DB: ${POSTGRES_DB:-fantasy}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"  # loopback only: never reachable from the network
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +29,7 @@ services:
     depends_on:
       db: { condition: service_healthy }
     ports:
-      - "8010:8010"
+      - "127.0.0.1:8010:8010"
     profiles: ["api"]
 
   api-demo:
@@ -34,7 +37,7 @@ services:
     environment:
       DEMO_MODE: "true"
     ports:
-      - "8010:8010"
+      - "127.0.0.1:8010:8010"
     profiles: ["demo"]
 
 volumes:

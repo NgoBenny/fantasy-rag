@@ -65,5 +65,5 @@ markers = [
 ]
 
 [[tool.mypy.overrides]]
-module = ["nflreadpy", "nflreadpy.*", "feedparser", "fastembed", "sklearn", "sklearn.*"]
+module = ["nflreadpy", "nflreadpy.*", "feedparser", "fastembed", "sklearn", "sklearn.*", "requests"]
 ignore_missing_imports = true

@@ -4,13 +4,16 @@ from sqlalchemy import Engine, create_engine, event
 
 from fantasy_rag.config import Settings
 
+# A database that is down fails fast instead of hanging a scheduled job.
+CONNECT = {"connect_args": {"connect_timeout": 10}}
+
 
 def get_engine(url: str | None = None) -> Engine:
-    return create_engine(url or Settings().database_url)
+    return create_engine(url or Settings().database_url, **CONNECT)
 
 
 def _with_role(url: str | None, role: str, read_only: bool) -> Engine:
-    engine = create_engine(url or Settings().database_url)
+    engine = create_engine(url or Settings().database_url, **CONNECT)
 
     @event.listens_for(engine, "connect")
     def _restrict(dbapi_conn: Any, _record: Any) -> None:

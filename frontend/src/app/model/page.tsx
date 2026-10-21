@@ -1,5 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type Metrics, type ModelRun, type PolicyResult, api } from "@/lib/api";
+import Link from "next/link";
+
+import { type ForwardResults, type Metrics, type ModelRun, type PolicyResult, type Scoring, api, scoringOf } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -63,8 +65,81 @@ function BenchmarkTable({ ppr }: { ppr: Record<string, PolicyResult> }) {
   );
 }
 
-export default async function ModelPage() {
-  const [runs, forward] = await Promise.all([api.modelRuns(), api.forwardRuns()]);
+const STATUS_TEXT: Record<string, string> = {
+  on_time: "on time",
+  late: "late (not counted)",
+  early_only: "early only (not counted)",
+  missing: "missing",
+};
+
+function ForwardResultsSection({ fr, scoring }: { fr: ForwardResults; scoring: Scoring }) {
+  return (
+    <section className="space-y-2" aria-label="Forward results">
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-lg font-semibold">Forward results (unseen 2026 weeks)</h2>
+        <div className="flex gap-3 text-sm">
+          {(["ppr", "half", "std"] as const).map((s) => (
+            <Link
+              key={s}
+              href={`/model?scoring=${s}`}
+              className={s === scoring ? "font-semibold underline" : "text-muted-foreground hover:underline"}
+            >
+              {s.toUpperCase()}
+            </Link>
+          ))}
+        </div>
+      </div>
+      {fr.rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No finalized weeks yet. A week counts once its on-time Tuesday run exists and its last game is 4 days old
+          (the first is week 8, final November 6).
+        </p>
+      ) : (
+        <>
+          <p className="text-sm">
+            TE, baseline vs Ridge on the same {fr.matched_total.n} player-weeks: MAE {fr.matched_total.baseline_mae ?? "–"} vs{" "}
+            {fr.matched_total.ridge_mae ?? "–"} ({scoring.toUpperCase()}).
+          </p>
+          <Table aria-label="Forward results by week">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Week</TableHead>
+                <TableHead>Position</TableHead>
+                <TableHead className="text-right">Baseline MAE (n)</TableHead>
+                <TableHead className="text-right">Matched: baseline / Ridge (n)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {fr.rows.map((r) => (
+                <TableRow key={`${r.season}-${r.week}-${r.position}`}>
+                  <TableCell>{r.week}</TableCell>
+                  <TableCell>{r.position}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {r.baseline_mae ?? "–"} ({r.n})
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {r.matched_n ? `${r.matched_baseline_mae} / ${r.matched_ridge_mae} (${r.matched_n})` : "–"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
+      )}
+      <ul className="flex flex-wrap gap-3 text-sm" aria-label="Tuesday status">
+        {fr.tuesdays.map((t) => (
+          <li key={`${t.season}-${t.week}`} className={t.status === "on_time" ? "" : "text-destructive"}>
+            wk {t.week}: {STATUS_TEXT[t.status]}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export default async function ModelPage({ searchParams }: PageProps<"/model">) {
+  const scoring = scoringOf((await searchParams).scoring);
+  const [runs, forward, fr] = await Promise.all([api.modelRuns(), api.forwardRuns(), api.forwardResults(scoring)]);
   const bench = benchmark(runs);
   const ridge = runs.find((r) => r.model_version === "ridge-components-v1");
   const promotion = ridge?.metrics.promotion ?? {};
@@ -173,8 +248,10 @@ export default async function ModelPage() {
         </section>
       ) : null}
 
+      <ForwardResultsSection fr={fr} scoring={scoring} />
+
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Forward predictions (2026)</h2>
+        <h2 className="text-lg font-semibold">Forward runs (2026)</h2>
         {forward.runs.length === 0 ? (
           <p className="text-sm text-muted-foreground">No forward run yet; the first is Tuesday, October 27.</p>
         ) : (

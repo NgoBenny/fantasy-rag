@@ -30,7 +30,7 @@ export default defineConfig({
       env: { UPSTREAM_PORT: "8030", PROXY_PORT: "8031" },
     },
     {
-      command: "npm run build && npx next start --port 3030",
+      command: "npm run build && npx next start --hostname 127.0.0.1 --port 3030",
       url: "http://localhost:3030",
       reuseExistingServer: false,
       timeout: 300_000,

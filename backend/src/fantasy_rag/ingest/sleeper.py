@@ -9,6 +9,8 @@ from typing import Any
 import httpx
 import polars as pl
 
+from fantasy_rag.ingest.retry import retry
+
 SLEEPER = "https://api.sleeper.app/v1"
 USER_AGENT = "fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)"
 SKILL = {"QB", "RB", "WR", "TE", "K"}
@@ -19,10 +21,13 @@ class Sleeper:
         self.client = httpx.Client(base_url=SLEEPER, headers={"User-Agent": USER_AGENT}, timeout=60)
 
     def get(self, path: str, **params: Any) -> Any:
-        time.sleep(0.25)  # far under Sleeper's 1,000 calls/minute
-        resp = self.client.get(path, params=params)
-        resp.raise_for_status()
-        return resp.json()
+        def once() -> Any:
+            time.sleep(0.25)  # far under Sleeper's 1,000 calls/minute
+            resp = self.client.get(path, params=params)
+            resp.raise_for_status()
+            return resp.json()
+
+        return retry(once)
 
     def players(self, cache_dir: Path) -> dict[str, dict[str, Any]]:
         """/players/nfl at most once per day: reuse today's cached copy if present."""

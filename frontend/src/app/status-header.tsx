@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { type Status, api } from "@/lib/api";
 
 const LABELS: Record<string, string> = {
   stats: "stats",
@@ -10,6 +10,23 @@ const LABELS: Record<string, string> = {
 
 function age(hours: number): string {
   return hours < 1 ? `${Math.round(hours * 60)}m ago` : hours < 48 ? `${Math.round(hours)}h ago` : `${Math.round(hours / 24)}d ago`;
+}
+
+/** One chip per source that isn't fresh: failing (its last attempts failed) or stale. */
+function SourceWarnings({ health }: { health?: Status["health"] }) {
+  const bad = Object.entries(health ?? {}).filter(([, h]) => h.state !== "fresh");
+  if (bad.length === 0) return null;
+  return (
+    <div role="status" aria-label="Source warnings" className="mx-auto mt-1 flex max-w-5xl flex-wrap gap-2">
+      {bad.map(([k, h]) => (
+        <span key={k} className="rounded bg-destructive/10 px-2 py-0.5 font-medium text-destructive">
+          {LABELS[k] ?? k}: {h.state}
+          {h.state === "failing" && h.last_error_at ? ` since ${new Date(h.last_error_at).toLocaleTimeString()}` : ""}
+          {h.last_ok ? ` · last good ${new Date(h.last_ok).toLocaleString()}` : " · never succeeded"}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 // Season, week and how fresh each kind of data is, on every page. Never breaks a page:
@@ -42,6 +59,7 @@ export async function StatusHeader() {
           </span>
         ))}
       </div>
+      <SourceWarnings health={s.health} />
     </div>
   );
 }

@@ -23,6 +23,13 @@ def main(argv: list[str] | None = None) -> None:
     bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
     bt.add_argument("--tune-season", type=int, default=2024)
     bt.add_argument("--test-season", type=int, default=2025)
+    bk = sub.add_parser("backup", help="verified local dump outside the repo (+ roles, manifest)")
+    bk.add_argument(
+        "--verify-latest",
+        action="store_true",
+        help="restore the newest dump into a fresh container and check it",
+    )
+    sub.add_parser("forward-check", help="exit 1 if this week's on-time forward run is missing")
     sub.add_parser("calibration-seed", help="Phase 8: record the frozen range calibration, once")
     sub.add_parser("predict", help="Phase 8 forward run: log baseline + TE Ridge (Tuesdays)")
     bm = sub.add_parser("benchmark", help="Phase 8: baseline vs Ridge vs LightGBM, frozen rules")
@@ -44,7 +51,42 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     if args.command == "eval" and args.what == "grounding" and not args.report:
         parser.error("eval grounding requires --report; it never regenerates answers")
+    lock = _lock_for(args)
+    if lock is None:
+        _dispatch(args)
+        return
+    from fantasy_rag.db import get_engine
+    from fantasy_rag.jobs import locks
+    from fantasy_rag.jobs.locks import job_lock
 
+    wait = locks.PREDICT_WAIT if args.command == "predict" else 0
+    with job_lock(get_engine(), lock, wait) as owned:
+        if not owned and wait:
+            print(f"{args.command}: lock {lock} still held after {wait} s; nothing written")
+            sys.exit(1)  # the week's prediction is at stake: fail so the task's toast fires
+        if not owned:
+            print(f"{args.command}: already running (lock {lock}); nothing to do")
+            return
+        _dispatch(args)
+
+
+def _lock_for(args: argparse.Namespace) -> int | None:
+    """The one lock a command takes (jobs.locks); read-only commands take none."""
+    from fantasy_rag.jobs import locks
+
+    what = getattr(args, "what", None) or getattr(args, "action", None)
+    return {
+        ("ingest", "structured"): locks.STRUCTURED,
+        ("ingest", "news"): locks.NEWS,
+        ("league", "import"): locks.STRUCTURED,
+        ("league", "sync-transactions"): locks.TRANSACTIONS,
+        ("predict", None): locks.STRUCTURED,
+        ("calibration-seed", None): locks.STRUCTURED,
+        ("backup", None): locks.BACKUP,
+    }.get((args.command, what if args.command in ("ingest", "league") else None))
+
+
+def _dispatch(args: argparse.Namespace) -> None:
     if args.command == "verify-sources":
         from fantasy_rag.verify_sources import run
 
@@ -88,6 +130,30 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "backup":
+        from fantasy_rag.jobs import backup
+
+        if args.verify_latest:
+            drill = backup.verify_latest()
+            print(f"restored {drill['dump']} into a fresh container in {drill['seconds']} s;"
+                  f" {drill['tables']} tables checked")  # fmt: skip
+            for p in drill["problems"]:
+                print(f"  PROBLEM: {p}")
+            if drill["problems"]:
+                sys.exit(1)
+        else:
+            print(f"backup written: {backup.run()}")
+    elif args.command == "forward-check":
+        from datetime import UTC, datetime
+
+        from fantasy_rag.db import get_engine
+        from fantasy_rag.ml.forward_results import check
+
+        with get_engine().connect() as conn:
+            ok, message = check(conn, datetime.now(UTC))
+        print(message)
+        if not ok:
+            sys.exit(1)
     elif args.command == "calibration-seed":
         from fantasy_rag.db import get_engine
         from fantasy_rag.ml.predict import seed
@@ -250,6 +316,9 @@ def _predict() -> None:
     from fantasy_rag.ml.predict import run
 
     r = run(get_engine())
+    if "skipped" in r:
+        print(f"predict: {r['skipped']}; nothing written")
+        return
     print(
         f"forward run {r['run_id']}: {r['season']} week {r['week']} {r['status'].upper()}"
         f" (data as of {r['snapshot_at']:%Y-%m-%d %H:%M %Z},"

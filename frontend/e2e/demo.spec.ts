@@ -184,4 +184,6 @@ test("model performance shows the frozen benchmark, ranges, FantasyPros and the 
   await expect(page.getByRole("table", { name: "FantasyPros" })).toContainText("FantasyPros consensus");
   await expect(page.getByText("captured on Fridays")).toBeVisible();
   await expect(page.getByRole("table", { name: "Model runs" })).toBeVisible();
+  // Forward results: honest empty state until a forward week is final.
+  await expect(page.getByLabel("Forward results")).toContainText("No finalized weeks yet");
 });
