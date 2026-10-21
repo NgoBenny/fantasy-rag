@@ -92,7 +92,7 @@ def problems(
         for i, c in enumerate(items, start=1):
             if not c.source_ids:
                 out.append(f"{kind} {i} cites no result")
-            if not evidence_free and (bad := [s for s in c.source_ids if s in failed]):
+            if bad := [s for s in c.source_ids if s in failed]:  # a claim is never an error
                 out.append(f"{kind} {i} cites a failed tool call: {', '.join(bad)}")
             check(f"{kind} {i}", c.text, c.source_ids)
     cited = set(answer.citations).union(*(c.source_ids for _, items in claims for c in items))

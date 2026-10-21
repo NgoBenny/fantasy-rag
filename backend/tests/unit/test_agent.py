@@ -323,6 +323,12 @@ def test_a_failed_tool_call_is_not_evidence(monkeypatch: pytest.MonkeyPatch) -> 
     ask_back = _answer("Which Warren do you mean?", cites=["r1"])
     ask_back.answer_type = "clarification"  # may point at the error that made it ask
     assert problems(ask_back, srcs, "", bad) == []
+    # Review case: no_data / out_of_scope answers skipped the check, so the same fact
+    # citing the failed lookup passed. Claims never rest on an error, whatever the type.
+    for kind in ("no_data", "out_of_scope", "clarification"):
+        a.answer_type = kind  # type: ignore[assignment]
+        assert problems(a, srcs, "", bad) == ["fact 1 cites a failed tool call: r1"], kind
+    a.answer_type = "start_sit"
     # Through ask(): the bad draft is repaired, or withheld if the repair fails too.
     monkeypatch.setattr(router, "context_block", lambda *a: "<context>week 7</context>")
     monkeypatch.setattr(router, "route", lambda *a: ([failed], False))
