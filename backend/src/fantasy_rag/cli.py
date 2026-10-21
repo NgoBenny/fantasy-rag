@@ -29,6 +29,8 @@ def main(argv: list[str] | None = None) -> None:
     dm = sub.add_parser("demo", help="build data/demo/demo.json for DEMO_MODE (free by default)")
     dm.add_argument("action", choices=["record"])
     dm.add_argument("--report", required=True, help="saved eval_answers report to reuse")
+    dm.add_argument("--record-question", help="ask one league-free question live (paid)")
+    dm.add_argument("--budget-usd", type=float, help="spending cap; required to record")
     ev = sub.add_parser("eval", help="evaluate retrieval on the labelled questions")
     ev.add_argument("what", choices=["news", "answers", "grounding"])
     ev.add_argument("--only", help="answers: comma-separated question ids or sets")
@@ -86,10 +88,12 @@ def main(argv: list[str] | None = None) -> None:
         from pathlib import Path
 
         from fantasy_rag.db import get_readonly_engine
-        from fantasy_rag.demo_record import build, write
+        from fantasy_rag.demo_record import build, load_recorded, write
 
+        if args.record_question:
+            _record_demo(args.record_question, args.budget_usd)
         with get_readonly_engine().connect() as conn:
-            print(f"wrote {write(build(conn, Path(args.report), []))}")
+            print(f"wrote {write(build(conn, Path(args.report), load_recorded()))}")
     elif args.command == "ask":
         _ask(args.question, args.league_id)
     elif args.command == "eval" and args.what == "answers":
@@ -121,6 +125,28 @@ def _tool(name: str, raw_args: str) -> None:
 
     with get_readonly_engine().connect() as conn:
         print(json.dumps(run_tool(conn, name, json.loads(raw_args)), indent=2, default=str))
+
+
+def _record_demo(question: str, cap: float | None) -> None:
+    """Paid: one live answer under a hard cap; saved only if it passed every check."""
+    from fantasy_rag.agent.budget import Budget
+    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.db import get_readonly_engine
+    from fantasy_rag.demo_record import record_question, save_recorded
+
+    if cap is None:
+        raise SystemExit("--record-question spends money: pass --budget-usd")
+    budget = Budget(cap)
+    llm = AnthropicLLM(budget=budget)
+    try:
+        with get_readonly_engine().connect() as conn:
+            chat = record_question(conn, llm, question)
+    finally:  # report what was spent even when recording fails
+        print(f"spent ${budget.spent:.4f} of ${cap:.2f} (calls with unknown usage: "
+              f"{llm.unpriced}); tokens {llm.usage}")  # fmt: skip
+    save_recorded(chat)
+    done = next(e for e in chat["events"] if e["event"] == "done")["data"]
+    print(f"recorded: first progress {done['progress_first_ms']} ms, answer {done['answer_ms']} ms")
 
 
 def _ask(question: str, league_id: int | None) -> None:

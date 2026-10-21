@@ -1,0 +1,128 @@
+[
+ {
+  "events": [
+   {
+    "at_ms": 0,
+    "data": {
+     "elapsed_ms": 0,
+     "message": "Reading the season and your league context",
+     "stage": "context"
+    },
+    "event": "progress"
+   },
+   {
+    "at_ms": 2764,
+    "data": {
+     "elapsed_ms": 2764,
+     "message": "Looked up projections for Jaylen Warren, Bucky Irving",
+     "ok": true,
+     "stage": "tool",
+     "tool": "compare_start_sit"
+    },
+    "event": "progress"
+   },
+   {
+    "at_ms": 4561,
+    "data": {
+     "elapsed_ms": 4561,
+     "message": "Writing the answer",
+     "stage": "writing"
+    },
+    "event": "progress"
+   },
+   {
+    "at_ms": 8734,
+    "data": {
+     "elapsed_ms": 8734,
+     "message": "Checking every number and source",
+     "stage": "checking"
+    },
+    "event": "progress"
+   },
+   {
+    "at_ms": 8734,
+    "data": {
+     "answer": {
+      "answer": "I'd start Jaylen Warren. The baseline projects him higher than Bucky Irving for week 7 in PPR. Neither player has an injury flag in the results. The projection ignores depth-chart changes and news.",
+      "answer_type": "start_sit",
+      "citations": [
+       "r1"
+      ],
+      "data_as_of": null,
+      "facts": [
+       {
+        "source_ids": [
+         "r1"
+        ],
+        "text": "Jaylen Warren (PIT) scored 9.8 PPR points in week 6."
+       },
+       {
+        "source_ids": [
+         "r1"
+        ],
+        "text": "Bucky Irving (TB) scored 6.9 PPR points in week 6."
+       },
+       {
+        "source_ids": [
+         "r1"
+        ],
+        "text": "No injury entries are listed for either player."
+       }
+      ],
+      "limitations": [
+       "No league is known, so PPR scoring was used by default.",
+       "The baseline does not account for depth-chart changes or news.",
+       "No prediction interval is available for the projections."
+      ],
+      "model_version": "baseline-ewm-v1",
+      "projections": [
+       {
+        "source_ids": [
+         "r1"
+        ],
+        "text": "Jaylen Warren is projected for 16.6 points in week 7 (PPR)."
+       },
+       {
+        "source_ids": [
+         "r1"
+        ],
+        "text": "Bucky Irving is projected for 13.5 points in week 7 (PPR)."
+       }
+      ],
+      "scoring_format": "ppr",
+      "season": 2026,
+      "week": 7
+     },
+     "as_of": {
+      "next_week": 7,
+      "season": 2026
+     },
+     "sources": [
+      {
+       "failed": false,
+       "href": "/compare?ids=00-0037228,00-0039361&scoring=ppr",
+       "id": "r1",
+       "kind": "tool",
+       "label": "Projections: Jaylen Warren, Bucky Irving",
+       "tool": "compare_start_sit"
+      }
+     ],
+     "status": "ok"
+    },
+    "event": "answer"
+   },
+   {
+    "at_ms": 8734,
+    "data": {
+     "answer_ms": 8734,
+     "logged": false,
+     "progress_first_ms": 0,
+     "query_id": null
+    },
+    "event": "done"
+   }
+  ],
+  "question": "bucky irving or jaylen warren this week?",
+  "recorded_from": "live run 2026-10-21"
+ }
+]

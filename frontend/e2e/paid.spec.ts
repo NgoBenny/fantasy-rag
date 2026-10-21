@@ -18,5 +18,11 @@ test("live start/sit question: progress, then a validated answer with clickable 
   const done = events.find((e) => e.event === "done");
   console.log("PAID_RUN", JSON.stringify({ terminal: events.at(-2)?.event, done: done?.data }));
   await expect(page.getByLabel("Answer")).toBeVisible();
-  await expect(page.getByLabel("Answer").getByLabel("Sources").getByRole("link").first()).toBeVisible();
+  const source = page.getByLabel("Answer").getByLabel("Sources").getByRole("link", { name: /Projections/ });
+  await expect(source.first()).toBeVisible();
+  // The source opens the same players' projections (league rules: no team needed).
+  await source.first().click();
+  const rows = page.getByRole("table", { name: "Start/sit" }).getByRole("row");
+  await expect(rows.filter({ hasText: "Jaylen Warren" })).toHaveCount(1);
+  await expect(rows.filter({ hasText: "Bucky Irving" })).toHaveCount(1);
 });

@@ -5,10 +5,12 @@ database; the league is a synthetic "Demo League" (no Sleeper IDs, owners or nam
 real leagues). Chat answers are reused from a saved Phase 6 evaluation report: the
 validated answer and its cited sources exactly as produced, with progress lines rebuilt
 by the same templates the live API uses (their timing is approximate). Questions with
-no saved answer can be recorded live only with `--record-question` and a spending cap.
+no saved answer can be recorded live only with `--record-question` and `--budget-usd` (paid); they
+are kept in data/demo/recorded_chats.json and included in every rebuild.
 """
 
 import json
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -18,7 +20,15 @@ from sqlalchemy import Connection, text
 
 from fantasy_rag.agent import tools
 from fantasy_rag.agent.answer import Answer
-from fantasy_rag.agent.router import WITHHELD_MESSAGE, Progress, ToolCall, Turn, tool_progress
+from fantasy_rag.agent.llm import LLMClient
+from fantasy_rag.agent.router import (
+    WITHHELD_MESSAGE,
+    Progress,
+    ToolCall,
+    Turn,
+    ask,
+    tool_progress,
+)
 from fantasy_rag.analytics import queries as q
 from fantasy_rag.analytics.optimizer import Candidate, optimize
 from fantasy_rag.analytics.scoring import ScoringRules
@@ -26,6 +36,7 @@ from fantasy_rag.api.chat import sources
 from fantasy_rag.config import REPO_ROOT
 
 OUT = REPO_ROOT / "data" / "demo" / "demo.json"
+RECORDED = REPO_ROOT / "data" / "demo" / "recorded_chats.json"  # paid live recordings
 LABEL = "Sample data from week 7, 2026, not live"
 DEMO_LEAGUE = 900
 DEMO_SCORING = "Demo League rules (half PPR)"
@@ -65,19 +76,57 @@ def _events_from_turn(turn: Turn, latency_ms: int) -> list[dict[str, Any]]:
                   Progress("checking", "Checking every number and source")]  # fmt: skip
     gap = max(150, latency_ms // (len(steps) + 1))
     out = []
-    for i, p in enumerate(steps):
-        data: dict[str, Any] = {"stage": p.stage, "message": p.message, "elapsed_ms": gap * i}
-        if p.tool:
-            data |= {"tool": p.tool, "ok": p.ok}
-        out.append({"event": "progress", "at_ms": gap * i, "data": data})
-    end = gap * len(steps)
+    out = [_progress_event(p, gap * i) for i, p in enumerate(steps)]
+    return out + _answer_events(turn, gap * len(steps), 0)
+
+
+def _progress_event(p: Progress, at: int) -> dict[str, Any]:
+    data: dict[str, Any] = {"stage": p.stage, "message": p.message, "elapsed_ms": at}
+    if p.tool:
+        data |= {"tool": p.tool, "ok": p.ok}
+    return {"event": "progress", "at_ms": at, "data": data}
+
+
+def _answer_events(turn: Turn, end: int, first: int | None) -> list[dict[str, Any]]:
     status = "repaired" if turn.first_problems else "ok"
-    out.append({"event": "answer", "at_ms": end, "data": {
-        "status": status, "answer": turn.answer.model_dump(), "sources": sources(turn),
-        "as_of": {"season": 2026, "next_week": 7}}})  # fmt: skip
-    out.append({"event": "done", "at_ms": end, "data": {
-        "query_id": None, "logged": False, "progress_first_ms": 0, "answer_ms": end}})  # fmt: skip
-    return out
+    return [
+        {"event": "answer", "at_ms": end, "data": {
+            "status": status, "answer": turn.answer.model_dump(), "sources": sources(turn),
+            "as_of": {"season": 2026, "next_week": 7}}},
+        {"event": "done", "at_ms": end, "data": {
+            "query_id": None, "logged": False, "progress_first_ms": first, "answer_ms": end}},
+    ]  # fmt: skip
+
+
+def record_question(conn: Connection, llm: LLMClient, question: str) -> dict[str, Any]:
+    """Ask one league-free question live (paid) and keep it only if it passed every check.
+    Progress lines and timing are the real ones from this run."""
+    start, events = time.monotonic(), []
+
+    def on_progress(p: Progress) -> None:
+        events.append(_progress_event(p, int((time.monotonic() - start) * 1000)))
+
+    turn = ask(conn, llm, question, [], None, on_progress)  # no leagues: nothing personal
+    if turn.problems:
+        raise ValueError(f"the answer was withheld ({turn.problems[0]}); nothing saved")
+    end = int((time.monotonic() - start) * 1000)
+    when = datetime.now(UTC).date().isoformat()
+    return {"question": question, "recorded_from": f"live run {when}",
+            "events": events + _answer_events(turn, end, events[0]["at_ms"])}  # fmt: skip
+
+
+def load_recorded(path: Path = RECORDED) -> list[dict[str, Any]]:
+    loaded: list[dict[str, Any]] = (
+        json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    )
+    return loaded
+
+
+def save_recorded(chat: dict[str, Any], path: Path = RECORDED) -> None:
+    """Keep live recordings apart from demo.json, so free rebuilds never drop them."""
+    kept = [c for c in load_recorded(path) if c["question"] != chat["question"]]
+    body = json.dumps([*kept, chat], indent=1, sort_keys=True) + "\n"
+    path.write_text(body, encoding="utf-8", newline="\n")
 
 
 def _from_report(path: Path, ids: list[str]) -> list[dict[str, Any]]:
@@ -120,6 +169,7 @@ def _refs(conn: Connection) -> dict[str, q.PlayerRef]:
 
 
 def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> dict[str, Any]:
+    """`extra_chats`: live recordings (load_recorded()), placed after the saved answers."""
     refs = _refs(conn)
     season, week = q.latest_week(conn)
     presets = ("ppr", "half", "std")

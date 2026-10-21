@@ -155,6 +155,7 @@ uv run fantasy-rag eval grounding --report ../data/logs/<report>.json --only a09
 uv run pytest -m llm                   # Phase 6 checks: golden targets + prompt-injection fixture (Claude API; set LLM_TEST_BUDGET_USD)
 uv run fantasy-rag league sync-transactions   # Sleeper adds/drops/trades -> waiver availability (hourly task runs it)
 uv run fantasy-rag demo record --report ../data/logs/<eval report>.json   # rebuild data/demo/demo.json (free)
+uv run fantasy-rag demo record --report ... --record-question "..." --budget-usd 0.10   # add one live answer (paid, capped; kept in data/demo/recorded_chats.json)
 
 uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 is taken on this PC); --reload so Playwright never reuses stale code
 
