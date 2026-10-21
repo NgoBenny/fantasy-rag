@@ -77,16 +77,18 @@ def status_of(sched: list[dict[str, Any]], season: int, week: int, snapshot: dat
     return "on_time"
 
 
-# (policy, scoring key, position) -> [(game kickoff, actual - predicted)], frozen
+# (policy, rules fingerprint, position) -> [(game kickoff, actual - predicted)], frozen
 Errors = dict[tuple[str, str, str], list[tuple[datetime, float]]]
 FINAL_AFTER = timedelta(days=4)  # a week's outcomes are final 4 days after its last game
 
 
 def offsets_at(
-    errors: Errors, policy: str, key: str, pos: str, cutoff: datetime
+    errors: Errors, policy: str, rules: ScoringRules, pos: str, cutoff: datetime
 ) -> list[float] | None:
-    """Range offsets from this policy's recorded errors on games usable at the cutoff."""
-    got = ranges.offsets([e for k, e in errors.get((policy, key, pos), []) if usable(k, cutoff)])
+    """Range offsets from this policy's recorded errors under these exact rules, on games
+    usable at the cutoff (a league that changed its rules starts a new pool)."""
+    pool = errors.get((policy, rules.fingerprint(), pos), [])
+    got = ranges.offsets([e for k, e in pool if usable(k, cutoff)])
     return list(got) if got else None
 
 
@@ -141,7 +143,8 @@ def forecast(
     position = {r.player_id: r.position for r in targets}
     for policy in POLICIES:
         out.ranges[policy] = {
-            k: {p: offsets_at(errors, policy, k, p, cutoff) for p in POSITIONS} for k in formats
+            k: {p: offsets_at(errors, policy, r, p, cutoff) for p in POSITIONS}
+            for k, r in formats.items()
         }
     for by_player in out.preds.values():
         for pid, by_key in by_player.items():
@@ -176,7 +179,8 @@ def seed_errors(
             for key, p in by_key.items():
                 if p is not None:
                     actual = score(r.label.stats, r.position, formats[key]).points
-                    out.append({"pol": policy, "k": key, "pos": r.position, "p": r.player_id,
+                    out.append({"pol": policy, "fp": formats[key].fingerprint(),
+                                "pos": r.position, "p": r.player_id,
                                 "s": r.season, "w": r.week, "kick": r.label.kickoff,
                                 "e": round(actual - p, 4)})  # fmt: skip
     return out
@@ -193,13 +197,14 @@ def seed(engine: Engine) -> int:
         games, sched = load(conn)
         formats, _ = scoring_rules(conn)
         rows = seed_errors(games, sched, formats)
-        conn.execute(_INSERT_ERROR, [r | {"src": "seed", "run": None} for r in rows])
-    return len(rows)
+        # Leagues with identical rules share one fingerprint: count what was stored.
+        stored = conn.execute(_INSERT_ERROR, [r | {"src": "seed", "run": None} for r in rows])
+    return int(stored.rowcount)
 
 
 _INSERT_ERROR = text(
-    "INSERT INTO calibration_errors (policy, scoring_key, position, player_id, season, week,"
-    " kickoff, error, source, run_id) VALUES (:pol, :k, :pos, :p, :s, :w, :kick, :e, :src, :run)"
+    "INSERT INTO calibration_errors (policy, rules_fp, position, player_id, season, week,"
+    " kickoff, error, source, run_id) VALUES (:pol, :fp, :pos, :p, :s, :w, :kick, :e, :src, :run)"
     " ON CONFLICT DO NOTHING"
 )
 
@@ -238,7 +243,8 @@ def record_final(engine: Engine) -> int:
         for run in runs:
             rules = {k: ScoringRules.from_sleeper(v["raw"]) for k, v in _obj(run.scoring).items()}
             played = conn.execute(_PLAYED, {"r": run.id, "s": run.season, "w": run.week})
-            rows = [{"pol": x.policy, "k": x.scoring_key, "pos": x.position, "p": x.player_id,
+            rows = [{"pol": x.policy, "fp": rules[x.scoring_key].fingerprint(),
+                     "pos": x.position, "p": x.player_id,
                      "s": run.season, "w": run.week, "kick": x.kickoff_at, "src": "forward",
                      "run": run.id,
                      "e": round(score(_obj(x.stats), x.position, rules[x.scoring_key]).points
@@ -273,12 +279,10 @@ def run(engine: Engine) -> dict[str, Any]:
             " WHERE status = 'ok' ORDER BY source, finished_at DESC"))}  # fmt: skip
         errors: Errors = {}
         found = conn.execute(
-            text("SELECT policy, scoring_key, position, kickoff, error FROM calibration_errors")
+            text("SELECT policy, rules_fp, position, kickoff, error FROM calibration_errors")
         )
         for e in found:
-            errors.setdefault((e.policy, e.scoring_key, e.position), []).append(
-                (e.kickoff, e.error)
-            )
+            errors.setdefault((e.policy, e.rules_fp, e.position), []).append((e.kickoff, e.error))
     f = forecast(games, sched, formats, snapshot, errors)
     stats_run = sync.get("nflverse.player_stats", {})
     with engine.begin() as w:
@@ -299,8 +303,8 @@ def run(engine: Engine) -> dict[str, Any]:
             "s": f.season, "w": f.week, "c": f.cutoff, "snap": snapshot,
             "ing": stats_run.get("finished_at"), "st": f.status, "new": f.newest_game,
             "sync": json.dumps(sync, default=str), "m": json.dumps(models),
-            "sc": json.dumps({k: {"weights": r.weights, "raw": raw[k]}
-                              for k, r in formats.items()}),
+            "sc": json.dumps({k: {"weights": r.weights, "raw": raw[k],
+                                  "fingerprint": r.fingerprint()} for k, r in formats.items()}),
             "r": json.dumps(f.ranges)}).scalar_one()  # fmt: skip
         w.execute(text(
             "INSERT INTO forward_inputs (run_id, player_id, position, features, games_used,"

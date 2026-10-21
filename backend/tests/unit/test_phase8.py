@@ -6,11 +6,13 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from fantasy_rag.analytics.queries import PRESETS
 from fantasy_rag.ml import ranges
 from fantasy_rag.ml.benchmark import FORMATS, run_policy
 from fantasy_rag.ml.features import ET, LAG, Game, History, cutoffs, rows_for_labels
 
 SEASON = 2024
+PPR_FP = FORMATS["ppr"].fingerprint()
 THURSDAY = datetime(2024, 9, 5, 20, 15, tzinfo=ET)  # week 1's first kickoff
 
 
@@ -247,8 +249,8 @@ def test_forward_ranges_use_only_recorded_errors_and_fallbacks_say_so() -> None:
     tuesday = cutoffs(sched)[(SEASON, 6)] - timedelta(hours=1)
     old = datetime(2024, 1, 1, tzinfo=UTC)
     errors = {
-        ("baseline", "ppr", "TE"): [(old, float(i)) for i in range(-30, 30)],
-        ("ridge", "ppr", "TE"): [(old, float(i) / 2) for i in range(-30, 30)],
+        ("baseline", PPR_FP, "TE"): [(old, float(i)) for i in range(-30, 30)],
+        ("ridge", PPR_FP, "TE"): [(old, float(i) / 2) for i in range(-30, 30)],
     }
     f = forecast(gs, sched, FORMATS, tuesday, errors)
     base_off, ridge_off = (
@@ -268,3 +270,24 @@ def test_forward_ranges_use_only_recorded_errors_and_fallbacks_say_so() -> None:
         replace(g, stats={k: v + 3 for k, v in g.stats.items()}) if g.week < 3 else g for g in gs
     ]
     assert forecast(fixed, sched, FORMATS, tuesday, errors).ranges == f.ranges
+
+
+def test_a_league_that_changes_its_rules_never_reuses_errors_made_under_the_old_ones() -> None:
+    from fantasy_rag.analytics.scoring import ScoringRules
+    from fantasy_rag.ml.predict import forecast, offsets_at
+
+    old = datetime(2024, 1, 1, tzinfo=UTC)
+    was_ppr = {(p, PPR_FP, "WR"): [(old, float(i)) for i in range(-40, 40)]
+               for p in ("baseline", "ridge")}  # fmt: skip
+    cut = cutoffs(schedule())[(SEASON, 6)]
+    assert offsets_at(was_ppr, "baseline", FORMATS["ppr"], "WR", cut) is not None
+    # The same league now scores half PPR: none of its PPR errors apply.
+    now_half = FORMATS | {"league:7": ScoringRules.from_sleeper({**PRESETS["half"]})}
+    f = forecast(games(weeks=5), schedule(), now_half, cut - timedelta(hours=1), was_ppr)
+    assert f.ranges["baseline"]["league:7"]["WR"] is None
+    assert f.ranges["baseline"]["ppr"]["WR"] is not None
+    # Identical rules share one pool, whichever league they belong to.
+    assert ScoringRules.from_sleeper(dict(PRESETS["ppr"])).fingerprint() == PPR_FP
+    # Under 50 matching errors: no range.
+    few = {("baseline", PPR_FP, "WR"): [(old, float(i)) for i in range(49)]}
+    assert offsets_at(few, "baseline", FORMATS["ppr"], "WR", cut) is None

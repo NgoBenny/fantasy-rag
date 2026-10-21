@@ -88,8 +88,8 @@ def test_the_seed_is_recorded_once(db: str) -> None:
     eng = create_engine(db)
     with eng.begin() as c:
         c.execute(text(
-            "INSERT INTO calibration_errors (policy, scoring_key, position, player_id, season,"
-            " week, kickoff, error, source) VALUES ('baseline', 'ppr', 'TE', '00-4', 2025, 1,"
+            "INSERT INTO calibration_errors (policy, rules_fp, position, player_id, season,"
+            " week, kickoff, error, source) VALUES ('baseline', 'abc', 'TE', '00-4', 2025, 1,"
             " now(), 1.5, 'seed')"))  # fmt: skip
     with pytest.raises(SystemExit, match="never rebuilt"):
         seed(eng)

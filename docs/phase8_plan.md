@@ -228,3 +228,15 @@ The rules above stay frozen; these replace or tighten the named sections.
   used: a Ridge row for a player with fewer than 3 games is `baseline`, carries the
   baseline's range, and is served as the baseline. Ridge's own errors come only from rows
   where Ridge predicted.
+- **Calibration keyed by the rules, not the league** (migration 0010). Errors are filed
+  under a fingerprint of the scored weights (`ScoringRules.fingerprint`), so a league that
+  changes its rules starts a fresh pool (no range until 50 matching errors), and leagues
+  with identical rules share one. The table was recreated and the seed recorded again on
+  Oct 21, 2026 (98,124 errors, 6 rule sets). The first seed was recorded about an hour
+  earlier on this unmerged branch and was used only by late test runs.
+- **Benchmark rerun after these fixes** (`benchmark_20261021T121012Z.json`): tuning
+  settings and the promotion decision are identical. Baseline predictions are identical.
+  For Ridge and LightGBM, 40 of 34,830 rows changed by up to 0.18 points: a running back's
+  2023 field goal (`fgm_20_29`, as an emergency kicker), which the old component-only
+  scoring dropped and the baseline-plus-adjustment scoring keeps. All other metric changes
+  are in the fourth decimal.
