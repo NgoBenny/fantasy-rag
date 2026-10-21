@@ -5,6 +5,7 @@ description = "Fantasy NFL assistant: typed tools over stats, projections and ne
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.13",
+    "anthropic>=1.17.0",
     "fastapi>=0.156.2",
     "fastembed>=0.9.0",
     "feedparser>=6.0.14",
@@ -54,10 +55,11 @@ plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-m 'not live'"
+addopts = "-m 'not live and not llm'"
 markers = [
     "live: hits live external APIs (deselected by default; run with -m live)",
     "db: needs a reachable Postgres at DATABASE_URL",
+    "llm: calls the paid Claude API (deselected by default; run with -m llm)",
 ]
 
 [[tool.mypy.overrides]]
