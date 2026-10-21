@@ -325,6 +325,19 @@ def league_roster(conn: Connection, league_id: int, roster_id: int) -> dict[str,
     return dict(row._mapping)
 
 
+def roster_checked_at(conn: Connection, league_id: int, week: int) -> datetime | None:
+    """When rosters for this league and week were last fetched from Sleeper successfully
+    (fantasy_rosters.ingested_at moves only when a roster changes)."""
+    found: datetime | None = conn.execute(
+        text(
+            "SELECT fetched_at FROM league_fetches"
+            " WHERE league_id = :l AND kind = 'rosters' AND week = :w AND ok"
+        ),
+        {"l": league_id, "w": week},
+    ).scalar()
+    return found
+
+
 def sleeper_to_gsis(conn: Connection, sleeper_ids: list[str]) -> dict[str, str]:
     rows = conn.execute(
         text(

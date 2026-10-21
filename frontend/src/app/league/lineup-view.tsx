@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Lineup, LineupPlayer, StartSit } from "@/lib/api";
-import { movesSummary } from "@/lib/lineup";
+import { movesSummary, rostersLabel } from "@/lib/lineup";
 
 /** Rules a projection leaves out; without this, incomplete projections look complete. */
 export function UnscoredNote({ items }: { items: { unscored_rules: string[] }[] }) {
@@ -73,8 +73,8 @@ export function LineupView({ lineup }: { lineup: Lineup }) {
           </p>
           <p className="text-sm">
             Week {lineup.week} · {lineup.scoring} · projected <b>{lineup.recommended_total}</b> vs current{" "}
-            {lineup.current_total} (<b>{lineup.gain >= 0 ? "+" : ""}{lineup.gain}</b>) · rosters synced{" "}
-            {new Date(lineup.rosters_as_of.synced_at).toLocaleString()}
+            {lineup.current_total} (<b>{lineup.gain >= 0 ? "+" : ""}{lineup.gain}</b>) ·{" "}
+            {rostersLabel(lineup.rosters_as_of)}
           </p>
           {lineup.recommended.every((s) => !s.player) ? (
             <p className="text-sm text-muted-foreground">This roster has no players with a projection.</p>

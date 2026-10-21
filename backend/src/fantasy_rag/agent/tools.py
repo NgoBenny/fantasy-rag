@@ -320,7 +320,12 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
         "league_id": a.league_id,
         "scoring": label,
         "week": last + 1,
-        "rosters_as_of": {"week": roster_week, "synced_at": synced},
+        # synced_at: when the roster data last changed; checked_at: when Sleeper was last asked
+        "rosters_as_of": {
+            "week": roster_week,
+            "synced_at": synced,
+            "checked_at": q.roster_checked_at(conn, a.league_id, roster_week),
+        },
         "availability_as_of": avail_now.as_of,
         "rostered_players_excluded": len(taken),
         "candidates": [
@@ -454,7 +459,11 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         "roster_id": a.roster_id,
         "week": last + 1,
         "scoring": label,
-        "rosters_as_of": {"week": roster["week"], "synced_at": roster["ingested_at"]},
+        "rosters_as_of": {
+            "week": roster["week"],
+            "synced_at": roster["ingested_at"],
+            "checked_at": q.roster_checked_at(conn, a.league_id, roster["week"]),
+        },
         "recommended": [
             {"slot": s, "player": named(pid), "current": named(current.get(i))}
             for i, s, pid in picks
