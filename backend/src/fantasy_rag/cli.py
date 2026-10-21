@@ -83,6 +83,9 @@ def main(argv: list[str] | None = None) -> None:
             rr = LocalBGEReranker() if args.rerank else None
             print(json.dumps(evaluate(conn, LocalBGE(), reranker=rr), indent=2))
             print(json.dumps({"heldout": evaluate_heldout(conn)}, indent=2, default=str))
+            if rr is not None:
+                held = evaluate_heldout(conn, reranker=rr)
+                print(json.dumps({"heldout+rerank": held}, indent=2, default=str))
 
 
 def _tool(name: str, raw_args: str) -> None:

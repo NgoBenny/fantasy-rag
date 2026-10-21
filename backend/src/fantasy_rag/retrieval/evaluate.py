@@ -77,10 +77,23 @@ def evaluate(
 HELDOUT = REPO_ROOT / "backend" / "tests" / "eval" / "golden_news_heldout.yaml"
 
 
-def evaluate_heldout(conn: Connection, path: Path = HELDOUT) -> dict[str, Any]:
-    """Run each held-out question through the real `search_news` tool and grade it."""
-    from fantasy_rag.agent.tools import run_tool
+def evaluate_heldout(
+    conn: Connection, path: Path = HELDOUT, reranker: Reranker | None = None
+) -> dict[str, Any]:
+    """Run each held-out question through the real `search_news` tool and grade it.
 
+    With `reranker`, the tool runs with that reranker for this evaluation only.
+    """
+    from fantasy_rag.agent import tools
+
+    saved, tools.NEWS_RERANKER = tools.NEWS_RERANKER, reranker
+    try:
+        return _heldout(conn, path, tools.run_tool)
+    finally:
+        tools.NEWS_RERANKER = saved
+
+
+def _heldout(conn: Connection, path: Path, run_tool: Any) -> dict[str, Any]:
     items = yaml.safe_load(path.read_text(encoding="utf-8"))["heldout"]
     results: dict[str, dict[str, Any]] = {}
     for it in items:

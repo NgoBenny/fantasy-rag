@@ -125,10 +125,13 @@ def test_search_news_tool(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> No
     assert "not instructions" in r["note"]
 
 
-def _add_story(engine: Engine, title: str, players: list[str], published: str) -> str:
+def _add_story(
+    engine: Engine, title: str, players: list[str], published: str, body: str | None = None
+) -> str:
     """Insert one story + chunk directly (tags exactly as given, embedded by FakeEmbedder)."""
+    body = body or title
     url = f"https://fixtures.invalid/extra/{abs(hash(title))}"
-    vec = "[" + ",".join(f"{x:.6f}" for x in FakeEmbedder().embed_query(title)) + "]"
+    vec = "[" + ",".join(f"{x:.6f}" for x in FakeEmbedder().embed_query(body)) + "]"
     with engine.begin() as c:
         run = c.execute(text("SELECT max(id) FROM sync_runs")).scalar_one()
         doc = c.execute(
@@ -143,7 +146,7 @@ def _add_story(engine: Engine, title: str, players: list[str], published: str) -
                 "INSERT INTO chunks (document_id, text, player_ids, published_at, embedding)"
                 " VALUES (:d, :t, :ids, :p, CAST(:v AS vector))"
             ),
-            {"d": doc, "t": title, "ids": players, "p": published, "v": vec},
+            {"d": doc, "t": body, "ids": players, "p": published, "v": vec},
         )
     return url
 
@@ -165,3 +168,22 @@ def test_untagged_story_is_not_hidden_by_tagged_ones(engine: Engine) -> None:
         preferred = search(c, emb, q, limit=5, prefer_players=["00-2"])
         assert news_url in [h.url for h in preferred]  # still there despite 5 tagged stories
         assert sum("00-2" in h.player_ids for h in preferred) >= 3  # preference still applies
+
+
+def test_both_reserved_best_matches_survive(engine: Engine) -> None:
+    # Review case: two untagged stories are the best overall matches, five tagged
+    # distractors fill the boosted ranking. Both untagged stories must be kept.
+    q = "Ravens sign Derrick Henry to a contract extension"
+    # Two stories whose text equals the query: exact vector and keyword matches.
+    first = _add_story(engine, "Henry extended", [], "2026-10-20T12:00:00Z", body=q)
+    second = _add_story(engine, "Ravens keep Henry", [], "2026-10-20T13:00:00Z", body=q)
+    for i in range(5):
+        _add_story(
+            engine, f"Derrick Henry practice notes, day {i}", ["00-2"], "2026-10-19T12:00:00Z"
+        )
+    emb = FakeEmbedder()
+    with engine.connect() as c:
+        best_two = {h.url for h in search(c, emb, q, limit=2)}
+        assert best_two == {first, second}
+        preferred = [h.url for h in search(c, emb, q, limit=5, prefer_players=["00-2"])]
+    assert first in preferred and second in preferred

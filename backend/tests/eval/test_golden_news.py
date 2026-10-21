@@ -20,9 +20,8 @@ def test_news_retrieval_meets_targets() -> None:
 
 
 def test_heldout_news_cases_through_the_tool() -> None:
-    """Harder held-out cases via `search_news`. 8/9 on Oct 20, 2026; h01 ("play against
-    Atlanta" vs a "Falcons" headline) is a known miss. Guards against regressions."""
+    """Harder held-out cases via `search_news` (9/9 on Oct 20, 2026). Guards regressions."""
     with get_readonly_engine().connect() as conn:
         r = evaluate_heldout(conn)
     print("\n", r["by_category"], "failed:", list(r["failed"]))
-    assert r["passed"] >= 8, r["failed"]
+    assert r["passed"] == r["total"], r["failed"]

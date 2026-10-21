@@ -18,6 +18,7 @@ from fantasy_rag.analytics.optimizer import Candidate, optimize
 from fantasy_rag.analytics.scoring import score
 from fantasy_rag.index.embedder import Embedder
 from fantasy_rag.ml import baseline
+from fantasy_rag.retrieval.hybrid import Reranker
 
 Scoring = Literal["ppr", "half", "std"]
 Position = Literal["QB", "RB", "WR", "TE", "K"]
@@ -317,6 +318,11 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
     }
 
 
+# Optional cross-encoder for search_news (retrieval.rerank.LocalBGEReranker). Off until
+# `fantasy-rag eval news --rerank` shows a top-1 gain worth its latency.
+NEWS_RERANKER: Reranker | None = None
+
+
 @cache
 def news_embedder() -> Embedder:
     """The local embedding model, loaded once per process (tests replace this)."""
@@ -338,6 +344,7 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
         since,
         a.limit,
         prefer_players=[r.id for r in refs] or None,
+        reranker=NEWS_RERANKER,
     )
     return {
         "query": a.query,

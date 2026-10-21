@@ -142,27 +142,28 @@ def search(
                 else:
                     keyword_ids.add(row[0])
 
-    def pick(order: list[int], n: int) -> list[int]:
-        out: list[int] = []
-        docs: set[int] = set()
-        heads: set[str] = set()
+    docs: set[int] = set()
+    heads: set[str] = set()
+
+    def take(order: list[int], n: int, out: list[int]) -> None:
+        """Append up to n new stories from `order`, skipping repeated stories/headlines."""
         for cid in order:
+            if n == 0:
+                return
             r = rows[cid]
             if r[1] in docs or _headline(r[3]) in heads:
                 continue
             docs.add(r[1])
             heads.add(_headline(r[3]))
             out.append(cid)
-            if len(out) == n:
-                break
-        return out
+            n -= 1
 
     want = RERANK_POOL if reranker else limit
-    chosen = pick(sorted(score, key=lambda c: -score[c]), want)
-    # Keep the best overall matches even if the player preference pushed them out.
-    for cid in pick(sorted(base, key=lambda c: -base[c]), min(RESERVE, want)):
-        if cid not in chosen and rows[cid][1] not in {rows[c][1] for c in chosen}:
-            chosen = chosen[: want - 1] + [cid] if len(chosen) >= want else [*chosen, cid]
+    chosen: list[int] = []
+    # The best overall matches go in first, so the player preference can't push them out;
+    # the remaining slots are filled from the preference-boosted ranking.
+    take(sorted(base, key=lambda c: -base[c]), min(RESERVE, want), chosen)
+    take(sorted(score, key=lambda c: -score[c]), want - len(chosen), chosen)
 
     hits = []
     for c in chosen:
