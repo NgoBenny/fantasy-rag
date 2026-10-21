@@ -250,7 +250,8 @@ def run_chat(
         })  # fmt: skip
         emit("done", {"demo": False, "query_id": qid, "logged": qid is not None,
                       "progress_first_ms": first[0] if first else None,
-                      "answer_ms": answer_ms})  # fmt: skip
+                      "answer_ms": answer_ms,
+                      "cost_usd": round(_cost(usage), 6) if usage else None})  # fmt: skip
 
 
 async def stream_chat(svc: ChatServices, req: ChatRequest) -> AsyncIterator[bytes]:

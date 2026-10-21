@@ -102,7 +102,68 @@ export interface League {
   rosters: { roster_id: number; owner_name: string | null }[];
 }
 
+export interface Status {
+  demo: boolean;
+  label?: string;
+  season: number;
+  latest_week: number;
+  next_week: number;
+  sources: Record<string, { last_ok: string; age_hours: number } | null>;
+}
+
+export interface AvailabilityAsOf {
+  status: "current" | "stale" | "uncertain" | "sample";
+  note: string | null;
+  reasons: string[];
+  missing_weeks: number[];
+  roster_fetched_at?: string | null;
+  transactions_fetched_at?: string | null;
+  applied: number;
+}
+
+export interface Projection {
+  player: PlayerRef;
+  season: number;
+  week: number;
+  scoring: string;
+  projected_points: number | null;
+  games_used: number;
+  availability: Availability | null;
+  last_game: { season: number; week: number; points: number } | null;
+  injury?: { source: string; status: string | null; body_part: string | null }[];
+}
+
+export interface Waivers {
+  league_id: number;
+  scoring: string;
+  week: number;
+  rosters_as_of: { week: number; synced_at: string };
+  availability_as_of: AvailabilityAsOf;
+  candidates: (LineupPlayer & { games_used: number })[];
+  model_version: string;
+}
+
+export interface ModelRun {
+  model_version: string;
+  created_at: string;
+  training_window: Record<string, unknown>;
+  features: string[];
+  metrics: {
+    tune?: { season: number; mae: number; start_sit_accuracy?: number };
+    test?: { season: number; mae: number; start_sit_accuracy?: number; mae_by_position?: Record<string, number> };
+    naive?: Record<string, { mae: number; start_sit_accuracy?: number }>;
+  };
+}
+
 export const api = {
+  status: () => call<Status>("/api/status"),
+  startSit: (ids: string[], leagueId: number | null) =>
+    call<{ ranked: Projection[]; higher_projection: string | null }>(
+      `/api/start-sit?ids=${ids.map(encodeURIComponent).join(",")}${leagueId ? `&league_id=${leagueId}` : ""}`,
+    ),
+  waivers: (leagueId: number) => call<Waivers>(`/api/leagues/${leagueId}/waivers`),
+  modelRuns: () => call<ModelRun[]>("/api/model-runs"),
+  chatSamples: () => call<{ question: string; scenario: boolean }[]>("/api/chat/samples"),
   health: () => call<{ ok: boolean; season: number; latest_week: number }>("/api/health"),
   freshness: () => call<{ source: string; last_ok: string; age_hours: number }[]>("/api/freshness"),
   trending: () =>

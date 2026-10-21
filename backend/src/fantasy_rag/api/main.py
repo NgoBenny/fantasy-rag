@@ -264,6 +264,15 @@ def model_runs(conn: Conn) -> list[dict[str, Any]]:
     return [dict(r._mapping) for r in found]
 
 
+@app.get("/api/chat/samples")
+def chat_samples() -> list[dict[str, Any]]:
+    """Questions the demo can answer (none in live mode, where anything can be asked)."""
+    if not DEMO:
+        return []
+    return [{"question": c["question"], "scenario": bool(c.get("scenario"))}
+            for c in demo.data()["chat"]]  # fmt: skip
+
+
 def _llm() -> LLMClient:
     return AnthropicLLM(budget=process_budget(Settings().llm_budget_usd))
 

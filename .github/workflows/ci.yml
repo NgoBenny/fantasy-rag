@@ -52,5 +52,13 @@ jobs:
       - run: npm run lint
       - run: npm test
       # Type-checks and builds; pages render per request, so no API is needed here.
-      # Playwright (e2e/) runs locally against the real API + dev database.
       - run: npm run build
+      # Browser tests in demo mode: the API serves labelled sample data with no database,
+      # no API key and no .env (CI has none). Live and paid Playwright runs stay local.
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+        working-directory: backend
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test -c playwright.demo.config.ts

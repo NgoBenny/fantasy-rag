@@ -1,4 +1,6 @@
-# Phase 0: database only. api and worker services arrive with their code (Phases 7 and 9).
+# db: Postgres 16 + pgvector. api (Phase 7): `docker compose up -d db api`, reads .env.
+# api-demo: `docker compose --profile demo up api-demo`, sample data with no .env,
+# database or API key. A worker arrives in Phase 9. Plain `uv run uvicorn` still works.
 services:
   db:
     image: pgvector/pgvector:0.8.7-pg16
@@ -15,6 +17,25 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+
+  api:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    env_file: [{ path: .env, required: false }]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-fantasy}:${POSTGRES_PASSWORD:-fantasy}@db:5432/${POSTGRES_DB:-fantasy}
+    depends_on:
+      db: { condition: service_healthy }
+    ports:
+      - "8010:8010"
+    profiles: ["api"]
+
+  api-demo:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    environment:
+      DEMO_MODE: "true"
+    ports:
+      - "8010:8010"
+    profiles: ["demo"]
 
 volumes:
   pgdata:

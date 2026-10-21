@@ -206,9 +206,8 @@ def test_a_logging_failure_still_delivers_the_answer(engines: Any) -> None:
     broken: Any = LogDown()
     got = ask(client_for(engines, lambda: FakeLLM([_msg(STATS)], [good]), log=broken))
     assert "answer" in dict(got)
-    assert dict(got)["done"] == {"demo": False, "query_id": None, "logged": False,
-                                 "progress_first_ms": dict(got)["done"]["progress_first_ms"],
-                                 "answer_ms": dict(got)["done"]["answer_ms"]}  # fmt: skip
+    done = dict(got)["done"]
+    assert done["query_id"] is None and done["logged"] is False and done["answer_ms"] is not None
 
 
 def test_disconnect_cancels_further_model_calls(engines: Any) -> None:
