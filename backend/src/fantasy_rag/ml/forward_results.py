@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy import Connection, text
 
 from fantasy_rag.ml.features import cutoffs
-from fantasy_rag.ml.predict import scoring_rules, target_week
+from fantasy_rag.ml.predict import NoUpcomingWeek, scoring_rules, target_week
 
 FIRST_FORWARD = (2026, 8)  # the first week with a valid Tuesday cutoff after Phase 8
 WARN_BEFORE = timedelta(minutes=30)
@@ -55,7 +55,10 @@ def check(conn: Connection, now: datetime) -> tuple[bool, str]:
         return False, (f"{p['season']} week {p['week']}: NO on-time forward run ({p['status']});"
                        f" the deadline {p['deadline']:%a %b %d %H:%M %Z} has passed")  # fmt: skip
     sched = _schedule(conn)
-    season, week = target_week(sched, now)
+    try:
+        season, week = target_week(sched, now)
+    except NoUpcomingWeek as e:  # season over and the next schedule isn't out yet
+        return True, str(e)
     if (season, week) < FIRST_FORWARD:
         return True, f"{season} week {week}: before the first forward week"
     deadline = cutoffs(sched)[(season, week)]

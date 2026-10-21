@@ -249,3 +249,54 @@ def test_status_endpoint_reports_health(db: str) -> None:
         eng.dispose()
     assert body["health"]["news"]["state"] == "failing"
     assert json.dumps(body)  # serializable
+
+
+def test_after_the_last_regular_season_week_nothing_is_due_or_predicted(eng: Engine) -> None:
+    _week(eng, 1, datetime(2026, 1, 1, 20, 15, tzinfo=ET))  # only past games, none ahead
+    with eng.connect() as c:
+        ok, msg = fr.check(c, NOW)
+    assert ok and "no upcoming regular-season week" in msg
+    before = _count(eng)
+    assert predict.run(eng) == {"skipped": "no upcoming regular-season week"}
+    assert _count(eng) == before
+
+
+def test_predict_waits_for_a_lock_that_becomes_free(eng: Engine) -> None:
+    import threading
+    import time
+
+    held = threading.Event()
+
+    def catch_up_ingest() -> None:
+        with locks.job_lock(eng, locks.STRUCTURED):
+            held.set()
+            time.sleep(1.5)
+
+    t = threading.Thread(target=catch_up_ingest)
+    t.start()
+    held.wait()
+    start = time.monotonic()
+    with locks.job_lock(eng, locks.STRUCTURED, wait=10) as got:
+        waited = time.monotonic() - start
+    t.join()
+    assert got and 0.5 < waited < 10
+
+
+def test_predict_fails_loudly_when_the_lock_wait_runs_out(
+    eng: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import fantasy_rag.db
+    from fantasy_rag import cli
+
+    monkeypatch.setattr(locks, "PREDICT_WAIT", 1)
+    monkeypatch.setattr(fantasy_rag.db, "get_engine", lambda: eng)
+    before = _count(eng)
+    with locks.job_lock(eng, locks.STRUCTURED) as holder:
+        assert holder
+        with locks.job_lock(eng, locks.STRUCTURED, wait=0.5) as got:
+            assert not got
+        with pytest.raises(SystemExit) as exit_:
+            cli.main(["predict"])
+    assert exit_.value.code == 1 and _count(eng) == before
+    with eng.connect() as c:  # the wait's timeout never leaks into pooled connections
+        assert c.execute(text("SHOW lock_timeout")).scalar() == "0"

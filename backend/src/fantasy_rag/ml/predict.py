@@ -56,6 +56,10 @@ class Forecast:
     artifacts: dict[str, bytes] = field(default_factory=dict)  # policy -> pickled model
 
 
+class NoUpcomingWeek(LookupError):
+    """No regular-season game left to kick off: after week 18, until the next schedule."""
+
+
 def target_week(sched: list[dict[str, Any]], snapshot: datetime) -> tuple[int, int]:
     """The week whose first game is the next one to kick off after the snapshot."""
     first: dict[tuple[int, int], datetime] = {}
@@ -63,7 +67,10 @@ def target_week(sched: list[dict[str, Any]], snapshot: datetime) -> tuple[int, i
         if g["game_type"] == "REG" and g["kickoff_at"] is not None:
             k = (g["season"], g["week"])
             first[k] = min(first.get(k, g["kickoff_at"]), g["kickoff_at"])
-    return min(k for k, kick in first.items() if kick > snapshot)
+    upcoming = [k for k, kick in first.items() if kick > snapshot]
+    if not upcoming:
+        raise NoUpcomingWeek("no upcoming regular-season week")
+    return min(upcoming)
 
 
 def status_of(sched: list[dict[str, Any]], season: int, week: int, snapshot: datetime) -> str:
@@ -282,7 +289,10 @@ def run(engine: Engine) -> dict[str, Any]:
         # The first statement fixes the snapshot; its clock time is the information cutoff.
         snapshot = conn.execute(text("SELECT clock_timestamp()")).scalar_one()
         games, sched = load(conn)
-        season, week = target_week(sched, snapshot)
+        try:
+            season, week = target_week(sched, snapshot)
+        except NoUpcomingWeek as none_left:  # offseason: nothing to predict, not a failure
+            return {"skipped": str(none_left)}
         if status_of(sched, season, week, snapshot) == "on_time" and _has_on_time(
             conn, season, week
         ):

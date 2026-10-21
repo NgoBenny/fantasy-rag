@@ -56,9 +56,14 @@ def main(argv: list[str] | None = None) -> None:
         _dispatch(args)
         return
     from fantasy_rag.db import get_engine
+    from fantasy_rag.jobs import locks
     from fantasy_rag.jobs.locks import job_lock
 
-    with job_lock(get_engine(), lock) as owned:
+    wait = locks.PREDICT_WAIT if args.command == "predict" else 0
+    with job_lock(get_engine(), lock, wait) as owned:
+        if not owned and wait:
+            print(f"{args.command}: lock {lock} still held after {wait} s; nothing written")
+            sys.exit(1)  # the week's prediction is at stake: fail so the task's toast fires
         if not owned:
             print(f"{args.command}: already running (lock {lock}); nothing to do")
             return
