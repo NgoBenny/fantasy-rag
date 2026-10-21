@@ -146,6 +146,7 @@ def usage_for(
             {
                 "season": season,
                 "week": week,
+                "team": g["team"],
                 "opponent": g["opponent"],
                 "snaps": g["snaps"],
                 "team_snaps": ts,
@@ -195,6 +196,56 @@ def window(games: list[dict[str, Any]], n: int = WINDOW) -> dict[str, Any] | Non
         "gl_carries": sum(g["gl_carries"] or 0 for g in last),
         "rz_unknown": sum(g["rz_unknown"] or 0 for g in last),
     }  # fmt: skip
+
+
+def team_weeks(conn: Connection, season: int, through_week: int) -> dict[str, set[int]]:
+    """Weeks each team has a regular-season game in the schedule (for bye labels)."""
+    out: dict[str, set[int]] = defaultdict(set)
+    for r in conn.execute(
+        text(
+            "SELECT week, home_team, away_team FROM schedules WHERE season = :s"
+            " AND game_type = 'REG' AND week <= :w"
+        ),
+        {"s": season, "w": through_week},
+    ):
+        out[r.home_team].add(r.week)
+        out[r.away_team].add(r.week)
+    return out
+
+
+def window_meta(
+    games: list[dict[str, Any]],
+    shown: list[dict[str, Any]],
+    schedule: dict[str, set[int]],
+    through_week: int,
+) -> dict[str, Any]:
+    """What a shown window leaves out, stated rather than left to guess: the season's
+    recorded games vs those shown (the rest are outside the requested window), and every
+    week inside the window without a recorded game. A week is a bye only when the
+    player's one team this season has no scheduled game that week; a week his team played
+    is "no recorded appearance"; with no single known team it is "unknown"."""
+    teams = {g["team"] for g in games if g.get("team")}
+    team = next(iter(teams)) if len(teams) == 1 else None
+    start = shown[0]["week"] if shown else 1
+    played = {g["week"] for g in games}
+    without = []
+    for week in range(start, through_week + 1):
+        if week in played:
+            continue
+        if team is None:
+            status = "unknown"
+        elif week not in schedule.get(team, set()):
+            status = "bye"
+        else:
+            status = "no recorded appearance"
+        without.append({"week": week, "status": status})
+    return {
+        "season_games_recorded": len(games),
+        "games_shown": len(shown),
+        "games_outside_requested_window": len(games) - len(shown),
+        "window_weeks": [start, through_week],
+        "weeks_without_a_game": without,
+    }
 
 
 def _weeks(ws: Iterable[int]) -> str:

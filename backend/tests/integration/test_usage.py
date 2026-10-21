@@ -76,6 +76,10 @@ def test_get_usage_shares_coverage_and_facts(season: str) -> None:
     assert r["as_of"]["through_week"] == 8  # Thursday of week 9 doesn't complete the week
     p = r["players"][0]
     assert [g["week"] for g in p["games"]] == [5, 6, 7, 8] and r["through_week"] == 8
+    # Weeks 1-4 are recorded but outside the requested window; none inside it is missing.
+    assert p["window"]["season_games_recorded"] == 8  # fixture weeks 1-2 plus 3-8
+    assert p["window"]["games_outside_requested_window"] == 4
+    assert p["window"]["weeks_without_a_game"] == []
     by_week = {g["week"]: g for g in p["games"]}
     assert by_week[8]["target_share_pct"] == 25.0  # 10 of 40
     assert by_week[8]["rz_looks"] == 0 and by_week[7]["rz_looks"] == 2  # known zero vs count

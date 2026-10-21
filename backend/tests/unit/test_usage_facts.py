@@ -113,3 +113,28 @@ def test_missing_snap_data_suppresses_snap_claims_instead_of_shrinking_the_windo
     highs = [game(1, snap_pct=None, snaps=None), game(2, snap_pct=60.0),
              game(3, snap_pct=61.0), game(4, snap_pct=70.0)]  # fmt: skip
     assert not [f for f in facts(highs, "WR") if f["kind"] == "season_high"]
+
+
+def test_window_meta_separates_outside_the_window_from_weeks_without_a_game() -> None:
+    from fantasy_rag.analytics.usage import window_meta
+
+    played = [game(w) | {"team": "DET"} for w in (1, 2, 3, 4, 5)]  # no week 6 or 7 row
+    schedule = {"DET": {1, 2, 3, 4, 5, 7}}  # DET had no game in week 6
+    meta = window_meta(played, played[-2:], schedule, 7)
+    assert (meta["season_games_recorded"], meta["games_shown"],
+            meta["games_outside_requested_window"]) == (5, 2, 3)  # fmt: skip
+    assert meta["window_weeks"] == [4, 7]
+    # Week 6: his team didn't play (a bye). Week 7: it did, and he has no recorded game.
+    assert meta["weeks_without_a_game"] == [
+        {"week": 6, "status": "bye"}, {"week": 7, "status": "no recorded appearance"}]  # fmt: skip
+
+
+def test_no_bye_is_inferred_without_one_known_team() -> None:
+    from fantasy_rag.analytics.usage import window_meta
+
+    traded = [game(1) | {"team": "DET"}, game(2) | {"team": "CHI"}]
+    meta = window_meta(traded, traded, {"DET": {1, 2}, "CHI": {1, 2}}, 3)
+    assert meta["weeks_without_a_game"] == [{"week": 3, "status": "unknown"}]
+    unknown = [game(1) | {"team": None}]
+    assert window_meta(unknown, unknown, {}, 2)["weeks_without_a_game"] == [
+        {"week": 2, "status": "unknown"}]  # fmt: skip

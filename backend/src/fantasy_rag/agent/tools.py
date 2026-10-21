@@ -553,16 +553,21 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
 def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
     refs = [q.resolve_player(conn, **p.model_dump()) for p in a.players]
     got, when = _usage(conn, refs, a.season)
+    through = when["through_week"]
+    schedule = u.team_weeks(conn, when["season"], through) if through else {}
+    players = []
+    for r in refs:
+        games = got[r.id]["games"]
+        shown = games[-a.last_n :]
+        players.append({
+            "player": r.model_dump(),
+            "games": shown,
+            "window": u.window_meta(games, shown, schedule, through) if through else None,
+            "last_3": got[r.id]["window"],
+            "facts": got[r.id]["facts"],
+        })  # fmt: skip
     return {
-        "players": [
-            {
-                "player": r.model_dump(),
-                "games": got[r.id]["games"][-a.last_n :],
-                "last_3": got[r.id]["window"],
-                "facts": got[r.id]["facts"],
-            }
-            for r in refs
-        ],
+        "players": players,
         "season": when["season"],
         "last_n": a.last_n,
         # Each player's own last `last_n` games through this week (a page shows the same).
@@ -574,11 +579,15 @@ def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
 
 USAGE_DEFINITIONS = (
     "Completed regular-season games only. Shares are percentages: target (carry) share = the "
-    "player's targets (carries) / the team's that game; last_3 shares are totals over those "
-    "games / team totals, not averages. Snap share is nflverse offense_pct (last_3: snaps / "
-    "team snaps; snap_pct_approx when a team total was estimated). Red-zone looks = targets + "
-    "carries inside the opponent's 20 (goal-line carries, inside the 5, are a subset); null "
-    "means no play-by-play for that game. Facts are observations, not causes."
+    "player's targets (carries) / the team's that game. last_3 shares are totals, not "
+    "averages: e.g. last_3 snap_pct is the player's share of all team offensive snaps across "
+    "those games (snap_pct_approx when a team total was estimated). Red-zone looks = targets "
+    "+ carries inside the opponent's 20 (goal-line carries, inside the 5, are a subset); null "
+    "means no play-by-play for that game. `games` shows only the last `last_n` recorded games: "
+    "earlier games are outside the requested window (window.season_games_recorded, "
+    "games_outside_requested_window), not missing. window.weeks_without_a_game labels each "
+    "week inside the window with no recorded game: bye (his team had no game), no recorded "
+    "appearance, or unknown; nothing else about why. Facts are observations, not causes."
 )
 
 

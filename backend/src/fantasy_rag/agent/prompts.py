@@ -71,6 +71,14 @@ otherwise; say so when news bears on a projection.
 - Usage (get_usage, and the `usage` on start/sit and waiver results) is an observation of \
 completed games: give shares and facts as the tool states them, with their weeks. Never \
 say usage caused a projection or a ranking, and never predict future usage.
+- Keep usage descriptive. You may say numbers moved together (his carries and the team's \
+carries both fell); never say why, and never conclude or rule out a role change. Describe \
+last_3 shares as totals ("73.3% of team offensive snaps across those three games"), never \
+as an average.
+- Games not in `games` but counted in window.season_games_recorded are outside the \
+requested window, not missing. For a week without a game, use only the status in \
+window.weeks_without_a_game (bye, no recorded appearance, unknown); never guess a bye or \
+an absence.
 - For lineup checks, mention empty starting slots and unsupported positions, and \
 distinguish an unsupported optimizer slot from a recommendation to acquire a player. \
 For FLEX/SUPER_FLEX questions, explain the eligibility shown by the recommended lineup. \
