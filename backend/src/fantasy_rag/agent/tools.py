@@ -334,10 +334,10 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
         conn,
         news_embedder(),
         a.query,
-        [r.id for r in refs] or None,
+        None,
         since,
         a.limit,
-        fill_unfiltered=True,
+        prefer_players=[r.id for r in refs] or None,
     )
     return {
         "query": a.query,
@@ -353,6 +353,8 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
                 "published_at": h.published_at,
                 "excerpt": h.text,
                 "about_requested_players": bool(set(h.player_ids) & {r.id for r in refs}),
+                "similarity": round(h.similarity, 3) if h.similarity is not None else None,
+                "keyword_match": h.keyword_match,
             }
             for h in hits
         ],

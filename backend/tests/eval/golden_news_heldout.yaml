@@ -1,0 +1,123 @@
+# Held-out news set (review of PR #8): harder cases, evaluated through the real
+# `search_news` tool (player preference + date window), on stories ingested by Oct 20,
+# 2026. None of these questions was used to tune search or the weak-evidence threshold.
+#
+# expect:
+#   hit      - a `relevant` story in the top 5
+#   top1     - the first result is one of `relevant` (e.g. the latest report)
+#   phase6   - no supporting story exists. Retrieval always returns its best candidates;
+#              saying "no supporting story" is the answer writer's job (Phase 6), where
+#              these are graded. A cosine-similarity cutoff was tried and dropped: it
+#              flagged 4 of 9 answerable questions here.
+#   ambiguous - the player name is shared; the tool must refuse to guess
+# `avoid`: a story that must not come first (an older, contradicted report).
+
+heldout:
+  # Untagged relevant stories among many tagged ones (another active Lamar Jackson
+  # leaves Falcons-site stories untagged; 19 other Lamar stories are tagged).
+  - id: h01
+    category: untagged_among_tagged
+    question: Did Lamar Jackson play against Atlanta?
+    players: [Lamar Jackson]
+    days: 30
+    expect: hit
+    relevant:
+      - https://www.atlantafalcons.com/news/lamar-jackson-ruled-out-sunday-night-football-ravens-vs-falcons
+      - https://www.baltimoreravens.com/news/lamar-jackson-trey-hendrickson-injury-report-marlon-humphrey-zay-flowers-ronnie-stanley-ravens-falcons
+  - id: h02
+    category: untagged_among_tagged
+    question: Lamar Jackson status for the Sunday night game against the Falcons
+    players: [Lamar Jackson]
+    days: 30
+    expect: hit
+    relevant:
+      - https://www.atlantafalcons.com/news/lamar-jackson-ruled-out-sunday-night-football-ravens-vs-falcons
+      - https://www.baltimoreravens.com/news/lamar-jackson-trey-hendrickson-injury-report-marlon-humphrey-zay-flowers-ronnie-stanley-ravens-falcons
+
+  # Recent updates versus older, contradicted reports.
+  - id: h03
+    category: recency
+    question: Is Lamar Jackson practicing yet?
+    players: [Lamar Jackson]
+    days: 30
+    expect: top1
+    relevant:  # Oct 14-19 reports
+      - https://www.baltimoreravens.com/news/jesse-minter-lamar-jackson-ankle-still-day-day-monday-week-7-injuries-rashod-bateman-cam-jurgens-trey-hendrickson-tyler-loop-critical-misses
+      - https://www.baltimoreravens.com/news/lamar-jackson-injury-report-ravens-browns-sidelined-matt-hibner-broderick-washington
+      - https://www.baltimoreravens.com/news/lamar-jackson-injury-report-ankle-ravens-browns-rashod-bateman-matt-hibner
+      - https://www.baltimoreravens.com/news/lamar-jackson-injury-report-ravens-browns-realistic-chance
+    avoid: https://www.baltimoreravens.com/news/lamar-jackson-injury-report-practicing-back-limited-ravens-titans
+  - id: h04
+    category: recency
+    question: Who will kick for the Rams this week?
+    days: 30
+    expect: top1
+    relevant:  # Brandon McManus, Oct 19-20
+      - https://sports.yahoo.com/nfl/breaking-news/article/rams-reportedly-signing-brandon-mcmanus-after-kicker-blake-grupe-suffers-torn-acl-in-week-6-204111683.html
+      - https://sports.yahoo.com/articles/rams-sign-another-kicker-204740544.html
+      - https://sports.yahoo.com/articles/rams-turn-third-kicker-three-205700245.html
+      - https://www.espn.com/nfl/story/_/id/50231705/sources-rams-signing-free-agent-kicker-brandon-mcmanus
+      - https://sports.yahoo.com/articles/brandon-mcmanus-becomes-rams-third-212047598.html
+      - https://www.therams.com/news/rams-sign-kicker-brandon-mcmanus-place-poona-ford-and-davante-adams-on-injured-reserve
+      - https://sports.yahoo.com/articles/rams-add-k-brandon-mcmanus-205635763.html
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/rams-add-k-brandon-mcmanus
+    avoid: https://www.therams.com/news/sean-mcvay-on-rams-waiving-harrison-mevis-signing-blake-grupe-week-6-cardinals-2026
+
+  # Nicknames, misspellings, shared names, several players.
+  - id: h05
+    category: misspelling
+    question: Davonte Adams hamstring
+    expect: hit
+    relevant:
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/rams-put-davante-adams-poona-ford-on-ir
+      - https://sports.yahoo.com/articles/rams-put-davante-adams-poona-222912374.html
+      - https://www.therams.com/news/rams-sign-kicker-brandon-mcmanus-place-poona-ford-and-davante-adams-on-injured-reserve
+      - https://www.espn.com/video/clip/_/id/50228440/what-does-davante-adams-injury-mean-other-rams-pass-catchers-fantasy
+  - id: h06
+    category: misspelling
+    question: knee injury
+    players: [Terry Mclauren]
+    expect: hit
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50230371/commanders-wr-terry-mclaurin-torn-patellar-tendon
+      - https://www.cbssports.com/nfl/news/commanders-terry-mclaurin-knee-injury-monday-night-football
+      - https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/terry-mclaurin-out-for-year-with-torn-patellar-tendon
+  - id: h07
+    category: nickname
+    question: Steelers sign MVS
+    expect: hit
+    relevant:
+      - https://www.espn.com/nfl/story/_/id/50232379/steelers-bring-back-marquez-valdes-scantling-amid-wr-injuries
+      - https://www.steelers.com/news/steelers-sign-valdes-scantling  # same news (label fix)
+  - id: h08
+    category: shared_name
+    question: Mike Williams touchdown
+    players: [Mike Williams]
+    expect: ambiguous
+  - id: h09
+    category: multiple_players
+    question: Which of these receivers is getting more targets?
+    players: [Christian Watson, Matthew Golden]
+    expect: hit
+    relevant:
+      - https://sports.yahoo.com/articles/christian-watson-matthew-golden-lead-194009422.html
+
+  # No supporting story.
+  - id: h10
+    category: no_support
+    question: Did Bo Nix tear his ACL?
+    players: [Bo Nix]
+    expect: phase6
+  - id: h11
+    category: no_support
+    question: Was Puka Nacua traded to the Giants?
+    players: [Puka Nacua]
+    expect: phase6
+  - id: h12
+    category: no_support
+    question: Did Jared Goff announce his retirement?
+    expect: phase6
+  - id: h13
+    category: no_support
+    question: Who won the World Series?
+    expect: phase6

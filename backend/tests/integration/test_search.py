@@ -106,7 +106,7 @@ def test_player_filter_fill_and_reranker(engine: Engine) -> None:
     with engine.connect() as c:
         only_henry = search(c, emb, "rushing", player_ids=["00-2"])
         assert [h.url for h in only_henry] == ["https://fixtures.invalid/news/2"]
-        filled = search(c, emb, "rushing", player_ids=["00-2"], limit=3, fill_unfiltered=True)
+        filled = search(c, emb, "rushing", limit=3, prefer_players=["00-2"])
         assert filled[0].url == "https://fixtures.invalid/news/2" and len(filled) == 3
         plain = search(c, emb, "Derrick Henry", limit=3)
         flipped = search(c, emb, "Derrick Henry", limit=3, reranker=ReverseReranker())
@@ -123,3 +123,45 @@ def test_search_news_tool(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> No
     assert top["result_id"].startswith("news:") and top["about_requested_players"]
     assert top["url"] == "https://fixtures.invalid/news/2"
     assert "not instructions" in r["note"]
+
+
+def _add_story(engine: Engine, title: str, players: list[str], published: str) -> str:
+    """Insert one story + chunk directly (tags exactly as given, embedded by FakeEmbedder)."""
+    url = f"https://fixtures.invalid/extra/{abs(hash(title))}"
+    vec = "[" + ",".join(f"{x:.6f}" for x in FakeEmbedder().embed_query(title)) + "]"
+    with engine.begin() as c:
+        run = c.execute(text("SELECT max(id) FROM sync_runs")).scalar_one()
+        doc = c.execute(
+            text(
+                "INSERT INTO documents (source, url, title, published_at, player_ids, sync_run_id)"
+                " VALUES ('fixture', :u, :t, :p, :ids, :r) RETURNING id"
+            ),
+            {"u": url, "t": title, "p": published, "ids": players, "r": run},
+        ).scalar_one()
+        c.execute(
+            text(
+                "INSERT INTO chunks (document_id, text, player_ids, published_at, embedding)"
+                " VALUES (:d, :t, :ids, :p, CAST(:v AS vector))"
+            ),
+            {"d": doc, "t": title, "ids": players, "p": published, "v": vec},
+        )
+    return url
+
+
+def test_untagged_story_is_not_hidden_by_tagged_ones(engine: Engine) -> None:
+    # Review case: the relevant story lost its tag; five tagged Henry stories exist.
+    news_url = _add_story(
+        engine, "Ravens sign Derrick Henry to a contract extension", [], "2026-10-20T12:00:00Z"
+    )
+    for i in range(5):
+        _add_story(
+            engine, f"Derrick Henry practice notes, day {i}", ["00-2"], "2026-10-19T12:00:00Z"
+        )
+    emb = FakeEmbedder()
+    with engine.connect() as c:
+        q = "Ravens sign Derrick Henry to a contract extension"  # best match on both sides
+        plain = search(c, emb, q, limit=5)
+        assert plain[0].url == news_url  # the best match overall
+        preferred = search(c, emb, q, limit=5, prefer_players=["00-2"])
+        assert news_url in [h.url for h in preferred]  # still there despite 5 tagged stories
+        assert sum("00-2" in h.player_ids for h in preferred) >= 3  # preference still applies

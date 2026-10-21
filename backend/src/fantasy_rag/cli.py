@@ -76,12 +76,13 @@ def main(argv: list[str] | None = None) -> None:
 
         from fantasy_rag.db import get_readonly_engine
         from fantasy_rag.index.embedder import LocalBGE
-        from fantasy_rag.retrieval.evaluate import evaluate
+        from fantasy_rag.retrieval.evaluate import evaluate, evaluate_heldout
         from fantasy_rag.retrieval.rerank import LocalBGEReranker
 
         with get_readonly_engine().connect() as conn:
             rr = LocalBGEReranker() if args.rerank else None
             print(json.dumps(evaluate(conn, LocalBGE(), reranker=rr), indent=2))
+            print(json.dumps({"heldout": evaluate_heldout(conn)}, indent=2, default=str))
 
 
 def _tool(name: str, raw_args: str) -> None:

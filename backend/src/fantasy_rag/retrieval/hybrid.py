@@ -8,7 +8,7 @@ sites) is dropped.
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Literal, Protocol
+from typing import Any, Literal, Protocol
 
 from sqlalchemy import Connection, text
 
@@ -24,6 +24,8 @@ class Reranker(Protocol):
 
 RRF_K = 60  # standard reciprocal-rank-fusion constant
 POOL = 50  # candidates taken from each search before fusing
+PREFER_WEIGHT = 0.5  # a preferred player's stories rank higher, without hiding others
+RESERVE = 2  # the best overall matches always stay in the results, tagged or not
 
 
 @dataclass
@@ -37,6 +39,8 @@ class Hit:
     text: str
     player_ids: list[str]
     score: float
+    similarity: float | None = None  # cosine similarity to the query, if a vector candidate
+    keyword_match: bool = False  # matched the full-text query
 
 
 _FILTER = """
@@ -47,20 +51,28 @@ _SELECT = """
     SELECT c.id, d.id, d.url, d.title, d.source, c.published_at, c.text, c.player_ids
     FROM chunks c JOIN documents d ON d.id = c.document_id
 """
+Row = tuple[Any, ...]
 
 
-def _vector(conn: Connection, qvec: list[float], params: dict[str, object]) -> list[tuple]:  # type: ignore[type-arg]
+def _vector(conn: Connection, qvec: list[float], params: dict[str, object]) -> list[Row]:
     rows = conn.execute(
         text(
-            f"{_SELECT} WHERE c.embedding IS NOT NULL AND {_FILTER}"
-            " ORDER BY c.embedding <=> CAST(:q AS vector) LIMIT :n"
+            f"""
+            SELECT * FROM ({
+                _SELECT.replace(
+                    "c.player_ids", "c.player_ids, 1 - (c.embedding <=> CAST(:q AS vector)) AS sim"
+                )
+            }
+                           WHERE c.embedding IS NOT NULL AND {_FILTER}) x
+            ORDER BY sim DESC LIMIT :n
+            """
         ),
         {**params, "q": "[" + ",".join(f"{x:.6f}" for x in qvec) + "]"},
     )
     return list(rows)
 
 
-def _keyword(conn: Connection, query: str, params: dict[str, object]) -> list[tuple]:  # type: ignore[type-arg]
+def _keyword(conn: Connection, query: str, params: dict[str, object]) -> list[Row]:
     # OR the query's terms (plainto_tsquery ANDs them, which drops most long questions);
     # ts_rank_cd still rewards chunks matching more terms, closer together.
     rows = conn.execute(
@@ -81,6 +93,14 @@ def _headline(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", title.lower()).strip()
 
 
+def _lists(
+    conn: Connection, embedder: Embedder, query: str, params: dict[str, object], mode: Mode
+) -> tuple[list[Row], list[Row]]:
+    vec = _vector(conn, embedder.embed_query(query), params) if mode != "keyword" else []
+    kw = _keyword(conn, query, params) if mode != "vector" else []
+    return vec, kw
+
+
 def search(
     conn: Connection,
     embedder: Embedder,
@@ -90,65 +110,72 @@ def search(
     limit: int = 5,
     mode: Mode = "hybrid",
     reranker: Reranker | None = None,
-    fill_unfiltered: bool = False,
+    prefer_players: list[str] | None = None,
 ) -> list[Hit]:
     """Top `limit` stories for `query`.
 
-    `player_ids` keeps only chunks tagged with those players. With `fill_unfiltered`, slots
-    the tagged stories can't fill are filled from an unfiltered search, so a story whose
-    player wasn't tagged (e.g. a practice-squad signing) can still be found.
+    `player_ids` is a hard filter. `prefer_players` only boosts stories tagged with those
+    players: every story is still a candidate, and the RESERVE best overall matches always
+    stay in the results, so an untagged story about the player is never hidden by tagged
+    ones.
     """
-    hits = _search(conn, embedder, query, player_ids, since, limit, mode, reranker)
-    if fill_unfiltered and player_ids and len(hits) < limit:
-        have = {h.document_id for h in hits} | {_headline(h.title) for h in hits}
-        for h in _search(conn, embedder, query, None, since, limit, mode, reranker):
-            if h.document_id not in have and _headline(h.title) not in have:
-                hits.append(h)
-                have |= {h.document_id, _headline(h.title)}
-            if len(hits) == limit:
-                break
-    return hits
-
-
-def _search(
-    conn: Connection,
-    embedder: Embedder,
-    query: str,
-    player_ids: list[str] | None,
-    since: datetime | None,
-    limit: int,
-    mode: Mode,
-    reranker: Reranker | None,
-) -> list[Hit]:
     params: dict[str, object] = {"players": player_ids or None, "since": since, "n": POOL}
-    ranked: list[list[tuple]] = []  # type: ignore[type-arg]
-    if mode in ("hybrid", "vector"):
-        ranked.append(_vector(conn, embedder.embed_query(query), params))
-    if mode in ("hybrid", "keyword"):
-        ranked.append(_keyword(conn, query, params))
-
-    scores: dict[int, float] = {}
-    rows: dict[int, tuple] = {}  # type: ignore[type-arg]
-    for result in ranked:
+    vec, kw = _lists(conn, embedder, query, params, mode)
+    base: dict[int, float] = {}
+    rows: dict[int, Row] = {}
+    for result in (vec, kw):
         for rank, row in enumerate(result, start=1):
-            scores[row[0]] = scores.get(row[0], 0.0) + 1.0 / (RRF_K + rank)
-            rows[row[0]] = row
+            base[row[0]] = base.get(row[0], 0.0) + 1.0 / (RRF_K + rank)
+            rows.setdefault(row[0], row)
+    sims = {r[0]: float(r[8]) for r in vec}
+    keyword_ids = {r[0] for r in kw}
 
-    hits: list[Hit] = []
-    seen_docs: set[int] = set()
-    seen_headlines: set[str] = set()
-    for cid in sorted(scores, key=lambda c: -scores[c]):
-        r = rows[cid]
-        if r[1] in seen_docs or _headline(r[3]) in seen_headlines:
-            continue
-        seen_docs.add(r[1])
-        seen_headlines.add(_headline(r[3]))
-        hits.append(Hit(r[0], r[1], r[2], r[3], r[4], r[5], r[6], list(r[7] or []), scores[cid]))
-        if len(hits) == (RERANK_POOL if reranker else limit):
-            break
+    score = dict(base)
+    if prefer_players:
+        pv, pk = _lists(conn, embedder, query, {**params, "players": prefer_players}, mode)
+        for result, is_vector in ((pv, True), (pk, False)):
+            for rank, row in enumerate(result, start=1):
+                score[row[0]] = score.get(row[0], 0.0) + PREFER_WEIGHT / (RRF_K + rank)
+                rows.setdefault(row[0], row)
+                if is_vector:
+                    sims.setdefault(row[0], float(row[8]))
+                else:
+                    keyword_ids.add(row[0])
+
+    def pick(order: list[int], n: int) -> list[int]:
+        out: list[int] = []
+        docs: set[int] = set()
+        heads: set[str] = set()
+        for cid in order:
+            r = rows[cid]
+            if r[1] in docs or _headline(r[3]) in heads:
+                continue
+            docs.add(r[1])
+            heads.add(_headline(r[3]))
+            out.append(cid)
+            if len(out) == n:
+                break
+        return out
+
+    want = RERANK_POOL if reranker else limit
+    chosen = pick(sorted(score, key=lambda c: -score[c]), want)
+    # Keep the best overall matches even if the player preference pushed them out.
+    for cid in pick(sorted(base, key=lambda c: -base[c]), min(RESERVE, want)):
+        if cid not in chosen and rows[cid][1] not in {rows[c][1] for c in chosen}:
+            chosen = chosen[: want - 1] + [cid] if len(chosen) >= want else [*chosen, cid]
+
+    hits = []
+    for c in chosen:
+        r = rows[c]
+        hits.append(
+            Hit(r[0], r[1], r[2], r[3], r[4], r[5], r[6], list(r[7] or []), score.get(c, 0.0),
+                sims.get(c), c in keyword_ids)
+        )  # fmt: skip
+    hits.sort(key=lambda h: -h.score)
     if reranker and hits:
-        new = reranker.scores(query, [f"{h.title}. {h.text}" for h in hits])
-        for h, s in zip(hits, new, strict=True):
+        for h, s in zip(
+            hits, reranker.scores(query, [f"{h.title}. {h.text}" for h in hits]), strict=True
+        ):
             h.score = s
         hits.sort(key=lambda h: -h.score)
     return hits[:limit]
