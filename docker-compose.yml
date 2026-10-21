@@ -1,6 +1,9 @@
 # db: Postgres 16 + pgvector. api (Phase 7): `docker compose up -d db api`, reads .env.
 # api-demo: `docker compose --profile demo up api-demo`, sample data with no .env,
 # database or API key. A worker arrives in Phase 9. Plain `uv run uvicorn` still works.
+# Fixed project name: the scheduled-task checkout (scripts/setup_runner.ps1) lives in another
+# folder but must use this same database container and volume, never start its own.
+name: fantasy-rag
 services:
   db:
     image: pgvector/pgvector:0.8.7-pg16

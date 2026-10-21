@@ -90,8 +90,13 @@ Everything binds to 127.0.0.1. Nothing is exposed to your network.
 
 Failures show a Windows toast.
 
+The tasks run from a separate checkout of reviewed `main`, so editing this one never breaks
+a collection run. It gets its own copy of `.env` (never committed) and its own virtual
+environment, and shares the database. Create it and register the tasks; rerun it after each
+merge, between jobs, to update:
+
 ```bash
-powershell -File scripts/register_daily_ingest.ps1
+powershell -File scripts/setup_runner.ps1 -Register
 ```
 
 **Backups** go to `%USERPROFILE%\fantasy-rag-backups` (outside the repo; they contain league

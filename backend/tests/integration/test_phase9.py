@@ -66,7 +66,7 @@ def _attempt(eng: Engine, source: str, ok: bool, at: datetime) -> None:
 
 
 def test_health_needs_two_failures_to_say_failing_and_clears_on_recovery(eng: Engine) -> None:
-    for source, _ in h.SOURCES.values():
+    for source in [s for s, _ in h.SOURCES.values()] + ["news.embed"]:
         _attempt(eng, source, True, NOW - timedelta(minutes=30))
     with eng.connect() as c:
         assert {v["state"] for v in h.health(c, NOW).values()} == {"fresh"}
@@ -83,6 +83,26 @@ def test_health_needs_two_failures_to_say_failing_and_clears_on_recovery(eng: En
         assert h.health(c, NOW)["news"]["state"] == "fresh"
         # Old successes alone: stale.
         assert h.health(c, NOW + timedelta(hours=4))["news"]["state"] == "stale"
+
+
+def test_news_is_fresh_only_while_embedding_also_works(eng: Engine) -> None:
+    # Stories still arrive, but two embedding runs in a row failed: no vectors, no search.
+    _attempt(eng, "news", True, NOW - timedelta(minutes=30))
+    _attempt(eng, "news.embed", True, NOW - timedelta(minutes=30))
+    _attempt(eng, "news", True, NOW - timedelta(minutes=10))
+    _attempt(eng, "news.embed", False, NOW - timedelta(minutes=20))
+    _attempt(eng, "news.embed", False, NOW - timedelta(minutes=10))
+    with eng.connect() as c:
+        got = h.health(c, NOW)["news"]
+    assert (got["state"], got["source"]) == ("failing", "news.embed")
+    _attempt(eng, "news.embed", True, NOW)
+    with eng.connect() as c:
+        assert h.health(c, NOW)["news"]["state"] == "fresh"
+    # Fetching keeps working but embedding stops running: stale once its success ages out.
+    _attempt(eng, "news", True, NOW + timedelta(hours=4))
+    with eng.connect() as c:
+        got = h.health(c, NOW + timedelta(hours=4))["news"]
+    assert (got["state"], got["source"]) == ("stale", "news.embed")
 
 
 def test_an_injected_outage_is_recorded_like_a_real_one(
@@ -144,6 +164,25 @@ def test_the_pre_deadline_check(eng: Engine) -> None:
     _run(eng, 8, "on_time")
     with eng.connect() as c:
         assert fr.check(c, deadline + timedelta(hours=1))[0]
+
+
+def test_a_check_that_runs_days_late_still_reports_the_missed_tuesday(eng: Engine) -> None:
+    week8 = datetime(2026, 10, 29, 20, 15, tzinfo=ET)
+    _week(eng, 8, week8)
+    _week(eng, 9, week8 + timedelta(days=7))
+    friday = datetime(2026, 10, 30, 12, tzinfo=ET)  # PC off Tuesday, back Friday
+    with eng.connect() as c:
+        ok, msg = fr.check(c, friday)  # week 9 is the upcoming week and not due yet
+    assert not ok and "week 8" in msg and "missing" in msg
+    _run(eng, 8, "late")  # a late run doesn't make the week on time
+    with eng.connect() as c:
+        assert not fr.check(c, friday)[0]
+    _run(eng, 8, "on_time")
+    with eng.connect() as c:
+        ok, msg = fr.check(c, friday)
+    assert ok and "week 9: not due yet" in msg
+    with eng.connect() as c:  # weeks before the first forward week are never due
+        assert fr.check(c, week8 - timedelta(days=7))[0]
 
 
 def test_forward_results_use_one_rule_set_on_time_runs_and_matched_samples(eng: Engine) -> None:

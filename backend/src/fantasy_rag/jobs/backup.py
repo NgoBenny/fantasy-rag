@@ -74,14 +74,34 @@ def _compose(
                           stderr=subprocess.PIPE, check=True)  # fmt: skip
 
 
+def _bundle(dump: Path) -> list[Path]:
+    """A backup's files, in publish order: the manifest last marks it complete."""
+    return [dump, dump.with_suffix(".roles.sql"), dump.with_suffix(".manifest.json")]
+
+
+def _staged(p: Path) -> Path:
+    return p.with_name(f".{p.name}.partial")
+
+
+def complete_dumps(out_dir: Path) -> list[Path]:
+    """Dumps with all three files, oldest first. Anything else is an unfinished attempt."""
+    return [d for d in sorted(out_dir.glob("fantasy_*.dump")) if all(map(Path.exists, _bundle(d)))]
+
+
 def run() -> Path:
-    """Dump, verify, move into the backup folder, rotate. Raises on any failure."""
+    """Dump, verify, publish the complete bundle, rotate. Raises on any failure, leaving
+    every earlier backup as it was and none of this attempt's files."""
     url = Settings().database_url
     db = _dsn(url)
     out_dir = backup_dir()
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = f"{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
-    tmp = out_dir / f".fantasy_{stamp}.dump.partial"
+    final = out_dir / f"fantasy_{stamp}.dump"
+    files = _bundle(final)
+    if any(p.exists() or _staged(p).exists() for p in files):
+        raise RuntimeError(f"a backup named {final.name} already exists")
+    tmp = _staged(final)
+    published = False
     try:
         with psycopg.connect(**db) as conn:
             conn.execute("BEGIN ISOLATION LEVEL REPEATABLE READ")
@@ -98,20 +118,25 @@ def run() -> Path:
             _compose("pg_restore", "--list", stdin=f, stdout=subprocess.DEVNULL)
         roles = _compose("pg_dumpall", "--roles-only", "--no-role-passwords", "-U", db["user"],
                          stdout=subprocess.PIPE).stdout  # fmt: skip
-        final = out_dir / f"fantasy_{stamp}.dump"
-        tmp.replace(final)
-        final.with_suffix(".roles.sql").write_bytes(roles)
-        final.with_suffix(".manifest.json").write_text(json.dumps(info, indent=1))
+        _staged(files[1]).write_bytes(roles)
+        _staged(files[2]).write_text(json.dumps(info, indent=1))
+        for p in files:
+            _staged(p).replace(p)
+        published = True
     finally:
-        tmp.unlink(missing_ok=True)
+        for p in files:  # only this attempt's files
+            _staged(p).unlink(missing_ok=True)
+            if not published:
+                p.unlink(missing_ok=True)
     rotate(out_dir)
     return final
 
 
 def rotate(out_dir: Path) -> list[Path]:
     """Keep the newest KEEP_DAILY dumps plus the newest dump of each of KEEP_WEEKLY older
-    ISO weeks. Returns what was removed (dump, roles and manifest together)."""
-    dumps = sorted(out_dir.glob("fantasy_*.dump"), reverse=True)
+    ISO weeks. Returns what was removed (dump, roles and manifest together). Incomplete
+    bundles are neither counted nor removed."""
+    dumps = complete_dumps(out_dir)[::-1]
     keep = set(dumps[:KEEP_DAILY])
     weeks: set[str] = set()
     for d in dumps[KEEP_DAILY:]:
@@ -121,16 +146,17 @@ def rotate(out_dir: Path) -> list[Path]:
             keep.add(d)
     removed = [d for d in dumps if d not in keep]
     for d in removed:
-        for f in (d, d.with_suffix(".roles.sql"), d.with_suffix(".manifest.json")):
+        for f in _bundle(d):
             f.unlink(missing_ok=True)
     return removed
 
 
 def verify_latest() -> dict[str, Any]:
-    """Restore the newest dump into a fresh container and compare it with its manifest."""
-    dumps = sorted(backup_dir().glob("fantasy_*.dump"))
+    """Restore the newest complete dump into a fresh container and compare it with its
+    manifest."""
+    dumps = complete_dumps(backup_dir())
     if not dumps:
-        raise RuntimeError(f"no dumps in {backup_dir()}")
+        raise RuntimeError(f"no complete backups in {backup_dir()}")
     dump = dumps[-1]
     expected = json.loads(dump.with_suffix(".manifest.json").read_text())
     db = _dsn(Settings().database_url)

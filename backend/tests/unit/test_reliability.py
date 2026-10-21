@@ -2,13 +2,17 @@
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
 
 import httpx
 import pytest
 
 from fantasy_rag.ingest.retry import Retrying, retry, transient
-from fantasy_rag.jobs.backup import rotate
+from fantasy_rag.jobs import backup
+from fantasy_rag.jobs.backup import complete_dumps, rotate
 from fantasy_rag.ml.features import ET, cutoffs
 
 PT = ZoneInfo("America/Los_Angeles")
@@ -83,9 +87,52 @@ def test_backup_rotation_keeps_7_recent_and_4_older_weeks(tmp_path: Path) -> Non
         stamp = f"{start + timedelta(days=day):%Y%m%dT%H%M%SZ}"
         for ext in (".dump", ".roles.sql", ".manifest.json"):
             (tmp_path / f"fantasy_{stamp}{ext}").write_text("x")
+    # Newer unfinished attempts (no manifest) are neither counted nor removed.
+    for day in (41, 42):
+        stamp = f"{start + timedelta(days=day):%Y%m%dT%H%M%SZ}"
+        (tmp_path / f"fantasy_{stamp}.dump").write_text("x")
     rotate(tmp_path)
-    kept = sorted(p.name for p in tmp_path.glob("*.dump"))
-    assert len(kept) == 7 + 4
+    kept = [p.name for p in complete_dumps(tmp_path)]
+    assert len(kept) == 7 + 4 and len(list(tmp_path.glob("*.dump"))) == 7 + 4 + 2
     assert kept[-1].startswith("fantasy_20261010")  # newest kept
     # Companions go with their dump.
     assert len(list(tmp_path.glob("*.manifest.json"))) == len(kept)
+
+
+def test_a_backup_that_fails_midway_leaves_only_complete_backups(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    old = tmp_path / "fantasy_20261001T190000Z.dump"
+    for f in backup._bundle(old):
+        f.write_text("old")
+    (tmp_path / "fantasy_20261002T190000Z.dump").write_text("unfinished")  # no manifest
+
+    def compose(*args: str, stdin: Any = None, stdout: Any = None) -> Any:
+        if hasattr(stdout, "write"):
+            stdout.write(b"dump")
+        return SimpleNamespace(stdout=b"roles")
+
+    monkeypatch.setenv("BACKUP_DIR", str(tmp_path))
+    monkeypatch.setattr(
+        backup,
+        "Settings",
+        lambda: SimpleNamespace(database_url="postgresql://u:p@127.0.0.1:5433/d"),
+    )
+    monkeypatch.setattr(backup.psycopg, "connect", MagicMock())
+    monkeypatch.setattr(backup, "manifest", lambda conn: {})
+    monkeypatch.setattr(backup, "_compose", compose)
+
+    def disk_full(*a: Any, **k: Any) -> str:
+        raise OSError(28, "No space left on device")
+
+    before = sorted(p.name for p in tmp_path.iterdir())
+    with monkeypatch.context() as m:
+        m.setattr(backup.json, "dumps", disk_full)  # the manifest write fails
+        with pytest.raises(OSError):
+            backup.run()
+    assert sorted(p.name for p in tmp_path.iterdir()) == before  # nothing new, nothing lost
+    assert complete_dumps(tmp_path) == [old]  # the unfinished dump is never selected
+
+    new = backup.run()
+    assert complete_dumps(tmp_path) == [old, new]
+    assert not list(tmp_path.glob(".*.partial"))
