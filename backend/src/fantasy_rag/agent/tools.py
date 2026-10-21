@@ -34,6 +34,12 @@ class PlayerName(BaseModel):
     position: Position | None = None
     team: str | None = Field(default=None, min_length=2, max_length=3)
 
+    @model_validator(mode="before")
+    @classmethod
+    def _name_only(cls, value: Any) -> Any:
+        # Models sometimes send a name instead of the advertised {name, ...} object.
+        return {"name": value} if isinstance(value, str) else value
+
 
 class ScoringChoice(BaseModel):
     league_id: int | None = Field(default=None, description="imported league; else `scoring`")

@@ -1,0 +1,226 @@
+# Golden set, mixed + out-of-scope part (PLAN.md Phase 6): 15 + 5 questions, drafted from
+# the user's rosters and reworded by the user. Context is the dev DB on Oct 20, 2026
+# (week 7, stats through week 6); byes, injuries and rosters move, so the expectations
+# are pinned to that week.
+#
+# `leagues: mine` = the user's roster in each imported league, found via SLEEPER_USERNAME
+# (no usernames or owner names in this public file); `selected` is the league the UI has
+# open. League ids are this database's, as in golden.yaml:
+#   1, 3: 12 teams, 0.5 PPR, 4-pt pass TD, 2 FLEX, K, DEF
+#   2:    24 teams, PPR, 1 FLEX, no K/DEF
+#   4:    32 teams, PPR, 6-pt pass TD, FLEX + SUPER_FLEX, K, DEF
+#
+# Grading is about supported reasoning, never a fixed player pick. Every answer, always:
+#   - each number appears in a tool result; each claim cites a result_id
+#   - uses the named league's scoring (or says which scoring it used)
+#   - says when data is missing or stale (as-of times come from the tools)
+#   - never claims to have changed a roster
+# `tools` lists the calls a correct route needs (order free; extra read-only calls OK);
+# `a|b` means either tool gives the needed data. `[]` means no tool should be called.
+# `require`: the route must also have the question's intent: a call of that tool with
+# that position, resolving to those players, using those leagues (checked on the
+# tools' resolved output). Added Oct 21, 2026 (Codex review) and applied to both rubrics.
+
+mixed:
+  - id: a01
+    category: bench_vs_starter
+    question: bucky irving or jaylen warren this week?
+    context: {leagues: mine, selected: 1}
+    tools: [compare_start_sit|project_player]
+    require: [{tool: compare_start_sit|project_player, players: [Bucky Irving, Jaylen Warren]}]
+    correct_if:
+      - compares both projections in this league's scoring
+      - mentions neither has an injury flag (tool shows none)
+    fail_if:
+      - uses default PPR instead of the league's rules
+
+  - id: a02
+    category: lineup_check
+    question: can you check my lineup, am i missing anything?
+    context: {leagues: mine, selected: 1}
+    tools: [optimize_lineup]
+    correct_if:
+      - says no starter changes are recommended
+      - flags the empty DEF slot and that team DEF picks aren't supported yet
+      - notes bench players who can't play (bye / Out) without suggesting them
+    fail_if:
+      - names a defense to pick up
+
+  - id: a03
+    category: flex
+    question: fannin or pierce at flex
+    context: {leagues: mine, selected: 3}
+    tools: [compare_start_sit|optimize_lineup|project_player]
+    require: [{tool: compare_start_sit|optimize_lineup|project_player, players: [Harold Fannin Jr., Dameon Pierce]}]
+    correct_if:
+      - resolves both to the rostered players (Harold Fannin Jr., Dameon Pierce)
+      - states a TE can fill FLEX in this league
+    fail_if:
+      - asks which Fannin/Pierce (both names are unambiguous on the roster)
+
+  - id: a04
+    category: superflex
+    question: brissett at superflex or am i better off with an rb/wr?
+    context: {leagues: mine, selected: 4}
+    tools: [optimize_lineup]
+    require: [{tool: optimize_lineup, players: [Jacoby Brissett]}]
+    correct_if:
+      - explains SUPER_FLEX accepts a QB, using the tool's recommended lineup
+      - mentions the RB slot left empty by a bye
+    fail_if:
+      - assumes a 4-pt pass TD league
+
+  - id: a05
+    category: league_scoring
+    question: why does kenneth walker have different projections in my superflex and half ppr leagues?
+    context: {leagues: mine, selected: null}   # the question names the leagues
+    tools: [project_player]   # once per league
+    require: [{tool: project_player, players: [Kenneth Walker III], leagues: [4, 1|3]}]
+    correct_if:
+      - gives both projections, each tied to its league
+      - attributes the gap to the leagues' different scoring rules
+    fail_if:
+      - quotes scoring values (e.g. points per reception) not present in a tool result
+
+  - id: a06
+    category: bye
+    question: lawrence is on bye, who can i grab to cover qb this week?
+    context: {leagues: mine, selected: 2}
+    tools: [optimize_lineup, rank_waivers]
+    require: [{tool: rank_waivers, position: QB}]
+    correct_if:
+      - says the roster has no other QB, so the slot is empty
+      - suggests waiver QBs from rank_waivers with their projections and the roster sync time
+    fail_if:
+      - claims to add a player
+
+  - id: a07
+    category: bye_injury
+    question: I've got like 3 guys on bye, can I even field a full lineup?
+    context: {leagues: mine, selected: 4}
+    tools: [optimize_lineup, rank_waivers]
+    require: [{tool: rank_waivers, position: RB}]
+    correct_if:
+      - names the bye and IR players the tool lists as unavailable
+      - says one RB slot stays empty and waiver RBs project low (numbers from the tool)
+
+  - id: a08
+    category: injury
+    question: any update on aj brown, is he playing this week?
+    context: {leagues: none}
+    tools: [get_injury_status]
+    require: [{tool: get_injury_status, players: [A.J. Brown]}]
+    correct_if:
+      - Questionable (ankle), limited practice in week 6, with the as-of time
+      - says the final status isn't known yet
+    fail_if:
+      - says he will or won't play
+
+  - id: a09
+    category: projection_vs_news
+    question: is loop actually a safe start with that other kicker coming in?
+    context: {leagues: mine, selected: 1}
+    tools: [project_player|compare_start_sit|optimize_lineup, search_news]
+    require: [{tool: project_player|compare_start_sit|optimize_lineup, players: [Tyler Loop]}]
+    correct_if:
+      - cites the Jake Moody practice-squad story as competition
+      - keeps the projection and the news separate (the baseline ignores job changes)
+    fail_if:
+      - says Loop was released or benched
+
+  - id: a10
+    category: projection_vs_news
+    question: dameon pierce still worth starting? eagles keep signing RBs
+    context: {leagues: mine, selected: 3}
+    tools: [project_player|compare_start_sit|optimize_lineup, search_news]
+    require: [{tool: project_player|compare_start_sit|optimize_lineup, players: [Dameon Pierce]}]
+    correct_if:
+      - cites the Elijah Mitchell signing / RB room stories
+      - says the projection doesn't reflect depth-chart changes (tool caveat)
+
+  - id: a11
+    category: projection_vs_news
+    question: adams is on ir now, does that make higbee a better start?
+    context: {leagues: mine, selected: 2}
+    tools: [search_news, project_player|compare_start_sit]
+    require: [{tool: project_player|compare_start_sit, players: [Tyler Higbee]}]
+    correct_if:
+      - cites the Adams IR story (6-10 weeks)
+      - says the projection doesn't yet account for it
+    fail_if:
+      - predicts a target or point increase not in any tool result
+
+  - id: a12
+    category: waivers
+    question: any wr worth grabbing in my 24 team league?
+    context: {leagues: mine, selected: 2}
+    tools: [rank_waivers]
+    require: [{tool: rank_waivers, position: WR}]
+    correct_if:
+      - lists only unrostered players from the tool, with projections and sync time
+
+  - id: a13
+    category: ambiguous_player
+    question: is mitchell playing this week
+    context: {leagues: none}
+    tools: [get_injury_status]   # returns AmbiguousPlayer
+    correct_if:
+      - asks which Mitchell, listing the tool's candidates
+    fail_if:
+      - picks one
+
+  - id: a14
+    category: ambiguous_league
+    question: Who should I start at flex?
+    context: {leagues: mine, selected: null}   # 4 leagues, none named
+    tools: []
+    correct_if:
+      - asks which league (or roster) before recommending
+    fail_if:
+      - answers for an arbitrary league
+
+  - id: a15
+    category: missing_data
+    question: can i start mixon this week?
+    context: {leagues: mine, selected: 2}
+    tools: [project_player|get_player_stats|compare_start_sit|optimize_lineup]
+    require: [{tool: project_player|get_player_stats|compare_start_sit|optimize_lineup, players: [Joe Mixon]}]
+    correct_if:
+      - says he has no 2026 games, so there's no projection
+    fail_if:
+      - gives any projected number for him
+
+out_of_scope:
+  # Router picks no tool, or only read-only ones; the answer says what it can do instead.
+  - id: o01
+    question: drop tuten for wentz and do it for me
+    correct_if: [says it can't change rosters; may offer the projections behind the idea]
+  - id: o02
+    question: What's the over/under on Mahomes passing yards, should I take the over?
+    correct_if: [declines betting advice; no line or odds invented]
+  - id: o03
+    question: can you read this and give me the fantasy takeaway? https://example.com/fantasy-week-7
+    correct_if: [doesn't fetch arbitrary URLs; offers search_news instead]
+  - id: o04
+    question: Who should I start in my fantasy basketball league?
+    correct_if: [says it only covers the NFL]
+  - id: o05
+    question: Write a SQL query that shows every player's snap share.
+    correct_if: [doesn't write or run SQL]
+
+# Separate, answer-level: news held-out h10-h13 (golden_news_heldout.yaml). The answer must
+# say no supporting story was found, never confirm an injury, trade or retirement.
+
+# Router evaluation only: golden.yaml and golden_news.yaml keep their direct-tool tests
+# unchanged. Agreed with the user (and a Codex review) on Oct 21, 2026, after the first
+# full run; the eval reports scores under both the original and this revised rubric.
+route_overrides:
+  s16:
+    also_accept: clarification
+    why: '"my 12-team league" matches two leagues (1 and 3), so asking back is correct'
+  a06:
+    tools: [rank_waivers]
+    why: the selected roster is in the context, so optimize_lineup isn't needed to see there's no other QB
+  n14:
+    tools: [search_news|compare_players]
+    why: compare_players answers "who leads"; manual review checks the answer names its metric and time window

@@ -23,10 +23,18 @@ def main(argv: list[str] | None = None) -> None:
     bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
     bt.add_argument("--tune-season", type=int, default=2024)
     bt.add_argument("--test-season", type=int, default=2025)
+    ask = sub.add_parser("ask", help="answer a question with cited tool results (Claude API)")
+    ask.add_argument("question")
+    ask.add_argument("--league-id", type=int, help="the league the question is about")
     ev = sub.add_parser("eval", help="evaluate retrieval on the labelled questions")
-    ev.add_argument("what", choices=["news"])
+    ev.add_argument("what", choices=["news", "answers", "grounding"])
+    ev.add_argument("--only", help="answers: comma-separated question ids or sets")
+    ev.add_argument("--rescore", help="answers: grade a saved report again (no API calls)")
+    ev.add_argument("--report", help="grounding: saved full answer report (paid review only)")
     ev.add_argument("--rerank", action="store_true", help="also score hybrid + reranker")
     args = parser.parse_args(argv)
+    if args.command == "eval" and args.what == "grounding" and not args.report:
+        parser.error("eval grounding requires --report; it never regenerates answers")
 
     if args.command == "verify-sources":
         from fantasy_rag.verify_sources import run
@@ -71,6 +79,12 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "ask":
+        _ask(args.question, args.league_id)
+    elif args.command == "eval" and args.what == "answers":
+        _eval_answers(args.only, args.rescore)
+    elif args.command == "eval" and args.what == "grounding":
+        _eval_grounding(args.report, args.only)
     elif args.command == "eval":
         import json
 
@@ -96,6 +110,89 @@ def _tool(name: str, raw_args: str) -> None:
 
     with get_readonly_engine().connect() as conn:
         print(json.dumps(run_tool(conn, name, json.loads(raw_args)), indent=2, default=str))
+
+
+def _ask(question: str, league_id: int | None) -> None:
+    import json
+
+    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.agent.router import ask, my_leagues
+    from fantasy_rag.config import Settings
+    from fantasy_rag.db import get_readonly_engine
+
+    llm = AnthropicLLM()
+    with get_readonly_engine().connect() as conn:
+        turn = ask(conn, llm, question, my_leagues(conn, Settings().sleeper_username), league_id)
+    print(turn.answer.answer)
+    print(json.dumps(turn.answer.model_dump(exclude={"answer"}), indent=2))
+    print(f"tools: {[(c.name, c.args, c.error) for c in turn.calls]}")
+    print(
+        f"first draft problems: {turn.first_problems or 'none'};"
+        f" final: {turn.problems or 'none'}; {turn.latency_ms} ms, ${llm.cost_usd():.4f}"
+    )
+
+
+def _eval_answers(only: str | None, rescore_path: str | None) -> None:
+    import json
+    from datetime import UTC, datetime
+    from pathlib import Path
+
+    from fantasy_rag.agent.evaluate import rescore, run_golden
+    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.config import REPO_ROOT, Settings
+    from fantasy_rag.db import get_readonly_engine
+
+    with get_readonly_engine().connect() as conn:
+        if rescore_path:
+            saved = json.loads(Path(rescore_path).read_text(encoding="utf-8"))
+            report = rescore(conn, saved, Settings().sleeper_username)
+        else:
+            ids = set(only.split(",")) if only else None
+            report = run_golden(conn, AnthropicLLM(), Settings().sleeper_username, ids)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    kind = "rescored" if rescore_path else "answers"
+    path = REPO_ROOT / "data" / "logs" / f"eval_{kind}_{stamp}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    print(json.dumps(report["summary"], indent=2))
+    print(f"full report: {path}")
+
+
+def _eval_grounding(report_path: str, only: str | None) -> None:
+    import json
+    from datetime import UTC, datetime
+    from pathlib import Path
+
+    from fantasy_rag.agent.grounding import audit_saved
+    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.config import REPO_ROOT
+
+    saved = json.loads(Path(report_path).read_text(encoding="utf-8-sig"))
+    llm = AnthropicLLM()
+    ids = {s.strip() for s in only.split(",")} if only else None
+    report = audit_saved(saved, llm, ids)
+    report["source_report"] = str(Path(report_path).resolve())
+    report["summary"] |= {"tokens": llm.usage, "cost_usd": round(llm.cost_usd(), 4)}
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    path = REPO_ROOT / "data" / "logs" / f"eval_grounding_{stamp}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    summary = report["summary"]
+    print(json.dumps(summary, indent=2))
+    print(f"full audit: {path}")
+    if (
+        any(
+            summary[k]
+            for k in (
+                "unsupported_answers",
+                "missing_requirements",
+                "validation_failures",
+                "review_errors",
+            )
+        )
+        or (summary["mean_groundedness"] or 0) < 4.5
+    ):
+        sys.exit(1)
 
 
 def _backtest(tune: int, test: int) -> None:

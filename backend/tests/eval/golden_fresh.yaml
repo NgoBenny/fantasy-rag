@@ -1,0 +1,116 @@
+# Fresh held-out questions (Oct 21, 2026), written after the Phase 6 prompt fixes to test
+# whether those fixes generalize. Each targets one failure kind found in the full run,
+# with a different player, league or wording than the question the fix was written from:
+#   league-format article -> n20;  "only"/"all" claims -> a15;  news vs fact -> h11/h12;
+#   lineup holes -> a02/a04.
+# Not part of the frozen 60-question rubric: scored separately (`--only fresh`) and never
+# used to tune prompts; reworded by the user (via Codex). Same fields as
+# golden_answers.yaml. Data pinned to week 7. The expectations were written before these
+# ran, so they are fresh regression cases now, not a private test set.
+
+fresh:
+  - id: f01
+    category: league_format_article
+    question: anyone worth grabbing in guillotine this week?
+    context: {leagues: mine, selected: null}
+    tools: [search_news]
+    correct_if:
+      - treats guillotine as knockout and cites the Week 7 knockout pickups story
+    fail_if:
+      - asks which of the user's leagues first
+      - names pickups that no cited story names
+
+  - id: f02
+    category: only_claim
+    question: maye my only decent qb option?
+    context: {leagues: mine, selected: 3}
+    tools: [optimize_lineup|project_player|compare_start_sit]
+    require: [{tool: optimize_lineup|project_player|compare_start_sit, players: [Drake Maye]}]
+    correct_if:
+      - notes Tyler Shough is also rostered and has a projection (lower than Maye's)
+    fail_if:
+      - says Maye is the only QB, or the only one with a projection
+
+  - id: f03
+    category: all_claim
+    question: my starters all good to go?
+    context: {leagues: mine, selected: 1}
+    tools: [optimize_lineup]
+    correct_if:
+      - says no starter has an injury designation, from the full recommended lineup
+      - keeps bench players (A.J. Brown Questionable, Jeremiyah Love Out) apart from starters
+      - mentions the empty DEF slot is not a player
+    fail_if:
+      - calls a starter injured, or a bench player a starter
+
+  - id: f04
+    category: speculation_vs_fact
+    question: wait saquon got traded to seattle?
+    context: {leagues: mine, selected: null}
+    tools: [search_news]
+    correct_if:
+      - says the story is a list of proposed trade-deadline moves, not a completed trade
+    fail_if:
+      - says the trade happened
+      - opens with a flat "No." or "Yes."
+
+  - id: f05
+    category: lineup_hole
+    question: check my other half ppr lineup—anything i should fix?
+    context: {leagues: mine, selected: 3}
+    tools: [optimize_lineup]
+    correct_if:
+      - names the recommended change (Harold Fannin Jr. in for Dameon Pierce at FLEX)
+      - flags the empty DEF slot as unsupported, without naming a defense to add
+      - says Zach Charbonnet (PUP) can't play
+    fail_if:
+      - says no changes are needed
+
+  - id: f06
+    category: league_format_article
+    question: who do experts like in superflex this week?
+    context: {leagues: mine, selected: null}
+    tools: [search_news]
+    correct_if:
+      - cites the Week 7 superflex rankings story and says only the headline/excerpt is available
+    fail_if:
+      - asks which of the user's leagues first
+      - invents ranking positions not in a cited result
+
+  # Added Oct 21, 2026 after the first fresh run. f01-f06 and their results stay as they
+  # were; these are reported separately as replacements or new cases.
+  - id: f07
+    category: league_format_personal
+    question: who should i grab for my guillotine team?
+    context: {leagues: mine, selected: null}
+    tools: []
+    expect_type: clarification
+    correct_if:
+      - asks which of the user's leagues, since the advice depends on their roster
+    fail_if:
+      - recommends players without a league
+
+  - id: f08
+    category: lineup_hole
+    replaces: f05   # f05 stays recorded: "my other half ppr lineup" was ambiguous with league 3 selected
+    question: anything i should fix in this lineup?
+    context: {leagues: mine, selected: 3}
+    tools: [optimize_lineup]
+    correct_if:
+      - names the recommended change (Harold Fannin Jr. in for Dameon Pierce at FLEX)
+      - flags the empty DEF slot as unsupported, without naming a defense to add
+      - says Zach Charbonnet (PUP) can't play
+    fail_if:
+      - says no changes are needed
+
+# Router evaluation only, as in golden_answers.yaml: scores are reported under the
+# original and the revised rubric.
+route_overrides:
+  f02:
+    tools: [optimize_lineup|project_player|compare_start_sit|compare_players]
+    require: [{tool: optimize_lineup|project_player|compare_start_sit|compare_players, players: [Drake Maye, Tyler Shough]}]
+    why: >-
+      Reviewed Oct 21, 2026: the run's compare_players result gave both QBs' points per
+      game in league 3 scoring (Maye 19.67, Shough 19.52), which supports calling Shough a
+      decent option. A tool counts only when its result supports the recommendation, so
+      the revised rule also requires both QBs in it.

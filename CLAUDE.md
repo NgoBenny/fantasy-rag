@@ -33,7 +33,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-5):
+Exists now (Phases 0-6):
 
 ```
 CLAUDE.md
@@ -71,16 +71,23 @@ backend/
   src/fantasy_rag/analytics/queries.py  # parameterized queries, name resolution, scoring presets
   src/fantasy_rag/ml/baseline.py        # EWM-of-league-points baseline (tuned half-life)
   src/fantasy_rag/ml/backtest.py, tune.py  # rolling-origin backtest, `fantasy-rag backtest`
-  src/fantasy_rag/agent/tools.py        # 9 typed tools + run_tool (Pydantic-validated, no SQL)
+  src/fantasy_rag/agent/tools.py        # 10 typed tools + run_tool (Pydantic-validated, no SQL)
+  src/fantasy_rag/agent/router.py       # haiku picks tools (<= 4 rounds) -> sonnet writes the answer
+  src/fantasy_rag/agent/llm.py, prompts.py  # LLMClient protocol + Anthropic client; static prompts
+  src/fantasy_rag/agent/answer.py       # answer contract; unsupported-number / citation checks
+  src/fantasy_rag/agent/evaluate.py     # `eval answers`: 60-question golden set + no-support cases
+  src/fantasy_rag/agent/grounding.py    # optional paid audit of saved answers; never runs in chat
   src/fantasy_rag/analytics/optimizer.py  # lineup optimizer (exact assignment, locks, empty slots)
   src/fantasy_rag/api/main.py           # FastAPI read-only HTTP layer (port 8010)
   tests/eval/golden.yaml                # golden stats questions (20)
   tests/eval/golden_news.yaml           # 20 labelled news questions (+15 bare-name queries)
+  tests/eval/golden_answers.yaml        # 15 mixed + 5 out-of-scope questions on the user's rosters
+  tests/eval/golden_fresh.yaml          # held-out cases, scored apart from the frozen 60
   tests/unit/, tests/integration/, tests/fixtures/phase1/ (recorded slices; record_phase1.py)
 frontend/                   # Next.js 16 App Router + Tailwind + shadcn/ui; e2e/ Playwright
 ```
 
-Planned (phase in brackets): `ml/` features, train, predict [8]; `agent/` llm, router, prompts [6] (tools incl. `search_news` exist); API chat/SSE endpoints [7]; `jobs/scheduler.py` [9]; rest of `tests/eval/golden.yaml` [6]; chat and My League pages [7].
+Planned (phase in brackets): `ml/` features, train, predict [8]; API chat/SSE endpoints and query_log writes [7]; `jobs/scheduler.py` [9]; chat and My League pages [7].
 
 ## Conventions
 
@@ -96,7 +103,8 @@ Planned (phase in brackets): `ml/` features, train, predict [8]; `agent/` llm, r
 - Snapshots can't be backfilled: the scheduled task (scripts/register_daily_ingest.ps1) must stay registered, and the PC on with Docker available, until ingestion moves to a hosted worker (Phase 9).
 - Ingestion: every write goes through `ingest.base.upsert` (re-runs over identical data change 0 rows) inside `sync_run`. Players resolve by ID only (`nflverse.resolve`); unmatched rows go to `unresolved_players`. Name-based `candidates` are hints for a human, never applied.
 - httpx clients: User-Agent `fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)`, a timeout, and a rate limit.
-- pytest markers: `live` (network; deselected by default) and `db` (needs Postgres; uses a throwaway `<db>_migtest` database, never the dev DB).
+- pytest markers: `live` (network; deselected by default), `llm` (calls the paid Claude API; deselected by default) and `db` (needs Postgres; uses a throwaway `<db>_migtest` database, never the dev DB).
+- Agent: the router sees tool schemas only; tool results reach the writer as JSON inside `<result id=...>` tags with `<` escaped, so retrieved text can't close the wrapper. Answers are checked in plain Python (`agent/answer.py`): every number must appear in a tool result, the question or the context; every citation must be a result ID from that turn.
 - Local Postgres listens on 5433 when another Postgres holds 5432 (set `DB_PORT` and `DATABASE_URL` in `.env`).
 
 ## Commands
@@ -127,6 +135,11 @@ uv run fantasy-rag league check-scoring  # our points vs Sleeper's, per player-w
 uv run fantasy-rag tool get_player_stats '{"player":{"name":"Amon-Ra"},"last_n":3}'  # any tool by hand
 uv run fantasy-rag backtest             # tune baseline on 2024, report 2025; writes model_runs
 uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode (--rerank: 1 GB model)
+uv run fantasy-rag ask "bucky irving or jaylen warren?" --league-id 1   # one cited answer (Claude API, ~1-3 cents)
+uv run fantasy-rag eval answers        # golden set through router + writer (~$1-2); --only mixed,a05; report in data/logs/
+uv run fantasy-rag eval answers --rescore ../data/logs/<report>.json   # re-grade a saved run under the current rubric (no API calls)
+uv run fantasy-rag eval grounding --report ../data/logs/<report>.json --only a09,a15   # advisory paid review of saved answers; never certifies grounding
+uv run pytest -m llm                   # Phase 6 checks: golden targets + prompt-injection fixture (Claude API)
 
 uv run uvicorn fantasy_rag.api.main:app --port 8010 --reload   # API (port 8000 is taken on this PC); --reload so Playwright never reuses stale code
 
