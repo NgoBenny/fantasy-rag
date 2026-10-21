@@ -76,3 +76,30 @@ def test_special_teams_credits_forcer_and_opponent_recoveries_only() -> None:
     ]
     packed = pbp.packed(out, [*pbp.KEYS, "player_id"])
     assert json.loads(packed["stats"][0]) == {"st_ff": 1, "st_fum_rec": 0}
+
+
+def test_usage_counts_targets_carries_and_red_zone_looks() -> None:
+    wr, rb, qb = "00-0000001", "00-0000002", "00-0000003"
+    plays = [
+        GB_OFF | {"play_type": "pass", "receiver_player_id": wr, "yardline_100": 19},  # rz
+        GB_OFF | {"play_type": "pass", "receiver_player_id": wr, "yardline_100": 21},  # not rz
+        GB_OFF | {"play_type": "pass", "receiver_player_id": wr, "yardline_100": None},  # unknown
+        GB_OFF | {"play_type": "run", "rusher_player_id": rb, "yardline_100": 4},  # rz + goal line
+        GB_OFF | {"play_type": "run", "rusher_player_id": qb, "yardline_100": 15},  # scramble
+        GB_OFF | {"play_type": "qb_kneel", "rusher_player_id": qb, "yardline_100": 12},
+        # Count for nothing: wiped out by a penalty, a two-point try, a sack (no receiver).
+        GB_OFF | {"play_type": "no_play", "receiver_player_id": wr, "yardline_100": 10},
+        GB_OFF | {"play_type": "pass", "receiver_player_id": wr, "yardline_100": 2,
+                  "two_point_attempt": 1},
+        GB_OFF | {"play_type": "pass", "sack": 1, "yardline_100": 8},
+    ]  # fmt: skip
+    got = {r["player_id"]: r for r in pbp.usage(_frame(plays)).to_dicts()}
+    assert {k: got[wr][k] for k in ("targets_pbp", "rz_targets", "rz_unknown")} == {
+        "targets_pbp": 3, "rz_targets": 1, "rz_unknown": 1}  # fmt: skip
+    # A goal-line carry is in rz_carries once, never counted again as an extra look.
+    assert (got[rb]["rz_carries"], got[rb]["gl_carries"]) == (1, 1)
+    # nflverse counts kneels as carries; red-zone carries leave them out.
+    assert (got[qb]["carries_pbp"], got[qb]["rz_carries"], got[qb]["rz_unknown"]) == (2, 1, 0)
+    assert pbp.games(_frame(plays)).to_dicts() == [
+        {"season": 2026, "week": 1, "season_type": "REG", "game_id": GAME["game_id"], "plays": 9}
+    ]

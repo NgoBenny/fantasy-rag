@@ -30,6 +30,9 @@ def main(argv: list[str] | None = None) -> None:
         help="restore the newest dump into a fresh container and check it",
     )
     sub.add_parser("forward-check", help="exit 1 if this week's on-time forward run is missing")
+    sub.add_parser(
+        "usage-check", help="Phase 10: play-by-play usage vs nflverse stats (exit 1 on miss)"
+    )
     sub.add_parser("calibration-seed", help="Phase 8: record the frozen range calibration, once")
     sub.add_parser("predict", help="Phase 8 forward run: log baseline + TE Ridge (Tuesdays)")
     bm = sub.add_parser("benchmark", help="Phase 8: baseline vs Ridge vs LightGBM, frozen rules")
@@ -143,6 +146,8 @@ def _dispatch(args: argparse.Namespace) -> None:
                 sys.exit(1)
         else:
             print(f"backup written: {backup.run()}")
+    elif args.command == "usage-check":
+        _usage_check()
     elif args.command == "forward-check":
         from datetime import UTC, datetime
 
@@ -433,4 +438,36 @@ def _league(args: argparse.Namespace) -> None:
                 )
             failed |= bool(r.mismatches)
     if failed:
+        sys.exit(1)
+
+
+def _usage_check() -> None:
+    import json
+    from datetime import UTC, datetime
+
+    from fantasy_rag.analytics.queries import latest_week
+    from fantasy_rag.analytics.usage_check import reconcile
+    from fantasy_rag.config import REPO_ROOT
+    from fantasy_rag.db import get_engine
+
+    with get_engine().connect() as conn:
+        season, _ = latest_week(conn)
+        report = reconcile(conn, list(range(2022, season + 1)))
+    path = REPO_ROOT / "data" / "logs" / f"usage_check_{datetime.now(UTC):%Y%m%dT%H%M%SZ}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=1, default=str))
+    for c in report["cells"]:
+        mark = "ok  " if c["ok"] else "FAIL"
+        print(
+            f"{mark} {c['stat']:8} {c['position']} {c['season']}: {c['exact_pct']:6}% exact"
+            f" of {c['rows']} (pbp more {c['pbp_more']}, less {c['pbp_less']}; bar {c['bar']}%)"
+        )
+    print(
+        f"uncovered player-weeks {report['uncovered_player_weeks']}, pbp rows without stats"
+        f" {report['pbp_rows_without_stats']}, unresolved pbp IDs {report['unresolved_pbp_ids']}"
+    )
+    print(f"snap denominators: {report['snap_denominators']}")
+    print(f"report: {path}")
+    if report["failed"]:
+        print("FAILED: " + "; ".join(report["failed"]))
         sys.exit(1)
