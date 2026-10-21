@@ -280,7 +280,8 @@ def compare_start_sit(conn: Connection, a: CompareStartSit) -> dict[str, Any]:
 
 def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
     season, last = q.latest_week(conn)
-    taken, roster_week, synced = q.rostered(conn, a.league_id)
+    avail_now, roster_week, synced = q.rostered(conn, a.league_id)
+    taken = avail_now.rostered
     if roster_week is None:
         raise ValueError(f"league {a.league_id} has no imported rosters")
     rules, label = q.rules_for(conn, a.league_id, None)
@@ -309,6 +310,7 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
         "scoring": label,
         "week": last + 1,
         "rosters_as_of": {"week": roster_week, "synced_at": synced},
+        "availability_as_of": avail_now.as_of,
         "rostered_players_excluded": len(taken),
         "candidates": [
             {

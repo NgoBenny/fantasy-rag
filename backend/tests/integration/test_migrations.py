@@ -12,7 +12,7 @@ ALL_TABLES = {
     "fantasy_leagues", "fantasy_rosters", "projections", "model_runs", "documents", "chunks",
     "query_log", "schedules", "player_week_stats", "snap_counts", "ff_opportunity",
     "depth_charts", "injury_history", "unresolved_players", "team_week_defense",
-    "player_week_special_teams",
+    "player_week_special_teams", "league_transactions", "league_fetches",
 }  # fmt: skip
 ALEMBIC_INI = Path(__file__).resolve().parents[2] / "alembic.ini"
 

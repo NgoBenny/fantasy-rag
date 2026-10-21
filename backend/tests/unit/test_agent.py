@@ -152,7 +152,12 @@ def test_an_answer_failing_twice_is_withheld(monkeypatch: pytest.MonkeyPatch) ->
     bad = _answer("99 points", Claim(text="99", source_ids=["r1"]), cites=["r1"])
     turn, _ = _turn(monkeypatch, [bad, bad.model_copy(deep=True)])
     assert turn.rejected is not None and turn.answer.answer_type == "no_data"
-    assert "99" not in turn.answer.answer and turn.answer.limitations == turn.problems
+    # The failed checks quote the draft ("99"); they stay internal, never in the answer.
+    assert turn.problems and any("99" in p for p in turn.problems)
+    shown = turn.answer.model_dump_json()
+    assert "99" not in shown and turn.answer.limitations == [
+        "The answer could not be verified against the data."
+    ]
 
 
 def test_tool_arguments_and_echoes_are_not_evidence() -> None:

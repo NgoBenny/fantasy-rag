@@ -9,7 +9,7 @@ def main(argv: list[str] | None = None) -> None:
     ingest = sub.add_parser("ingest", help="load data into Postgres")
     ingest.add_argument("what", choices=["structured", "news", "news-report"])
     league = sub.add_parser("league", help="Sleeper league import and scoring check")
-    league.add_argument("action", choices=["import", "check-scoring"])
+    league.add_argument("action", choices=["import", "check-scoring", "sync-transactions"])
     league.add_argument("--username", help="Sleeper username (default: SLEEPER_USERNAME)")
     league.add_argument("--league-id", help="import one league instead of all of a user's")
     league.add_argument(
@@ -220,6 +220,17 @@ def _league(args: argparse.Namespace) -> None:
     from fantasy_rag.db import get_engine
 
     engine = get_engine()
+    if args.action == "sync-transactions":
+        from fantasy_rag.ingest.sleeper import Sleeper
+        from fantasy_rag.ingest.transactions import sync_transactions
+
+        failed = False
+        for s in sync_transactions(engine, Sleeper()):
+            print(f"league {s['league_pk']}: weeks {s['weeks']}, failed: {s['failed'] or 'none'}")
+            failed |= bool(s["failed"])
+        if failed:
+            sys.exit(1)
+        return
     if args.action == "import":
         from fantasy_rag.ingest.league import import_leagues
         from fantasy_rag.ingest.sleeper import Sleeper

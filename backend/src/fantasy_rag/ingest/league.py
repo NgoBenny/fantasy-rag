@@ -1,6 +1,7 @@
 """Import Sleeper leagues (read-only): settings, scoring rules, rosters and weekly matchups."""
 
 import json
+from datetime import UTC, datetime
 from typing import Any
 
 import polars as pl
@@ -9,6 +10,7 @@ from sqlalchemy import Engine, text
 from fantasy_rag.analytics.scoring import ScoringRules
 from fantasy_rag.ingest.base import Run, record_unresolved, sync_run, upsert
 from fantasy_rag.ingest.nflverse import resolve
+from fantasy_rag.ingest.transactions import fetch_row, record_fetches
 
 
 def league_ids(api: Any, username: str | None, league_id: str | None, season: str) -> list[str]:
@@ -125,6 +127,7 @@ def _import_one(run: Run, api: Any, lid: str, state: dict[str, Any]) -> dict[str
     ).scalar_one()
 
     users = {u["user_id"]: u.get("display_name") for u in api.get(f"/league/{lid}/users") or []}
+    rosters_requested = datetime.now(UTC)  # snapshot boundary for transaction replay
     rosters = api.get(f"/league/{lid}/rosters") or []
     owners = {int(r["roster_id"]): users.get(r.get("owner_id")) for r in rosters}
     in_season = int(league["season"]) == int(state["season"])
@@ -160,6 +163,10 @@ def _import_one(run: Run, api: Any, lid: str, state: dict[str, Any]) -> dict[str
             all_misses.append(misses)
     rows = pl.concat(all_rows) if all_rows else pl.DataFrame()
     changed += upsert(conn, "fantasy_rosters", rows, ["league_id", "roster_id", "week"], run.id)
+    if live_week is not None and rows.height:
+        record_fetches(
+            conn, [fetch_row(league_pk, "rosters", live_week, rosters_requested, True)], run.id
+        )
     misses = pl.concat(all_misses).unique() if all_misses else pl.DataFrame({"external_id": []})
     record_unresolved(run, f"league.{league_pk}", misses)
     run.rows = changed

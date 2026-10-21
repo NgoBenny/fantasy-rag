@@ -8,8 +8,9 @@ citations and numbers that no tool result contains are reported, never hidden.
 
 import json
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 from pydantic import BaseModel
@@ -132,26 +133,100 @@ def _as_data(value: Any) -> str:
     return json.dumps(value, default=str).replace("<", "\\u003c")
 
 
+@dataclass(frozen=True)
+class Progress:
+    """A status line for the user. Written by this module from fixed templates and data
+    the tools resolved, never from model text."""
+
+    stage: Literal["context", "tool", "writing", "checking", "repairing"]
+    message: str
+    tool: str | None = None
+    ok: bool | None = None
+
+
+class Cancelled(Exception):
+    """The client went away; no further model or tool call is started."""
+
+
+def _noop(_: Progress) -> None:
+    return None
+
+
+TOOL_LABELS = {
+    "get_player_stats": "stats",
+    "compare_players": "stats",
+    "defense_vs_position": "points allowed",
+    "get_injury_status": "injury status",
+    "get_trending": "trending adds and drops",
+    "project_player": "a projection",
+    "compare_start_sit": "projections",
+    "optimize_lineup": "your best lineup",
+    "search_news": "recent news",
+    "rank_waivers": "waiver options",
+}
+
+
+def _resolved_names(result: dict[str, Any]) -> list[str]:
+    found = [result.get("player")]
+    found += [r.get("player") for r in result.get("ranked", [])]
+    found += [p.get("player", p) for p in result.get("players") or [] if isinstance(p, dict)]
+    return [p["name"] for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
+
+
+def _failure_kind(error: str) -> str:
+    """The class of a tool error, never its text (which can quote the model's input)."""
+    if "matches no single player" in error:
+        return "name matches several players" if "Candidates:" in error else "no such player"
+    if error.startswith("unknown tool"):
+        return "not an available tool"
+    if "validation error" in error:
+        return "invalid request"
+    return "no data for that request"
+
+
+def tool_progress(call: ToolCall) -> Progress:
+    label = TOOL_LABELS.get(call.name, "data")
+    if call.error is not None or call.result is None:
+        what = "Player lookup" if "player" in (call.error or "") else f"Looking up {label}"
+        return Progress("tool", f"{what} failed: {_failure_kind(call.error or '')}",
+                        call.name, False)  # fmt: skip
+    names = _resolved_names(call.result)
+    who = f" for {', '.join(dict.fromkeys(names))}" if names else ""
+    league = call.args.get("league_id")
+    rules = f" (league {league} rules)" if isinstance(league, int) else ""
+    return Progress("tool", f"Looked up {label}{who}{rules}", call.name, True)
+
+
 def route(
-    conn: Connection, llm: LLMClient, question: str, context: str
+    conn: Connection,
+    llm: LLMClient,
+    question: str,
+    context: str,
+    on_progress: Callable[[Progress], None] = _noop,
+    cancelled: Callable[[], bool] = bool,
 ) -> tuple[list[ToolCall], bool]:
     """Let the router call tools for up to MAX_ROUNDS rounds. Returns (calls, hit limit)."""
     messages: list[MessageParam] = [{"role": "user", "content": f"{context}\n\n{question}"}]
     tools = tool_specs()
     calls: list[ToolCall] = []
     for _ in range(MAX_ROUNDS):
+        if cancelled():
+            raise Cancelled
         resp = llm.tool_turn(ROUTER_SYSTEM, messages, tools)
         uses = [b for b in resp.content if b.type == "tool_use"]
         if not uses or resp.stop_reason != "tool_use":
             return calls, False
         results: list[ToolResultBlockParam] = []
         for b in uses:
+            if cancelled():
+                raise Cancelled
             call = ToolCall(f"r{len(calls) + 1}", b.name, dict(b.input))
             try:
                 call.result = run_tool(conn, b.name, call.args)
             except ValueError as e:  # bad input, unknown tool, ambiguous player, no data
                 call.error = str(e)
             calls.append(call)
+            on_progress(tool_progress(call))
             results.append(
                 {
                     "type": "tool_result",
@@ -219,14 +294,21 @@ def _repair_input(content: str, answer: Answer, found: list[str]) -> str:
     )
 
 
-def _withheld(found: list[str]) -> Answer:
+WITHHELD_MESSAGE = (
+    "I couldn't match every number and source in my answer to the data, so I'm not showing"
+    " it. Try asking about one player or one league at a time."
+)
+
+
+def _withheld() -> Answer:
+    # The failed checks quote the rejected draft, so they stay in Turn.problems (and the
+    # internal log); the user only learns that verification failed.
     return Answer(
-        answer="I couldn't match every number and source in my answer to the data, so I'm"
-        " not showing it. Try asking about one player or one league at a time.",
+        answer=WITHHELD_MESSAGE,
         answer_type="no_data",
         season=None, week=None, scoring_format=None, data_as_of=None, model_version=None,
         facts=[], projections=[], citations=[],
-        limitations=found,
+        limitations=["The answer could not be verified against the data."],
     )  # fmt: skip
 
 
@@ -236,25 +318,37 @@ def ask(
     question: str,
     leagues: list[MyLeague] | None = None,
     selected: int | None = None,
+    on_progress: Callable[[Progress], None] = _noop,
+    cancelled: Callable[[], bool] = bool,
 ) -> Turn:
     """Route, write, check. A failed check gets one repair attempt; if that fails too, the
-    answer is withheld (kept in `rejected` for evaluation) and the user sees why."""
+    answer is withheld (kept in `rejected` for evaluation) and the user sees why.
+    `cancelled` is polled before every model and tool call; it raises `Cancelled`."""
     start = time.monotonic()
     before = {m: list(v) for m, v in getattr(llm, "usage", {}).items()}
+    on_progress(Progress("context", "Reading the season and your league context"))
     context = context_block(conn, leagues or [], selected)
-    calls, capped = route(conn, llm, question, context)
+    calls, capped = route(conn, llm, question, context, on_progress, cancelled)
     content = writer_input(question, context, calls)
     srcs, failed = sources(calls), failed_ids(calls)
+    if cancelled():
+        raise Cancelled
+    on_progress(Progress("writing", "Writing the answer"))
     answer = llm.structured(WRITER_SYSTEM, content, Answer)
+    on_progress(Progress("checking", "Checking every number and source"))
     first = problems(answer, srcs, context, failed)
     first_draft = answer.model_copy(deep=True) if first else None
     found = first
     if first:
+        if cancelled():
+            raise Cancelled
+        on_progress(Progress("repairing", "Fixing a failed check"))
         answer = llm.structured(WRITER_SYSTEM, _repair_input(content, answer, first), Answer)
+        on_progress(Progress("checking", "Checking every number and source"))
         found = problems(answer, srcs, context, failed)
     rejected = None
     if found:
-        rejected, answer = answer, _withheld(found)
+        rejected, answer = answer, _withheld()
     if capped:
         answer.limitations.append(f"stopped after {MAX_ROUNDS} rounds of tool calls")
     return Turn(
