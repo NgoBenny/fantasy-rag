@@ -12,7 +12,7 @@ import hashlib
 import json
 import pickle
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 from sqlalchemy import Connection, Engine, text
@@ -77,26 +77,17 @@ def status_of(sched: list[dict[str, Any]], season: int, week: int, snapshot: dat
     return "on_time"
 
 
-def _residual_offsets(
-    rows: list[Row], preds: dict[tuple[str, int, int], dict[str, float | None]],
-    formats: dict[str, ScoringRules], cutoff: datetime, positions: tuple[str, ...],
-) -> dict[str, dict[str, list[float] | None]]:  # fmt: skip
-    """key -> position -> [lower, upper] offsets from this policy's own errors on games
-    usable at the cutoff (calibration season on)."""
-    out: dict[str, dict[str, list[float] | None]] = {k: {} for k in formats}
-    for pos in positions:
-        mine = [r for r in rows if r.position == pos and r.label and r.season >= CALIBRATE
-                and usable(r.label.kickoff, cutoff)]  # fmt: skip
-        for key, rules in formats.items():
-            res = []
-            for r in mine:
-                p = preds.get((r.player_id, r.season, r.week), {}).get(key)
-                if p is not None:
-                    assert r.label is not None
-                    res.append(score(r.label.stats, pos, rules).points - p)
-            off = ranges.offsets(res)
-            out[key][pos] = list(off) if off else None
-    return out
+# (policy, scoring key, position) -> [(game kickoff, actual - predicted)], frozen
+Errors = dict[tuple[str, str, str], list[tuple[datetime, float]]]
+FINAL_AFTER = timedelta(days=4)  # a week's outcomes are final 4 days after its last game
+
+
+def offsets_at(
+    errors: Errors, policy: str, key: str, pos: str, cutoff: datetime
+) -> list[float] | None:
+    """Range offsets from this policy's recorded errors on games usable at the cutoff."""
+    got = ranges.offsets([e for k, e in errors.get((policy, key, pos), []) if usable(k, cutoff)])
+    return list(got) if got else None
 
 
 def forecast(
@@ -104,8 +95,10 @@ def forecast(
     sched: list[dict[str, Any]],
     formats: dict[str, ScoringRules],
     snapshot: datetime,
+    errors: Errors,
 ) -> Forecast:
-    """Everything the run writes, from inputs read at `snapshot` (pure: tests drive it)."""
+    """Everything the run writes, from inputs read at `snapshot` (pure: tests drive it).
+    Ranges use only the recorded calibration `errors`, never a rebuild from today's data."""
     season, week = target_week(sched, snapshot)
     cutoff = cutoffs(sched)[(season, week)]
     h = History(games, formats)
@@ -122,17 +115,12 @@ def forecast(
     out = Forecast(season, week, cutoff, status_of(sched, season, week, snapshot), newest,
                    targets, {}, {})  # fmt: skip
 
-    base_hist = {(r.player_id, r.season, r.week): dict(r.baseline) for r in labeled}
-    out.preds["baseline"] = {r.player_id: {k: {"points": v} for k, v in r.baseline.items()}
-                             for r in targets}  # fmt: skip
-    out.ranges["baseline"] = _residual_offsets(labeled, base_hist, formats, cutoff, POSITIONS)
-
+    out.preds["baseline"] = {
+        r.player_id: {k: {"points": v, "effective": "baseline"} for k, v in r.baseline.items()}
+        for r in targets
+    }
     spec = POLICIES["ridge"]
     out.preds["ridge"] = {}
-    hist: dict[tuple[str, int, int], dict[str, float | None]] = {}
-    for s in range(CALIBRATE, season + 1):  # out-of-sample errors for its own ranges
-        hist |= run_policy("ridge", spec["params"], labeled, s, formats, spec["positions"])
-    out.ranges["ridge"] = _residual_offsets(labeled, hist, formats, cutoff, spec["positions"])
     for pos in spec["positions"]:
         train = [r for r in labeled if r.position == pos and r.label and r.games_used >= 1
                  and usable(r.label.kickoff, cutoff)]  # fmt: skip
@@ -144,20 +132,124 @@ def forecast(
         predicted = model.predict(mine)
         for i, r in enumerate(mine):
             comps = {c: float(v[i]) for c, v in predicted.items()}
-            pts = points(r, comps, formats)
-            fallback = r.games_used < MIN_GAMES
+            # Too little history: the policy serves the baseline, and says so.
+            effective = "baseline" if r.games_used < MIN_GAMES else "ridge"
             out.preds["ridge"][r.player_id] = {
-                k: {"points": v, "components": None if fallback else comps}
-                for k, v in pts.items()}  # fmt: skip
-    for policy, by_player in out.preds.items():
+                k: {"points": v, "effective": effective,
+                    "components": comps if effective == "ridge" else None}
+                for k, v in points(r, comps, formats).items()}  # fmt: skip
+    position = {r.player_id: r.position for r in targets}
+    for policy in POLICIES:
+        out.ranges[policy] = {
+            k: {p: offsets_at(errors, policy, k, p, cutoff) for p in POSITIONS} for k in formats
+        }
+    for by_player in out.preds.values():
         for pid, by_key in by_player.items():
-            pos = next(r.position for r in targets if r.player_id == pid)
             for key, v in by_key.items():
-                off = out.ranges[policy][key].get(pos)
+                off = out.ranges[v["effective"]][key][position[pid]]
                 p = v["points"]
                 v["p10"], v["p90"] = (None, None) if p is None or off is None else (
                     round(p + off[0], 2), round(p + off[1], 2))  # fmt: skip
     return out
+
+
+def seed_errors(
+    games: list[Game], sched: list[dict[str, Any]], formats: dict[str, ScoringRules]
+) -> list[dict[str, Any]]:
+    """Out-of-sample errors from the calibration season to now, per policy as it serves:
+    the baseline everywhere, Ridge only where it predicted (not its fallback rows)."""
+    h = History(games, formats)
+    seasons = range(min(g.season for g in games), max(g.season for g in games) + 1)
+    labeled = rows_for_labels(h, sched, seasons)
+    spec = POLICIES["ridge"]
+    ridge: dict[tuple[str, int, int], dict[str, float | None]] = {}
+    for s in range(CALIBRATE, seasons[-1] + 1):
+        ridge |= run_policy("ridge", spec["params"], labeled, s, formats, spec["positions"])
+    out = []
+    for r in labeled:
+        if r.season < CALIBRATE or r.games_used < 1 or r.label is None:
+            continue
+        preds = {"baseline": r.baseline}
+        if r.position in spec["positions"] and r.games_used >= MIN_GAMES:
+            preds["ridge"] = ridge.get((r.player_id, r.season, r.week), {})
+        for policy, by_key in preds.items():
+            for key, p in by_key.items():
+                if p is not None:
+                    actual = score(r.label.stats, r.position, formats[key]).points
+                    out.append({"pol": policy, "k": key, "pos": r.position, "p": r.player_id,
+                                "s": r.season, "w": r.week, "kick": r.label.kickoff,
+                                "e": round(actual - p, 4)})  # fmt: skip
+    return out
+
+
+def seed(engine: Engine) -> int:
+    """Record the calibration seed, once. A second seed would rebuild old errors from data
+    corrected since, which the frozen plan forbids, so it is refused."""
+    with engine.begin() as conn:
+        if conn.execute(
+            text("SELECT 1 FROM calibration_errors WHERE source = 'seed' LIMIT 1")
+        ).first():
+            raise SystemExit("the calibration seed is already recorded; it is never rebuilt")
+        games, sched = load(conn)
+        formats, _ = scoring_rules(conn)
+        rows = seed_errors(games, sched, formats)
+        conn.execute(_INSERT_ERROR, [r | {"src": "seed", "run": None} for r in rows])
+    return len(rows)
+
+
+_INSERT_ERROR = text(
+    "INSERT INTO calibration_errors (policy, scoring_key, position, player_id, season, week,"
+    " kickoff, error, source, run_id) VALUES (:pol, :k, :pos, :p, :s, :w, :kick, :e, :src, :run)"
+    " ON CONFLICT DO NOTHING"
+)
+
+
+# Each week's first on-time run, once the week's last game is FINAL_AFTER old.
+_FINAL_RUNS = text(
+    """SELECT DISTINCT ON (f.season, f.week) f.id, f.season, f.week, f.scoring
+       FROM forward_runs f
+       WHERE f.status = 'on_time'
+         AND clock_timestamp() >= (SELECT max(kickoff_at) FROM schedules s
+             WHERE s.season = f.season AND s.week = f.week AND s.game_type = 'REG') + :final
+       ORDER BY f.season, f.week, f.snapshot_at"""
+)
+# That run's predictions the policy itself made, for players who played (with outcomes).
+_PLAYED = text(
+    """SELECT p.policy, p.scoring_key, p.player_id, p.points, i.position, sc.kickoff_at,
+              s.stats || COALESCE(st.stats, '{}'::jsonb) AS stats
+       FROM projections p
+       JOIN forward_inputs i ON i.run_id = p.run_id AND i.player_id = p.player_id
+       JOIN player_week_stats s ON s.player_id = p.player_id AND s.season = :s
+            AND s.week = :w AND s.season_type = 'REG'
+       JOIN schedules sc ON sc.game_id = s.game_id
+       LEFT JOIN player_week_special_teams st ON st.player_id = s.player_id
+            AND st.season = s.season AND st.week = s.week AND st.season_type = s.season_type
+       WHERE p.run_id = :r AND p.effective_policy = p.policy AND p.points IS NOT NULL"""
+)
+
+
+def record_final(engine: Engine) -> int:
+    """Score the saved predictions of each week's first on-time run once that week is final
+    (FINAL_AFTER its last game, after the NFL's stat corrections). Insert-only: a recorded
+    error never changes, and a player who didn't play adds none."""
+    added = 0
+    with engine.begin() as conn:
+        runs = conn.execute(_FINAL_RUNS, {"final": FINAL_AFTER}).all()
+        for run in runs:
+            rules = {k: ScoringRules.from_sleeper(v["raw"]) for k, v in _obj(run.scoring).items()}
+            played = conn.execute(_PLAYED, {"r": run.id, "s": run.season, "w": run.week})
+            rows = [{"pol": x.policy, "k": x.scoring_key, "pos": x.position, "p": x.player_id,
+                     "s": run.season, "w": run.week, "kick": x.kickoff_at, "src": "forward",
+                     "run": run.id,
+                     "e": round(score(_obj(x.stats), x.position, rules[x.scoring_key]).points
+                                - x.points, 4)} for x in played]  # fmt: skip
+            if rows:
+                added += conn.execute(_INSERT_ERROR, rows).rowcount
+    return added
+
+
+def _obj(v: Any) -> Any:
+    return json.loads(v) if isinstance(v, str) else v
 
 
 def scoring_rules(conn: Connection) -> tuple[dict[str, ScoringRules], dict[str, Any]]:
@@ -169,6 +261,7 @@ def scoring_rules(conn: Connection) -> tuple[dict[str, ScoringRules], dict[str, 
 
 
 def run(engine: Engine) -> dict[str, Any]:
+    finalized = record_final(engine)
     conn = engine.connect().execution_options(isolation_level="REPEATABLE READ")
     with conn, conn.begin():
         # The first statement fixes the snapshot; its clock time is the information cutoff.
@@ -178,7 +271,15 @@ def run(engine: Engine) -> dict[str, Any]:
         sync = {r.source: {"id": r.id, "finished_at": r.finished_at} for r in conn.execute(text(
             "SELECT DISTINCT ON (source) source, id, finished_at FROM sync_runs"
             " WHERE status = 'ok' ORDER BY source, finished_at DESC"))}  # fmt: skip
-    f = forecast(games, sched, formats, snapshot)
+        errors: Errors = {}
+        found = conn.execute(
+            text("SELECT policy, scoring_key, position, kickoff, error FROM calibration_errors")
+        )
+        for e in found:
+            errors.setdefault((e.policy, e.scoring_key, e.position), []).append(
+                (e.kickoff, e.error)
+            )
+    f = forecast(games, sched, formats, snapshot, errors)
     stats_run = sync.get("nflverse.player_stats", {})
     with engine.begin() as w:
         shas = {}
@@ -208,11 +309,12 @@ def run(engine: Engine) -> dict[str, Any]:
               "g": r.games_used, "li": r.latest_input} for r in f.rows])  # fmt: skip
         w.execute(text(
             "INSERT INTO projections (run_id, policy, scoring_key, player_id, points, p10, p90,"
-            " components) VALUES (:run, :pol, :k, :p, :pts, :lo, :hi, :c)"),
+            " components, effective_policy) VALUES (:run, :pol, :k, :p, :pts, :lo, :hi, :c, :ef)"),
             [{"run": run_id, "pol": pol, "k": k, "p": pid, "pts": v["points"], "lo": v["p10"],
-              "hi": v["p90"], "c": json.dumps(v.get("components"))}
+              "hi": v["p90"], "c": json.dumps(v.get("components")), "ef": v["effective"]}
              for pol, by_player in f.preds.items() for pid, by_key in by_player.items()
              for k, v in by_key.items()])  # fmt: skip
     return {"run_id": run_id, "season": f.season, "week": f.week, "status": f.status,
             "snapshot_at": snapshot, "cutoff": f.cutoff, "players": len(f.rows),
-            "newest_game": f.newest_game, "models": models}  # fmt: skip
+            "newest_game": f.newest_game, "models": models, "finalized_errors": finalized,
+            "calibration_errors": sum(len(v) for v in errors.values())}  # fmt: skip

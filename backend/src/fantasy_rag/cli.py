@@ -23,6 +23,7 @@ def main(argv: list[str] | None = None) -> None:
     bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
     bt.add_argument("--tune-season", type=int, default=2024)
     bt.add_argument("--test-season", type=int, default=2025)
+    sub.add_parser("calibration-seed", help="Phase 8: record the frozen range calibration, once")
     sub.add_parser("predict", help="Phase 8 forward run: log baseline + TE Ridge (Tuesdays)")
     bm = sub.add_parser("benchmark", help="Phase 8: baseline vs Ridge vs LightGBM, frozen rules")
     bm.add_argument("--predictions", help="re-report a saved predictions file (no retraining)")
@@ -87,6 +88,11 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "calibration-seed":
+        from fantasy_rag.db import get_engine
+        from fantasy_rag.ml.predict import seed
+
+        print(f"recorded {seed(get_engine())} calibration errors (seed; never rebuilt)")
     elif args.command == "predict":
         _predict()
     elif args.command == "benchmark":
@@ -251,6 +257,10 @@ def _predict() -> None:
         f" newest game {r['newest_game']}); {r['players']} players"
     )
     print(f"models: {r['models']}")
+    print(f"calibration errors: {r['calibration_errors']} ({r['finalized_errors']} added from"
+          " finalized forward weeks)")  # fmt: skip
+    if not r["calibration_errors"]:
+        print("no calibration errors recorded: no ranges (run `fantasy-rag calibration-seed`)")
 
 
 def _benchmark(saved: str | None) -> None:

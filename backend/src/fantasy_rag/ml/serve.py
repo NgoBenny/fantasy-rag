@@ -70,7 +70,8 @@ def project(
     if same_rules and any(ACTIVE.get(r.position or "") for r in refs):
         for row in conn.execute(
             text(
-                "SELECT policy, player_id, points, p10, p90 FROM projections WHERE run_id = :r"
+                "SELECT policy, player_id, points, p10, p90, effective_policy FROM projections"
+                " WHERE run_id = :r"
                 " AND scoring_key = :k AND player_id = ANY(:ids)"
             ),
             {"r": run.id, "k": key, "ids": ids},
@@ -83,7 +84,8 @@ def project(
         base = baseline.project(history.get(ref.id, []), season, week)
         policy = ACTIVE.get(pos)
         got = logged.get((policy, ref.id)) if policy else None
-        if got is not None and got.points is not None:
+        # A challenger's row that fell back (too little history) is served as the baseline.
+        if got is not None and got.points is not None and got.effective_policy == policy:
             rng = None if got.p10 is None else (got.p10, got.p90)
             n = base[1] if base else 0
             out[ref.id] = Served(got.points, n, policy or "", models[policy]["version"], rng)

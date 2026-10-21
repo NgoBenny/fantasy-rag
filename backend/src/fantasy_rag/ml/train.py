@@ -15,8 +15,8 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from fantasy_rag.analytics.scoring import ScoringRules, score
-from fantasy_rag.ml.features import COMPONENTS, MODELED, Row
+from fantasy_rag.analytics.scoring import THRESHOLD_KEYS, ScoringRules, score
+from fantasy_rag.ml.features import MODELED, Row
 
 MIN_GAMES = 3
 RIDGE_GRID = [{"alpha": a} for a in (1.0, 10.0, 100.0, 1000.0)]
@@ -83,11 +83,21 @@ def fit_predict(
 def points(
     row: Row, predicted: dict[str, float], formats: dict[str, ScoringRules]
 ) -> dict[str, float | None]:
-    """Score predicted components (others from the player's weighted averages); the
-    baseline when the player has too little history."""
+    """The baseline's points, adjusted only for the components the model predicts:
+    baseline + score(predicted) - score(their weighted averages), under each rule set's
+    linear keys. Everything the model doesn't predict (special teams, targets, first
+    downs, threshold bonuses...) therefore counts exactly as in the baseline. The
+    baseline itself when the player has too little history."""
     if row.games_used < MIN_GAMES:
         return dict(row.baseline)
-    stats = {c: row.features[f"{c}_ewm"] or 0.0 for c in COMPONENTS}
+    now = {c: row.features[f"{c}_ewm"] or 0.0 for c in predicted}
     # Counts (catches, TDs, picks, fumbles) can't be negative; yards can.
-    stats |= {c: v if c.endswith("_yards") else max(0.0, v) for c, v in predicted.items()}
-    return {f: score(stats, row.position, r).points for f, r in formats.items()}
+    new = {c: v if c.endswith("_yards") else max(0.0, v) for c, v in predicted.items()}
+    out: dict[str, float | None] = {}
+    for f, rules in formats.items():
+        base = row.baseline.get(f)
+        lin = rules.model_copy(update={"weights": {
+            k: w for k, w in rules.weights.items() if k not in THRESHOLD_KEYS}})  # fmt: skip
+        delta = score(new, row.position, lin).points - score(now, row.position, lin).points
+        out[f] = None if base is None else round(base + delta, 2)
+    return out

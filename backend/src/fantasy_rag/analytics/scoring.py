@@ -139,6 +139,8 @@ DERIVE: dict[str, Callable[[Stats, str], float]] = {
     "st_ff": _col("st_ff"),
     "st_fum_rec": _col("st_fum_rec"),
 }
+# Per-game threshold bonuses: not linear in the stats, so a point estimate can't score them.
+THRESHOLD_KEYS = frozenset(k for k in DERIVE if k.startswith("bonus_") and k[-1].isdigit())
 
 
 def _band(key: str, lo: float, hi: float | None) -> Callable[[Stats, str], float]:

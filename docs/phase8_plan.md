@@ -208,3 +208,23 @@ The rules above stay frozen; these replace or tighten the named sections.
   pipeline end to end, after the Oct 20 deadline); they are never counted.
 - XGBoost and CatBoost stay deferred: adding challengers against the already examined 2025
   benchmark would weaken any new win; they'd be judged on forward weeks instead.
+
+## Review fixes, Oct 21, 2026
+
+- **Trained points keep every league rule.** A challenger's points are the baseline's
+  plus the change in the components it predicts, scored with each rule set's linear
+  keys. Anything it doesn't predict (special-teams `st_ff`/`st_fum_rec`, targets, first
+  downs, threshold bonuses) counts exactly as in the baseline. For the presets this equals
+  the previous calculation.
+- **Calibration is frozen, not rebuilt.** `calibration_errors` (insert-only, migration
+  0009) holds the seed, recorded once on Oct 21, 2026 (`fantasy-rag calibration-seed`;
+  a second seed is refused): each policy's out-of-sample errors from 2024 to week 6 of 2026.
+  From then on it grows only from saved forward predictions. **Outcome-finalization policy:**
+  a week is final 4 days after its last game (after the NFL's Monday–Wednesday stat
+  corrections). Its first on-time run's predictions are then scored once against the
+  stats at that moment, for players who played. A recorded error never changes. Forward
+  ranges read only this table.
+- **Fallbacks say so.** `projections.effective_policy` records the policy a row really
+  used: a Ridge row for a player with fewer than 3 games is `baseline`, carries the
+  baseline's range, and is served as the baseline. Ridge's own errors come only from rows
+  where Ridge predicted.

@@ -40,10 +40,13 @@ def load(conn: Connection) -> tuple[list[Game], list[dict[str, Any]]]:
     rows = conn.execute(text(
         """
         SELECT s.player_id, p.position, s.season, s.week, s.game_id, s.team, s.opponent,
-               sc.kickoff_at, s.stats, n.offense_pct
+               sc.kickoff_at, s.stats || COALESCE(st.stats, '{}'::jsonb) AS stats, n.offense_pct
         FROM player_week_stats s
         JOIN players p ON p.id = s.player_id
         JOIN schedules sc ON sc.game_id = s.game_id
+        -- special-teams stats (st_ff, st_fum_rec) from play-by-play, as weekly_rows merges them
+        LEFT JOIN player_week_special_teams st ON st.player_id = s.player_id
+             AND st.season = s.season AND st.week = s.week AND st.season_type = s.season_type
         LEFT JOIN snap_counts n ON n.player_id = s.player_id AND n.season = s.season
              AND n.week = s.week AND n.game_type = 'REG'
         WHERE s.season_type = 'REG' AND s.season >= 2022

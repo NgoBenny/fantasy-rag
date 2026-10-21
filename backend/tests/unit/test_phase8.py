@@ -206,13 +206,65 @@ def test_the_forward_run_labels_its_snapshot_and_logs_te_ridge_beside_the_baseli
     sched = schedule()
     deadline = cutoffs(sched)[(SEASON, 6)]
     tuesday = deadline - timedelta(hours=1, minutes=30)  # 10:30 ET
-    f = forecast(gs, sched, FORMATS, tuesday)
+    f = forecast(gs, sched, FORMATS, tuesday, {})
     assert (f.season, f.week, f.status, f.cutoff) == (SEASON, 6, "on_time", deadline)
     assert set(f.preds["baseline"]) == {f"p{i}" for i in range(12)}
     assert set(f.preds["ridge"]) == {"p0", "p1", "p2", "p3"}  # TE only
     assert f.newest_game is not None and f.newest_game <= deadline - LAG
     assert "ridge" in f.artifacts
     # Same Thursday-before-kickoff week, but after the deadline: late, never on time.
-    assert forecast(gs, sched, FORMATS, deadline + timedelta(hours=20)).status == "late"
+    assert forecast(gs, sched, FORMATS, deadline + timedelta(hours=20), {}).status == "late"
     # Before the last game of the previous week could be in: early.
-    assert forecast(gs, sched, FORMATS, sunday(5) + timedelta(hours=1)).status == "early"
+    assert forecast(gs, sched, FORMATS, sunday(5) + timedelta(hours=1), {}).status == "early"
+
+
+def test_league_rules_the_model_does_not_predict_still_count() -> None:
+    """A league scoring special-teams forced fumbles and targets: the trained projection
+    keeps those points (from the baseline), instead of silently dropping them."""
+    from fantasy_rag.analytics.scoring import ScoringRules
+    from fantasy_rag.ml.train import points
+
+    league = FORMATS | {  # History needs PPR for its opponent feature
+        "lg": ScoringRules.from_sleeper({"rec": 1, "rec_yd": 0.1, "st_ff": 4, "rec_tgt": 0.5})
+    }
+    gs = [replace(g, stats={**g.stats, "st_ff": 1}) for g in games()]  # one per game
+    r = {
+        (x.player_id, x.week): x for x in rows_for_labels(History(gs, league), schedule(), [SEASON])
+    }[("p1", 6)]
+    same = {c: r.features[f"{c}_ewm"] for c in ("receptions", "receiving_yards", "receiving_tds")}
+    assert points(r, same, league)["lg"] == r.baseline["lg"]  # includes 4 pts of st_ff
+    more = same | {"receptions": same["receptions"] + 1}
+    assert points(r, more, league)["lg"] == pytest.approx(r.baseline["lg"] + 1, abs=0.011)
+
+
+def test_forward_ranges_use_only_recorded_errors_and_fallbacks_say_so() -> None:
+    from fantasy_rag.ml import ranges as rng
+    from fantasy_rag.ml.predict import forecast
+
+    gs = [replace(g, position="TE") if g.player_id in ("p0", "p1") else g for g in games(weeks=5)]
+    gs.append(Game("rookie", "TE", SEASON, 5, "S5", "CCC", "DDD", sunday(5), {"receptions": 2}))
+    sched = schedule()
+    tuesday = cutoffs(sched)[(SEASON, 6)] - timedelta(hours=1)
+    old = datetime(2024, 1, 1, tzinfo=UTC)
+    errors = {
+        ("baseline", "ppr", "TE"): [(old, float(i)) for i in range(-30, 30)],
+        ("ridge", "ppr", "TE"): [(old, float(i) / 2) for i in range(-30, 30)],
+    }
+    f = forecast(gs, sched, FORMATS, tuesday, errors)
+    base_off, ridge_off = (
+        rng.offsets([float(i) for i in range(-30, 30)]),
+        rng.offsets([float(i) / 2 for i in range(-30, 30)]),
+    )
+    assert f.ranges["ridge"]["ppr"]["TE"] == list(ridge_off)
+    full = f.preds["ridge"]["p0"]["ppr"]
+    assert full["effective"] == "ridge" and full["p10"] == round(full["points"] + ridge_off[0], 2)
+    # One game of history: the Ridge row is the baseline, labelled and ranged as such.
+    rookie = f.preds["ridge"]["rookie"]["ppr"]
+    assert rookie["effective"] == "baseline" and rookie["components"] is None
+    assert rookie["points"] == f.preds["baseline"]["rookie"]["ppr"]["points"]
+    assert rookie["p10"] == round(rookie["points"] + base_off[0], 2)
+    # Corrections to past stats change no range: ranges come from recorded errors only.
+    fixed = [
+        replace(g, stats={k: v + 3 for k, v in g.stats.items()}) if g.week < 3 else g for g in gs
+    ]
+    assert forecast(fixed, sched, FORMATS, tuesday, errors).ranges == f.ranges

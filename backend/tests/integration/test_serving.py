@@ -18,7 +18,10 @@ LOGGED = {"points": 9.5, "p10": 3.0, "p90": 17.25}
 BASE_OFF = {"WR": [-4.0, 6.0], "TE": [-3.0, 5.0]}
 
 
-def _run(c: Connection, weights: dict[str, Any] | None = None, rows: bool = True) -> int:
+def _run(
+    c: Connection, weights: dict[str, Any] | None = None, rows: bool = True,
+    effective: str = "ridge",
+) -> int:  # fmt: skip
     rules = {k: q.rules_for(c, None, k)[0].weights for k in ("ppr",)}
     rules["league:1"] = weights or q.rules_for(c, 1, None)[0].weights
     run_id: int = c.execute(text(
@@ -35,9 +38,9 @@ def _run(c: Connection, weights: dict[str, Any] | None = None, rows: bool = True
         for key in rules:
             c.execute(text(
                 "INSERT INTO projections (run_id, policy, scoring_key, player_id, points, p10,"
-                " p90) VALUES (:r, 'ridge', :k, :p, :pts, :lo, :hi)"),
+                " p90, effective_policy) VALUES (:r, 'ridge', :k, :p, :pts, :lo, :hi, :ef)"),
                 {"r": run_id, "k": key, "p": TE, "pts": LOGGED["points"], "lo": LOGGED["p10"],
-                 "hi": LOGGED["p90"]})  # fmt: skip
+                 "hi": LOGGED["p90"], "ef": effective})  # fmt: skip
     return run_id
 
 
@@ -131,3 +134,15 @@ def test_the_forward_log_is_insert_only(conn: Connection) -> None:
         conn.rollback()
     assert conn.execute(text("SELECT count(*) FROM projections WHERE run_id = :r"),
                         {"r": run_id}).scalar_one() == 2  # fmt: skip
+
+
+def test_a_fallback_row_is_served_as_the_baseline_with_the_baseline_range(
+    conn: Connection, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A Ridge row that fell back (too little history) holds baseline points: it must be
+    served and labelled as the baseline, with the baseline's range, not Ridge's."""
+    monkeypatch.setattr(serve, "ACTIVE", {"TE": "ridge"})
+    _run(conn, effective="baseline")
+    seen = _every_caller(conn)
+    ((pts, rng, policy),) = _same(seen, TE)
+    assert policy == "baseline" and rng == (round(pts - 3.0, 2), round(pts + 5.0, 2))
