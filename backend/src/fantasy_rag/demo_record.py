@@ -199,7 +199,8 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
         if pid is None:
             return None
         return {**names[pid].model_dump(), "projected_points": proj[pid]["projected_points"],
-                "availability": proj[pid]["availability"]}  # fmt: skip
+                "availability": proj[pid]["availability"], "policy": proj[pid]["policy"],
+                "range_80": proj[pid]["range_80"]}  # fmt: skip
 
     starters = {pid for _, pid, _ in lineup.slots if pid}
     now = datetime.now(UTC)
@@ -289,6 +290,8 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                         "projected_points": p["projected_points"],
                         "games_used": p["games_used"],
                         "availability": p["availability"],
+                        "policy": p["policy"],
+                        "range_80": p["range_80"],
                         "unscored_rules": p["unscored_rules"],
                     }
                     for p in waiver_proj

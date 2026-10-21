@@ -14,6 +14,11 @@ export function UnscoredNote({ items }: { items: { unscored_rules: string[] }[] 
   );
 }
 
+/** The 80% range from the serving policy's own past errors (nominal; coverage is measured). */
+export function Range({ r }: { r?: [number, number] | null }) {
+  return r ? <>{r[0]} to {r[1]}</> : <>–</>;
+}
+
 export function StartSitTable({ result }: { result: StartSit }) {
   return (
     <>
@@ -26,6 +31,7 @@ export function StartSitTable({ result }: { result: StartSit }) {
           <TableRow>
             <TableHead>Player</TableHead>
             <TableHead className="text-right">Proj (wk {result.ranked[0]?.week})</TableHead>
+            <TableHead className="text-right">80% range</TableHead>
             <TableHead className="text-right">Last game</TableHead>
           </TableRow>
         </TableHeader>
@@ -37,6 +43,9 @@ export function StartSitTable({ result }: { result: StartSit }) {
                 <Status p={{ ...r.player, projected_points: r.projected_points, availability: r.availability }} />
               </TableCell>
               <TableCell className="text-right tabular-nums">{r.projected_points ?? "–"}</TableCell>
+              <TableCell className="text-right tabular-nums text-muted-foreground">
+                <Range r={r.range_80} />
+              </TableCell>
               <TableCell className="text-right tabular-nums">{r.last_game?.points ?? "–"}</TableCell>
             </TableRow>
           ))}

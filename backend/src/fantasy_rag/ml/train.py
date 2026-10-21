@@ -5,6 +5,7 @@ and scores them under each format. Players with fewer than MIN_GAMES usable game
 the baseline instead (the fallback is part of the policy being evaluated).
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -38,24 +39,45 @@ def labels(rows: list[Row], component: str) -> np.ndarray:
                      for r in rows])  # fmt: skip
 
 
-def fit_predict(
-    kind: str, params: dict[str, Any], train: list[Row], test: list[Row], position: str
-) -> dict[str, np.ndarray]:
-    """Component -> predictions for `test`, fit only on `train` (every learned step)."""
+@dataclass
+class Fitted:
+    """A trained policy for one position: what the forward log saves as an artifact."""
+
+    kind: str
+    position: str
+    names: list[str]  # feature order
+    models: dict[str, Any]  # component (or "*" for Ridge's multi-output) -> estimator
+
+    def predict(self, rows: list[Row]) -> dict[str, np.ndarray]:
+        x = matrix(rows, self.names)
+        if self.kind == "ridge":
+            pred = self.models["*"].predict(x)
+            return {c: pred[:, i] for i, c in enumerate(MODELED[self.position])}
+        return {c: np.asarray(m.predict(x)) for c, m in self.models.items()}
+
+
+def fit(kind: str, params: dict[str, Any], train: list[Row], position: str) -> Fitted:
+    """Fit only on `train` (every learned step: imputation, scaling, model)."""
     names = sorted(train[0].features)
-    x_train, x_test = matrix(train, names), matrix(test, names)
+    x = matrix(train, names)
     targets = MODELED[position]
     if kind == "ridge":
         model = make_pipeline(SimpleImputer(strategy="median", keep_empty_features=True),
                               StandardScaler(), Ridge(**params))  # fmt: skip
         y = np.column_stack([labels(train, c) for c in targets])
-        pred = model.fit(x_train, y).predict(x_test)
-        return {c: pred[:, i] for i, c in enumerate(targets)}
-    out: dict[str, np.ndarray] = {}
+        return Fitted(kind, position, names, {"*": model.fit(x, y)})
+    models = {}
     for c in targets:  # LightGBM handles missing values itself
         m = LGBMRegressor(**params, random_state=0, verbose=-1, n_jobs=4)
-        out[c] = np.asarray(m.fit(x_train, labels(train, c)).predict(x_test))
-    return out
+        models[c] = m.fit(x, labels(train, c))
+    return Fitted(kind, position, names, models)
+
+
+def fit_predict(
+    kind: str, params: dict[str, Any], train: list[Row], test: list[Row], position: str
+) -> dict[str, np.ndarray]:
+    """Component -> predictions for `test`, fit only on `train`."""
+    return fit(kind, params, train, position).predict(test)
 
 
 def points(

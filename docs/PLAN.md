@@ -224,6 +224,7 @@ Ten phases, each ending in something you can run and a test that proves it; phas
      - CatBoost and XGBoost wait until Ridge or LightGBM wins somewhere.
      - The FantasyPros comparison uses weekly rankings captured on Fridays, three days after the cutoff, and covers ranking metrics only.
      - Leakage tests prove the code uses only data available under the stated publication assumptions; they can't prove what was published by a past Tuesday.
+   - Status (Oct 21, 2026, draft PR): frozen 2025 benchmark done. Ridge qualifies for TE only, a small gain (about 0.09 PPR points of MAE); QB/RB/WR stay on the baseline and LightGBM wins nowhere. 80% ranges cover 77–82% everywhere. FantasyPros' Friday rankings beat every Tuesday model on ranking metrics. A Tuesday 10:30 ET task logs the baseline and TE Ridge from the same saved inputs to an insert-only forward log, starting week 8 (Oct 27). Production serves the baseline until TE Ridge's serving code is reviewed.
 10. **Phase 9 — Scheduling, deploy, and stretch.** APScheduler jobs on the cadences in the data model; retries with backoff and stale-source warnings; deploy DB to Supabase, API and worker to Render or Fly.io, frontend to Vercel. Stretch: weather and live-odds tools.
     - Done when: the hosted app answers about this week's games with data under a day old, survives one source being down with an explicit warning, and the README shows architecture, eval numbers and a demo GIF.
 

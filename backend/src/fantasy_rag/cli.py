@@ -23,6 +23,7 @@ def main(argv: list[str] | None = None) -> None:
     bt = sub.add_parser("backtest", help="tune the baseline on one season, test on the next")
     bt.add_argument("--tune-season", type=int, default=2024)
     bt.add_argument("--test-season", type=int, default=2025)
+    sub.add_parser("predict", help="Phase 8 forward run: log baseline + TE Ridge (Tuesdays)")
     bm = sub.add_parser("benchmark", help="Phase 8: baseline vs Ridge vs LightGBM, frozen rules")
     bm.add_argument("--predictions", help="re-report a saved predictions file (no retraining)")
     ask = sub.add_parser("ask", help="answer a question with cited tool results (Claude API)")
@@ -86,6 +87,8 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "predict":
+        _predict()
     elif args.command == "benchmark":
         _benchmark(args.predictions)
     elif args.command == "demo":
@@ -234,6 +237,20 @@ def _eval_grounding(report_path: str, only: str | None) -> None:
         or (summary["mean_groundedness"] or 0) < 4.5
     ):
         sys.exit(1)
+
+
+def _predict() -> None:
+    from fantasy_rag.db import get_engine
+    from fantasy_rag.ml.predict import run
+
+    r = run(get_engine())
+    print(
+        f"forward run {r['run_id']}: {r['season']} week {r['week']} {r['status'].upper()}"
+        f" (data as of {r['snapshot_at']:%Y-%m-%d %H:%M %Z},"
+        f" deadline {r['cutoff']:%Y-%m-%d %H:%M %Z},"
+        f" newest game {r['newest_game']}); {r['players']} players"
+    )
+    print(f"models: {r['models']}")
 
 
 def _benchmark(saved: str | None) -> None:

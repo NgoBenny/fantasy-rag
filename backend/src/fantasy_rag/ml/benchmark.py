@@ -53,7 +53,14 @@ def load(conn: Connection) -> tuple[list[Game], list[dict[str, Any]]]:
     return games, sched
 
 
-def run_policy(kind: str, params: dict[str, Any], rows: list[Row], season: int) -> Preds:
+def run_policy(
+    kind: str,
+    params: dict[str, Any],
+    rows: list[Row],
+    season: int,
+    formats: dict[str, ScoringRules] = FORMATS,
+    positions: tuple[str, ...] = POSITIONS,
+) -> Preds:
     """Predictions for every evaluated row of `season`, one cutoff at a time."""
     out: Preds = {}
     for (s, w), test in sorted(_by_week(rows, season).items()):
@@ -63,7 +70,7 @@ def run_policy(kind: str, params: dict[str, Any], rows: list[Row], season: int) 
         # Leakage guards: labels and feature inputs both predate the cutoff.
         assert all(r.label and r.label.kickoff <= cutoff - LAG for r in train)
         assert all(r.latest_input is None or r.latest_input <= cutoff - LAG for r in test)
-        for pos in POSITIONS:
+        for pos in positions:
             t_pos = [r for r in test if r.position == pos]
             if not t_pos:
                 continue
@@ -73,7 +80,7 @@ def run_policy(kind: str, params: dict[str, Any], rows: list[Row], season: int) 
             fitted = fit_predict(kind, params, tr, t_pos, pos) if model else {}
             for i, r in enumerate(t_pos):
                 pred = {c: float(v[i]) for c, v in fitted.items()}
-                got = points(r, pred, FORMATS) if model else dict(r.baseline)
+                got = points(r, pred, formats) if model else dict(r.baseline)
                 out[(r.player_id, s, w)] = got
     return out
 
@@ -397,5 +404,6 @@ def write_runs(engine: Engine, report: dict[str, Any]) -> None:
                 "f": ["per-component ewm/last3/season means", "snap share", "target/carry share",
                       "opponent PPR allowed", "home", "baseline_ppr"],
                 "m": json.dumps({f: {k: report["formats"][f][k] for k in ("baseline", kind)}
-                                 for f in report["formats"]} | {"promotion": report["promotion"]}),
+                                 for f in report["formats"]}
+                                | {k: report[k] for k in ("promotion", "fantasypros")}),
             })  # fmt: skip

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type AvailabilityAsOf, type Lineup, type LineupPlayer, api } from "@/lib/api";
 
-import { LineupView, StartSitTable, Status, UnscoredNote } from "./lineup-view";
+import { LineupView, Range, StartSitTable, Status, UnscoredNote } from "./lineup-view";
 import { RosterPicker } from "./roster-picker";
 
 export const dynamic = "force-dynamic";
@@ -92,6 +92,7 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
             <TableHead>Player</TableHead>
             <TableHead>Pos</TableHead>
             <TableHead className="text-right">Proj</TableHead>
+            <TableHead className="text-right">80% range</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -103,6 +104,9 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
               </TableCell>
               <TableCell>{c.position}</TableCell>
               <TableCell className="text-right tabular-nums">{c.projected_points ?? "–"}</TableCell>
+              <TableCell className="text-right tabular-nums text-muted-foreground">
+                <Range r={c.range_80} />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

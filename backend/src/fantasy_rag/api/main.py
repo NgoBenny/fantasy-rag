@@ -21,6 +21,7 @@ from fantasy_rag.api import demo
 from fantasy_rag.api.chat import ChatRequest, ChatServices, process_budget, stream_chat
 from fantasy_rag.config import Settings
 from fantasy_rag.db import get_log_engine, get_readonly_engine
+from fantasy_rag.ml import serve
 
 app = FastAPI(title="fantasy-rag", version="0.1")
 DEMO = Settings().demo_mode
@@ -262,6 +263,23 @@ def model_runs(conn: Conn) -> list[dict[str, Any]]:
         )
     )
     return [dict(r._mapping) for r in found]
+
+
+@app.get("/api/forward-runs")
+def forward_runs(conn: Conn) -> dict[str, Any]:
+    """Phase 8: the Tuesday forward runs (newest first) and which policy serves each
+    position (baseline unless a reviewed change activated another)."""
+    if DEMO:
+        return {"active": {}, "runs": demo.data().get("forward_runs", []), "demo": True}
+    found = conn.execute(
+        text(
+            "SELECT id, season, week, status, cutoff_at, snapshot_at, predicted_at,"
+            " newest_game_kickoff, models,"
+            " (SELECT count(*) FROM forward_inputs i WHERE i.run_id = f.id) AS players"
+            " FROM forward_runs f ORDER BY id DESC LIMIT 20"
+        )
+    )
+    return {"active": serve.ACTIVE, "runs": [dict(r._mapping) for r in found]}
 
 
 @app.get("/api/chat/samples")

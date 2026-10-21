@@ -56,3 +56,22 @@ test("with Claude unavailable, chat says so and stats still work", async ({ page
   await page.getByLabel("Teams").getByRole("link").nth(1).click();
   await expect(page.getByLabel("Lineup changes")).toBeVisible();
 });
+
+test("model page: benchmark, ranges and forward runs with honest status", async ({ page }) => {
+  await page.goto("/model");
+  await expect(page.getByRole("table", { name: "Benchmark" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Range coverage" })).toBeVisible();
+  const forward = page.getByRole("table", { name: "Forward runs" });
+  await expect(forward).toBeVisible();
+  // Week 7's runs were made after its Tuesday deadline: shown as late, never on time.
+  await expect(forward.getByRole("row").filter({ hasText: "wk 7" }).first()).toContainText("late (not counted)");
+});
+
+test("start/sit shows each projection's 80% range", async ({ page }) => {
+  const players = await (await page.request.get("http://localhost:8012/api/players?q=kelce&position=TE")).json();
+  const others = await (await page.request.get("http://localhost:8012/api/players?q=ertz&position=TE")).json();
+  await page.goto(`/compare?ids=${players[0].id},${others[0].id}&scoring=ppr`);
+  const table = page.getByRole("table", { name: "Start/sit" });
+  await expect(table.getByRole("columnheader", { name: "80% range" })).toBeVisible();
+  await expect(table.getByRole("row").nth(1)).toContainText(/-?\d+(\.\d+)? to -?\d+(\.\d+)?/);
+});

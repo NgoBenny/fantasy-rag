@@ -69,6 +69,8 @@ export interface Availability {
 export type LineupPlayer = PlayerRef & {
   projected_points: number | null;
   availability: Availability | null;
+  policy?: string | null;
+  range_80?: [number, number] | null;
 };
 
 export interface LineupSlot {
@@ -131,6 +133,8 @@ export interface Projection {
   availability: Availability | null;
   last_game: { season: number; week: number; points: number } | null;
   unscored_rules: string[];
+  policy?: string | null;
+  range_80?: [number, number] | null;
   injury?: { source: string; status: string | null; body_part: string | null }[];
 }
 
@@ -144,6 +148,22 @@ export interface Waivers {
   model_version: string;
 }
 
+export interface Metrics {
+  n: number;
+  mae: number | null;
+  spearman: number | null;
+  spearman_groups: number;
+  start_sit: number | null;
+  start_sit_pairs: number;
+}
+
+export interface PolicyResult {
+  all: Metrics;
+  by_position: Record<string, Metrics>;
+  ranges: Record<string, { n: number; coverage: number | null; width: number | null; no_range: number }>;
+  vs_baseline_ci?: Record<string, { mae: [number, number]; spearman: [number, number]; start_sit: [number, number] }>;
+}
+
 export interface ModelRun {
   model_version: string;
   created_at: string;
@@ -153,7 +173,27 @@ export interface ModelRun {
     tune?: { season: number; mae: number; start_sit_accuracy?: number };
     test?: { season: number; mae: number; start_sit_accuracy?: number; mae_by_position?: Record<string, number> };
     naive?: Record<string, { mae: number; start_sit_accuracy?: number }>;
+    // Phase 8 benchmark runs: format -> policy -> results
+    ppr?: Record<string, PolicyResult>;
+    half?: Record<string, PolicyResult>;
+    std?: Record<string, PolicyResult>;
+    promotion?: Record<string, { winner: string | null; ppr_qualified: string[]; blocked_by_formats: string[] }>;
+    fantasypros?: { rows: number; of: number } & Record<string, unknown>;
   };
+}
+
+export interface ForwardRuns {
+  active: Record<string, string>;
+  runs: {
+    id: number;
+    season: number;
+    week: number;
+    status: "on_time" | "late" | "early";
+    cutoff_at: string;
+    snapshot_at: string;
+    newest_game_kickoff: string | null;
+    players: number;
+  }[];
 }
 
 export interface StartSit {
@@ -169,6 +209,7 @@ export const api = {
     ),
   waivers: (leagueId: number) => call<Waivers>(`/api/leagues/${leagueId}/waivers`),
   modelRuns: () => call<ModelRun[]>("/api/model-runs"),
+  forwardRuns: () => call<ForwardRuns>("/api/forward-runs"),
   chatSamples: () => call<{ question: string; scenario: boolean }[]>("/api/chat/samples"),
   health: () => call<{ ok: boolean; season: number; latest_week: number }>("/api/health"),
   freshness: () => call<{ source: string; last_ok: string; age_hours: number }[]>("/api/freshness"),

@@ -191,3 +191,20 @@ The rules above stay frozen; these replace or tighten the named sections.
 - **Rare components:** two-point conversions and return / fumble-recovery TDs are
   projected by the player's exponentially weighted average, not a trained model (too few
   events per position to fit).
+
+## Implementation notes, Oct 21, 2026 (after the benchmark)
+
+- **Result (frozen rule, PPR 2025):** only Ridge for TE qualifies (MAE −2.4%, 95% CI of the
+  difference −0.16 to −0.02; Spearman 0.623 vs 0.605; start/sit 60.6% vs 59.4%; half and
+  standard also better). QB, RB and WR stay on the baseline; LightGBM qualifies nowhere.
+  Ranges cover 77–82% in every policy, position and format. Full report:
+  `data/logs/benchmark_20261021T112422Z.json` (local).
+- **Activation is a separate, reviewed step.** `ml/serve.py` `ACTIVE` is empty: production
+  serves the baseline everywhere. Ridge is logged forward for TE every Tuesday regardless.
+- **Model artifacts** are stored in Postgres (`model_artifacts`, insert-only, by SHA-256)
+  instead of files in `data/models/`: they live and are backed up with the database, never
+  in git. Each forward run references the hash.
+- **Week 7 of 2026** has two forward runs, both recorded `late` (made Oct 21 to test the
+  pipeline end to end, after the Oct 20 deadline); they are never counted.
+- XGBoost and CatBoost stay deferred: adding challengers against the already examined 2025
+  benchmark would weaken any new win; they'd be judged on forward weeks instead.
