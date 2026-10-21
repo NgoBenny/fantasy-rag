@@ -26,6 +26,9 @@ def main(argv: list[str] | None = None) -> None:
     ask = sub.add_parser("ask", help="answer a question with cited tool results (Claude API)")
     ask.add_argument("question")
     ask.add_argument("--league-id", type=int, help="the league the question is about")
+    dm = sub.add_parser("demo", help="build data/demo/demo.json for DEMO_MODE (free by default)")
+    dm.add_argument("action", choices=["record"])
+    dm.add_argument("--report", required=True, help="saved eval_answers report to reuse")
     ev = sub.add_parser("eval", help="evaluate retrieval on the labelled questions")
     ev.add_argument("what", choices=["news", "answers", "grounding"])
     ev.add_argument("--only", help="answers: comma-separated question ids or sets")
@@ -79,6 +82,14 @@ def main(argv: list[str] | None = None) -> None:
         _tool(args.name, args.args)
     elif args.command == "backtest":
         _backtest(args.tune_season, args.test_season)
+    elif args.command == "demo":
+        from pathlib import Path
+
+        from fantasy_rag.db import get_readonly_engine
+        from fantasy_rag.demo_record import build, write
+
+        with get_readonly_engine().connect() as conn:
+            print(f"wrote {write(build(conn, Path(args.report), []))}")
     elif args.command == "ask":
         _ask(args.question, args.league_id)
     elif args.command == "eval" and args.what == "answers":

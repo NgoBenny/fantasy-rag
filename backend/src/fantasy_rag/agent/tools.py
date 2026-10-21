@@ -262,7 +262,11 @@ def project_player(conn: Connection, a: ProjectPlayer) -> dict[str, Any]:
 
 
 def compare_start_sit(conn: Connection, a: CompareStartSit) -> dict[str, Any]:
-    refs = [q.resolve_player(conn, **p.model_dump()) for p in a.players]
+    return rank_start_sit(conn, [q.resolve_player(conn, **p.model_dump()) for p in a.players], a)
+
+
+def rank_start_sit(conn: Connection, refs: list[q.PlayerRef], a: ScoringChoice) -> dict[str, Any]:
+    """Rank already-resolved players by projection (the tool and the API share this)."""
     projections = [_projection(conn, r, a) for r in refs]
     for p in projections:
         p["injury"] = q.injury_snapshots(conn, p["player"]["id"])

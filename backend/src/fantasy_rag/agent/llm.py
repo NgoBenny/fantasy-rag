@@ -20,6 +20,10 @@ WRITER_MAX_TOKENS = 3000
 T = TypeVar("T", bound=BaseModel)
 
 
+class LLMUnavailable(RuntimeError):
+    """No API key is configured, so no model call can be made."""
+
+
 class LLMClient(Protocol):
     def tool_turn(
         self, system: str, messages: list[MessageParam], tools: list[ToolParam]
@@ -51,7 +55,7 @@ class AnthropicLLM:
     def __init__(self, api_key: str | None = None, budget: Budget | None = None) -> None:
         key = api_key or Settings().anthropic_api_key.get_secret_value()
         if not key:
-            raise RuntimeError("set ANTHROPIC_API_KEY in .env")
+            raise LLMUnavailable("set ANTHROPIC_API_KEY in .env")
         self.budget = budget
         self.client = anthropic.Anthropic(api_key=key, timeout=60.0, max_retries=0 if budget else 2)
         self.usage: dict[str, list[int]] = {}
