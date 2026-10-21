@@ -16,6 +16,8 @@ class Embedder(Protocol):
 
     def embed(self, texts: list[str]) -> list[list[float]]: ...
 
+    def embed_query(self, query: str) -> list[float]: ...
+
 
 class LocalBGE:
     model_name = "BAAI/bge-small-en-v1.5"
@@ -29,3 +31,7 @@ class LocalBGE:
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         return [v.tolist() for v in self._model.embed(texts)]
+
+    def embed_query(self, query: str) -> list[float]:
+        """Questions use the model's retrieval-query form, unlike stored passages."""
+        return [float(x) for x in next(iter(self._model.query_embed(query)))]
