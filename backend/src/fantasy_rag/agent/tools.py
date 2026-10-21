@@ -115,6 +115,10 @@ class SearchNews(BaseModel):
 class StatsWindow(ScoringChoice, WeekRange):
     """Week window + scoring, for callers that already know the player ID (the API)."""
 
+    # Usage shows each player's last N completed games up to the window's end (a cited
+    # get_usage window) instead of every game in the weeks.
+    usage_games: int | None = Field(default=None, ge=1, le=8)
+
 
 class OptimizeLineup(BaseModel):
     league_id: int
@@ -192,18 +196,20 @@ def _player_block(conn: Connection, ref: q.PlayerRef, args: Any) -> dict[str, An
         "totals": totals,
         "by_week": weeks,
         "unscored_rules": unscored,
-        "usage": _shown_usage(conn, ref, season, w0, w1),
+        "usage": _shown_usage(conn, ref, season, w0, w1, getattr(args, "usage_games", None)),
     }
 
 
 def _shown_usage(
-    conn: Connection, ref: q.PlayerRef, season: int, w0: int, w1: int
+    conn: Connection, ref: q.PlayerRef, season: int, w0: int, w1: int, last: int | None = None
 ) -> dict[str, Any]:
-    """Usage for the weeks a stats window shows (completed games only); facts and the
-    last-3 window still read the season up to the window's end."""
+    """Usage for the games a stats window shows (completed games only): every game in its
+    weeks, or the player's own last `last` games up to its end. Facts and the last-3
+    window still read the season up to the window's end."""
     got, when = _usage(conn, [ref], season, w1)
     mine = got[ref.id]
-    return {**mine, "games": [g for g in mine["games"] if g["week"] >= w0], "as_of": when}
+    games = mine["games"][-last:] if last else [g for g in mine["games"] if g["week"] >= w0]
+    return {**mine, "games": games, "as_of": when}
 
 
 def get_player_stats(conn: Connection, a: GetPlayerStats) -> dict[str, Any]:
@@ -547,7 +553,6 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
 def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
     refs = [q.resolve_player(conn, **p.model_dump()) for p in a.players]
     got, when = _usage(conn, refs, a.season)
-    shown = [g["week"] for r in refs for g in got[r.id]["games"][-a.last_n :]]
     return {
         "players": [
             {
@@ -560,8 +565,8 @@ def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
         ],
         "season": when["season"],
         "last_n": a.last_n,
-        # The weeks the shown games span, so a page can show exactly this window.
-        "weeks": [min(shown), when["through_week"]] if shown else None,
+        # Each player's own last `last_n` games through this week (a page shows the same).
+        "through_week": when["through_week"],
         "as_of": when,
         "definitions": USAGE_DEFINITIONS,
     }

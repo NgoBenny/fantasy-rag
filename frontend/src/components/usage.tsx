@@ -29,10 +29,12 @@ export function UsageContext({ usage }: { usage?: Usage | null }) {
 export function UsageAsOfLine({ usage }: { usage: Usage }) {
   const a = usage.as_of;
   if (!a) return null;
-  const updated = a.stats_updated_at ? new Date(a.stats_updated_at).toLocaleString() : "unknown";
+  const at = (t: string | null) => (t ? new Date(t).toLocaleString() : "never loaded");
   return (
-    <p className="text-xs text-muted-foreground">
-      {a.season} season, completed games through week {a.through_week ?? "–"} · data updated {updated}
+    <p className="text-xs text-muted-foreground" aria-label="Usage freshness">
+      {a.season} season, completed games through week {a.through_week ?? "–"} · usage data as of{" "}
+      {a.updated_at ? at(a.updated_at) : "unknown (an input never loaded)"} (stats {at(a.stats_updated_at)}, snaps{" "}
+      {at(a.snaps_updated_at)}, play-by-play {at(a.pbp_updated_at)})
     </p>
   );
 }

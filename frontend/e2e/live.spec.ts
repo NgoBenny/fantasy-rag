@@ -82,22 +82,23 @@ test("start/sit shows each projection's 80% range", async ({ page }) => {
   await expect(table.getByRole("row").nth(1)).toContainText(/-?\d+(\.\d+)? to -?\d+(\.\d+)?/);
 });
 
-test("a usage citation opens the same players and weeks at their usage section", async ({ page }) => {
+test("a usage citation opens each player's same games at their usage section", async ({ page }) => {
   const API = "http://localhost:8011";
   const find = async (q: string) => (await (await page.request.get(`${API}/api/players?q=${q}`)).json())[0];
   const [a, b] = [await find("gibbs"), await find("worthy")];
-  const usage = (await (await page.request.get(`${API}/api/players/${a.id}`)).json()).usage;
-  const w1: number = usage.as_of.through_week;
-  const w0 = Math.max(1, w1 - 3);
-  const season: number = usage.as_of.season;
-  // The link format get_usage's citation uses (backend: api/chat.py _href, unit-tested).
-  const href = `/compare?ids=${a.id},${b.id}&season=${season}&start_week=${w0}&end_week=${w1}#usage`;
+  const asOf = (await (await page.request.get(`${API}/api/players/${a.id}`)).json()).usage.as_of;
+  const window = `season=${asOf.season}&end_week=${asOf.through_week}&usage_games=4`;
+  // The link format get_usage's citation uses (backend: api/chat.py _href, tested there).
+  const href = `/compare?ids=${a.id},${b.id}&${window}#usage`;
   const answer = {
-    answer: "Usage for both players is in the cited result.", answer_type: "stats", season,
+    answer: "Usage for both players is in the cited result.", answer_type: "stats", season: asOf.season,
     week: null, scoring_format: null, data_as_of: null, model_version: null,
     facts: [{ text: "usage", source_ids: ["r1"] }], projections: [], citations: ["r1"], limitations: [],
   };
-  const sse = (event: string, data: object) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  const sse = (event: string, data: object) => `event: ${event}
+data: ${JSON.stringify(data)}
+
+`;
   await page.route("**/api/chat", (route) =>
     route.fulfill({
       contentType: "text/event-stream",
@@ -112,15 +113,14 @@ test("a usage citation opens the same players and weeks at their usage section",
   await page.getByRole("textbox", { name: "Question" }).fill("how has their usage changed?");
   await page.getByRole("button", { name: "Ask" }).click();
   await page.getByLabel("Sources").getByRole("link", { name: /^Usage:/ }).click();
-  await expect(page).toHaveURL(new RegExp(`start_week=${w0}&end_week=${w1}#usage$`));
-  await expect(page.getByRole("heading", { name: `Stats · ${season} weeks ${w0}–${w1}` })).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`usage_games=4#usage$`));
   for (const p of [a, b]) {
+    // Each player's own last 4 completed games, exactly as the API gives them for that window.
+    const games = (await (await page.request.get(`${API}/api/players/${p.id}?${window}`)).json()).usage.games;
     const table = page.getByRole("table", { name: `Usage by game: ${p.name}` });
-    await expect(table).toBeVisible();
-    // Only completed games inside the cited weeks.
-    for (const cell of await table.locator("tbody tr td:first-child").allTextContents()) {
-      const week = Number(cell.split("wk ")[1]);
-      expect(week >= w0 && week <= w1).toBe(true);
-    }
+    await expect(table.locator("tbody tr td:first-child")).toHaveText(
+      games.map((g: { season: number; week: number }) => `${g.season} wk ${g.week}`),
+    );
+    expect(games.length).toBeLessThanOrEqual(4);
   }
 });

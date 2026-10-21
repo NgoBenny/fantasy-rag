@@ -739,7 +739,7 @@
  "freshness": [
   {
    "age_hours": 0.0,
-   "last_ok": "2026-10-21T22:59:52.148812+00:00",
+   "last_ok": "2026-10-21T23:19:42.756182+00:00",
    "source": "sample data"
   }
  ],
@@ -1067,7 +1067,7 @@
    "recommended_total": 123.23,
    "roster_id": 1,
    "rosters_as_of": {
-    "synced_at": "2026-10-21T22:59:52.148812+00:00",
+    "synced_at": "2026-10-21T23:19:42.756182+00:00",
     "week": 7
    },
    "scoring": "Demo League rules (half PPR)",
@@ -2628,8 +2628,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -2777,6 +2779,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -2834,8 +2837,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -2887,6 +2892,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -2966,8 +2972,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -3059,6 +3067,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -3157,8 +3166,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -3328,6 +3339,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -3413,8 +3425,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -3553,6 +3567,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -3660,8 +3675,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -3847,6 +3864,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -3940,8 +3958,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -4106,6 +4126,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -4221,8 +4242,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -4370,6 +4393,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -4478,8 +4502,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -4644,6 +4670,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -4727,8 +4754,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -4836,6 +4865,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -4937,8 +4967,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -5083,6 +5115,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -5188,8 +5221,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -5348,6 +5383,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -5437,8 +5473,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -5570,6 +5608,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -5697,8 +5736,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -5846,6 +5887,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -5903,8 +5945,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -5956,6 +6000,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -6035,8 +6080,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -6128,6 +6175,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -6226,8 +6274,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -6397,6 +6447,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -6482,8 +6533,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -6622,6 +6675,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -6729,8 +6783,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -6916,6 +6972,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -7009,8 +7066,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -7175,6 +7234,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -7290,8 +7350,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -7439,6 +7501,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -7547,8 +7610,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -7713,6 +7778,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -7796,8 +7862,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -7905,6 +7973,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -8006,8 +8075,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -8152,6 +8223,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -8257,8 +8329,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -8417,6 +8491,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -8506,8 +8581,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -8639,6 +8716,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -8766,8 +8844,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -8915,6 +8995,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -8972,8 +9053,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -9025,6 +9108,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -9104,8 +9188,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -9197,6 +9283,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -9295,8 +9382,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -9466,6 +9555,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -9551,8 +9641,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -9691,6 +9783,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -9798,8 +9891,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -9985,6 +10080,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -10078,8 +10174,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -10244,6 +10342,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -10359,8 +10458,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -10508,6 +10609,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -10616,8 +10718,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -10782,6 +10886,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -10865,8 +10970,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -10974,6 +11081,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -11075,8 +11183,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -11221,6 +11331,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -11326,8 +11437,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -11486,6 +11599,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -11575,8 +11689,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "games": [
@@ -11708,6 +11824,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -11869,8 +11986,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -11896,6 +12015,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -11967,8 +12087,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -11978,6 +12100,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -12024,8 +12147,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -12035,6 +12160,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -12092,8 +12218,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12141,6 +12269,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -12188,8 +12317,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12226,6 +12357,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -12273,8 +12405,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12338,6 +12472,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -12385,8 +12520,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12429,6 +12566,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -12476,8 +12614,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12503,6 +12643,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -12550,8 +12691,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12594,6 +12737,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -12641,8 +12785,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12668,6 +12814,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -12715,8 +12862,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12759,6 +12908,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -12806,8 +12956,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12844,6 +12996,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -12888,8 +13041,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -12899,6 +13054,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -12951,8 +13107,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -12978,6 +13136,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -13051,8 +13210,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -13062,6 +13223,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -13110,8 +13272,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -13121,6 +13285,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -13180,8 +13345,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13229,6 +13396,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -13278,8 +13446,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13316,6 +13486,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -13365,8 +13536,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13430,6 +13603,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -13479,8 +13653,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13523,6 +13699,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -13572,8 +13749,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13599,6 +13778,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -13648,8 +13828,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13692,6 +13874,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -13741,8 +13924,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13768,6 +13953,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -13817,8 +14003,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13861,6 +14049,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -13910,8 +14099,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -13948,6 +14139,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -13994,8 +14186,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -14005,6 +14199,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -14055,8 +14250,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14082,6 +14279,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -14153,8 +14351,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -14164,6 +14364,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -14210,8 +14411,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -14221,6 +14424,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -14278,8 +14482,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14327,6 +14533,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -14374,8 +14581,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14412,6 +14621,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -14459,8 +14669,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14524,6 +14736,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -14571,8 +14784,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14615,6 +14830,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -14662,8 +14878,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14689,6 +14907,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -14736,8 +14955,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14780,6 +15001,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -14827,8 +15049,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14854,6 +15078,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -14901,8 +15126,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -14945,6 +15172,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -14992,8 +15220,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15030,6 +15260,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -15074,8 +15305,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -15085,6 +15318,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -15135,8 +15369,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15162,6 +15398,7 @@
       "gl_carries": 2,
       "rz_looks": 6,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -15233,8 +15470,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -15244,6 +15483,7 @@
       "gl_carries": 0,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 59.7,
       "snap_pct_approx": false,
       "target_share_pct": 23.0,
@@ -15290,8 +15530,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -15301,6 +15543,7 @@
       "gl_carries": 0,
       "rz_looks": 2,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 67.0,
       "snap_pct_approx": false,
       "target_share_pct": 20.5,
@@ -15358,8 +15601,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15407,6 +15652,7 @@
       "gl_carries": 0,
       "rz_looks": 7,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 78.7,
       "snap_pct_approx": false,
       "target_share_pct": 31.7,
@@ -15454,8 +15700,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15492,6 +15740,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 65.7,
       "snap_pct_approx": false,
       "target_share_pct": 20.7,
@@ -15539,8 +15788,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15604,6 +15855,7 @@
       "gl_carries": 1,
       "rz_looks": 3,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 85.8,
       "snap_pct_approx": false,
       "target_share_pct": 14.2,
@@ -15651,8 +15903,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15695,6 +15949,7 @@
       "gl_carries": 0,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 94.8,
       "snap_pct_approx": false,
       "target_share_pct": 27.0,
@@ -15742,8 +15997,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15769,6 +16026,7 @@
       "gl_carries": 1,
       "rz_looks": 4,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 100.0,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -15816,8 +16074,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15860,6 +16120,7 @@
       "gl_carries": 2,
       "rz_looks": 11,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 73.3,
       "snap_pct_approx": false,
       "target_share_pct": 12.6,
@@ -15907,8 +16168,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -15934,6 +16197,7 @@
       "gl_carries": 1,
       "rz_looks": 5,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 88.4,
       "snap_pct_approx": false,
       "target_share_pct": 31.6,
@@ -15981,8 +16245,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -16025,6 +16291,7 @@
       "gl_carries": 8,
       "rz_looks": 23,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 75.7,
       "snap_pct_approx": false,
       "target_share_pct": 18.9,
@@ -16072,8 +16339,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [
       {
@@ -16110,6 +16379,7 @@
       "gl_carries": 1,
       "rz_looks": 12,
       "rz_unknown": 0,
+      "snap_missing": 0,
       "snap_pct": 66.5,
       "snap_pct_approx": false,
       "target_share_pct": 6.5,
@@ -16154,8 +16424,10 @@
      "as_of": {
       "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
       "season": 2026,
+      "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
       "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-      "through_week": 6
+      "through_week": 6,
+      "updated_at": "2026-10-21T22:48:20.731255+00:00"
      },
      "facts": [],
      "window": {
@@ -16165,6 +16437,7 @@
       "gl_carries": 0,
       "rz_looks": 0,
       "rz_unknown": 0,
+      "snap_missing": 3,
       "snap_pct": null,
       "snap_pct_approx": false,
       "target_share_pct": 0.0,
@@ -16180,7 +16453,7 @@
    }
   }
  },
- "recorded_at": "2026-10-21T22:59:52.148812+00:00",
+ "recorded_at": "2026-10-21T23:19:42.756182+00:00",
  "status": {
   "label": "Sample data from week 7, 2026, not live",
   "latest_week": 6,
@@ -16189,23 +16462,23 @@
   "sources": {
    "injuries": {
     "age_hours": 6.0,
-    "last_ok": "2026-10-21T16:59:52.148812+00:00"
+    "last_ok": "2026-10-21T17:19:42.756182+00:00"
    },
    "news": {
     "age_hours": 1.0,
-    "last_ok": "2026-10-21T21:59:52.148812+00:00"
+    "last_ok": "2026-10-21T22:19:42.756182+00:00"
    },
    "rosters": {
     "age_hours": 6.0,
-    "last_ok": "2026-10-21T16:59:52.148812+00:00"
+    "last_ok": "2026-10-21T17:19:42.756182+00:00"
    },
    "stats": {
     "age_hours": 6.0,
-    "last_ok": "2026-10-21T16:59:52.148812+00:00"
+    "last_ok": "2026-10-21T17:19:42.756182+00:00"
    },
    "transactions": {
     "age_hours": 1.0,
-    "last_ok": "2026-10-21T21:59:52.148812+00:00"
+    "last_ok": "2026-10-21T22:19:42.756182+00:00"
    }
   }
  },
@@ -16367,6 +16640,7 @@
        "gl_carries": 8,
        "rz_looks": 23,
        "rz_unknown": 0,
+       "snap_missing": 0,
        "snap_pct": 75.7,
        "snap_pct_approx": false,
        "target_share_pct": 18.9,
@@ -16443,6 +16717,7 @@
        "gl_carries": 0,
        "rz_looks": 7,
        "rz_unknown": 0,
+       "snap_missing": 0,
        "snap_pct": 78.7,
        "snap_pct_approx": false,
        "target_share_pct": 31.7,
@@ -16481,6 +16756,7 @@
        "gl_carries": 0,
        "rz_looks": 2,
        "rz_unknown": 0,
+       "snap_missing": 0,
        "snap_pct": 67.0,
        "snap_pct_approx": false,
        "target_share_pct": 20.5,
@@ -16499,15 +16775,17 @@
    "model_version": "baseline-ewm-v1",
    "rostered_players_excluded": 10,
    "rosters_as_of": {
-    "synced_at": "2026-10-21T22:59:52.148812+00:00",
+    "synced_at": "2026-10-21T23:19:42.756182+00:00",
     "week": 7
    },
    "scoring": "Demo League rules (half PPR)",
    "usage_as_of": {
     "pbp_updated_at": "2026-10-21T22:48:41.148789+00:00",
     "season": 2026,
+    "snaps_updated_at": "2026-10-21T22:48:22.597365+00:00",
     "stats_updated_at": "2026-10-21T22:48:20.731255+00:00",
-    "through_week": 6
+    "through_week": 6,
+    "updated_at": "2026-10-21T22:48:20.731255+00:00"
    },
    "week": 7
   }

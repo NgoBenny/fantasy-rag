@@ -8,8 +8,9 @@ import pytest
 from sqlalchemy import create_engine, event, text
 
 from fantasy_rag.agent.router import ToolCall
-from fantasy_rag.agent.tools import run_tool
+from fantasy_rag.agent.tools import StatsWindow, _player_block, run_tool
 from fantasy_rag.analytics import usage as u
+from fantasy_rag.analytics.queries import players_by_id
 from fantasy_rag.api.chat import _href
 from fantasy_rag.db import get_readonly_engine
 
@@ -74,7 +75,7 @@ def test_get_usage_shares_coverage_and_facts(season: str) -> None:
         r = run_tool(conn, "get_usage", {"players": [{"name": "Justin Jefferson"}]})
     assert r["as_of"]["through_week"] == 8  # Thursday of week 9 doesn't complete the week
     p = r["players"][0]
-    assert [g["week"] for g in p["games"]] == [5, 6, 7, 8] and r["weeks"] == [5, 8]
+    assert [g["week"] for g in p["games"]] == [5, 6, 7, 8] and r["through_week"] == 8
     by_week = {g["week"]: g for g in p["games"]}
     assert by_week[8]["target_share_pct"] == 25.0  # 10 of 40
     assert by_week[8]["rz_looks"] == 0 and by_week[7]["rz_looks"] == 2  # known zero vs count
@@ -115,11 +116,36 @@ def test_start_sit_and_waivers_carry_usage(season: str) -> None:
     assert all("usage" in c for c in wv["candidates"]) and wv["usage_as_of"]["through_week"] == 8
 
 
+def test_a_usage_citation_shows_each_players_own_games(season: str) -> None:
+    """Two players with different playing histories: the cited page shows, per player,
+    exactly the games the tool showed (not one shared calendar range)."""
+    eng = create_engine(season)
+    with eng.begin() as c:  # Free Agent (00-5) played weeks 1-2 (fixture) and then 6 and 8
+        run = c.execute(text("SELECT min(id) FROM sync_runs")).scalar_one()
+        for week in (6, 8):
+            c.execute(text(
+                "INSERT INTO player_week_stats (season, week, season_type, player_id, game_id,"
+                " team, opponent, stats, sync_run_id) VALUES (2026, :w, 'REG', '00-5', :g,"
+                " 'NE', 'NYJ', '{\"targets\": 3}', :r)"),
+                {"w": week, "g": f"ne{week}", "r": run})  # fmt: skip
+    eng.dispose()
+    with get_readonly_engine(season).connect() as conn:
+        args = {"players": [{"name": "Justin Jefferson"}, {"name": "Free Agent"}], "last_n": 3}
+        r = run_tool(conn, "get_usage", args)
+        shown = {p["player"]["id"]: [g["week"] for g in p["games"]] for p in r["players"]}
+        assert shown == {"00-1": [6, 7, 8], "00-5": [2, 6, 8]}
+        href = _href(ToolCall("r1", "get_usage", args, r))
+        assert href == "/compare?ids=00-1,00-5&season=2026&end_week=8&usage_games=3#usage"
+        # What /api/compare returns for that link's parameters, per player:
+        w = StatsWindow(season=2026, end_week=8, usage_games=3)
+        refs = players_by_id(conn, ["00-1", "00-5"])
+        page = {i: [g["week"] for g in _player_block(conn, refs[i], w)["usage"]["games"]]
+                for i in refs}  # fmt: skip
+    assert page == shown
+
+
 def test_usage_citation_opens_the_same_players_and_weeks() -> None:
-    one = {"players": [{"player": {"id": "00-1"}}], "season": 2026, "weeks": [5, 8]}
-    two = {"players": [{"player": {"id": "00-1"}}, {"player": {"id": "00-5"}}], "season": 2026,
-           "weeks": [5, 8]}  # fmt: skip
+    one = {"players": [{"player": {"id": "00-1"}}], "season": 2026, "through_week": 8,
+           "last_n": 4}  # fmt: skip
     assert _href(ToolCall("r1", "get_usage", {}, one)) == (
-        "/players/00-1?season=2026&start_week=5&end_week=8#usage")  # fmt: skip
-    assert _href(ToolCall("r1", "get_usage", {}, two)) == (
-        "/compare?ids=00-1,00-5&season=2026&start_week=5&end_week=8#usage")  # fmt: skip
+        "/players/00-1?season=2026&end_week=8&usage_games=4#usage")  # fmt: skip

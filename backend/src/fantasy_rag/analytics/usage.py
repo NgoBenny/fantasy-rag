@@ -169,19 +169,22 @@ def usage_for(
 
 
 def window(games: list[dict[str, Any]], n: int = WINDOW) -> dict[str, Any] | None:
-    """Totals-based shares over the last `n` games (None with no games)."""
+    """Totals-based shares over the last `n` games (None with no games). A share needs every
+    game in the window: one game without snap data makes the window's snap share None
+    (counted in snap_missing), never a share over fewer games."""
     last = games[-n:]
     if not last:
         return None
-    snapped = [g for g in last if g["snaps"] is not None and g["team_snaps"]]
+    missing = [g for g in last if g["snaps"] is None or not g["team_snaps"]]
     looks = [g["rz_looks"] for g in last]
     return {
         "games": len(last),
         "weeks": [g["week"] for g in last],
-        "snap_pct": pct(sum(g["snaps"] for g in snapped), sum(g["team_snaps"] for g in snapped))
-        if snapped
-        else None,
-        "snap_pct_approx": any(not g["team_snaps_exact"] for g in snapped),
+        "snap_pct": None
+        if missing
+        else pct(sum(g["snaps"] for g in last), sum(g["team_snaps"] for g in last)),
+        "snap_missing": len(missing),
+        "snap_pct_approx": any(not g["team_snaps_exact"] for g in last),
         "targets": sum(g["targets"] for g in last),
         "target_share_pct": pct(sum(g["targets"] for g in last),
                                 sum(g["team_targets"] for g in last)),
@@ -278,8 +281,10 @@ def facts(games: list[dict[str, Any]], position: str | None) -> list[dict[str, A
             if key == "rz_looks" and any(g["rz_looks"] is None or g["rz_unknown"]
                                          for g in games):  # fmt: skip
                 continue
-            vals = [g[key] for g in earlier if g[key] is not None]
-            if latest[key] is None or not vals or latest[key] <= max(vals) or latest[key] < 3:
+            vals = [g[key] for g in earlier]
+            if any(v is None for v in vals):  # an unknown earlier game could be the high
+                continue
+            if latest[key] is None or latest[key] <= max(vals) or latest[key] < 3:
                 continue
             found.append({
                 "kind": "season_high",
@@ -296,13 +301,21 @@ def as_of(conn: Connection, season: int, through_week: int | None) -> dict[str, 
         conn.execute(
             text(
                 "SELECT source, max(finished_at) FROM sync_runs WHERE status = 'ok'"
-                " AND source IN ('nflverse.player_stats', 'nflverse.pbp_usage') GROUP BY source"
+                " AND source IN ('nflverse.player_stats', 'nflverse.snap_counts',"
+                " 'nflverse.pbp_usage') GROUP BY source"
             )
         ).all()
     )
+    parts = {
+        "stats_updated_at": rows.get("nflverse.player_stats"),
+        "snaps_updated_at": rows.get("nflverse.snap_counts"),
+        "pbp_updated_at": rows.get("nflverse.pbp_usage"),
+    }
+    known = [t for t in parts.values() if t is not None]
     return {
         "season": season,
         "through_week": through_week,
-        "stats_updated_at": rows.get("nflverse.player_stats"),
-        "pbp_updated_at": rows.get("nflverse.pbp_usage"),
+        **parts,
+        # Usage is only as fresh as its oldest input; None if any input never loaded.
+        "updated_at": min(known) if len(known) == len(parts) else None,
     }

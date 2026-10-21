@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { pct, redZone, usageSummary, windowQuery } from "./usage";
 
 const w = {
-  games: 3, weeks: [4, 5, 6], snap_pct: 80.3, snap_pct_approx: false, target_share_pct: 20.3,
+  games: 3, weeks: [4, 5, 6], snap_pct: 80.3, snap_missing: 0, snap_pct_approx: false, target_share_pct: 20.3,
   carry_share_pct: 0, carries: 0, rz_looks: 2, rz_unknown: 0,
 };
 
@@ -25,6 +25,9 @@ describe("usage formatting", () => {
       "snaps 80.3% · carries 77.9% · red zone 2",
     );
     expect(usageSummary(null)).toBe("No completed games");
+    expect(usageSummary({ ...w, snap_pct: null, snap_missing: 1 })).toBe(
+      "snaps – (no snap data for 1 game) · targets 20.3% · red zone 2",
+    );
   });
   it("passes through only a valid week window", () => {
     expect(windowQuery({ season: "2026", start_week: "5", end_week: "8" })).toBe(

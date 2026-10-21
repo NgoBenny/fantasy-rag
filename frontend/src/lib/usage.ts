@@ -19,7 +19,8 @@ export interface UsageGame {
 export interface UsageWindow {
   games: number;
   weeks: number[];
-  snap_pct: number | null;
+  snap_pct: number | null; // null when any game in the window has no snap data
+  snap_missing: number;
   snap_pct_approx: boolean;
   target_share_pct: number | null;
   carry_share_pct: number | null;
@@ -37,7 +38,9 @@ export interface UsageAsOf {
   season: number;
   through_week: number | null;
   stats_updated_at: string | null;
+  snaps_updated_at: string | null;
   pbp_updated_at: string | null;
+  updated_at: string | null; // the oldest of the three; null if one never loaded
 }
 
 export interface Usage {
@@ -70,12 +73,15 @@ export function usageSummary(w: UsageWindow | null): string {
     w.carries > 0 && (w.carry_share_pct ?? 0) > (w.target_share_pct ?? 0)
       ? `carries ${pct(w.carry_share_pct)}`
       : `targets ${pct(w.target_share_pct)}`;
-  return `snaps ${pct(w.snap_pct, w.snap_pct_approx)} · ${share} · red zone ${redZone(w.rz_looks, null, w.rz_unknown)}`;
+  const snaps = w.snap_missing
+    ? `snaps – (no snap data for ${w.snap_missing} game${w.snap_missing > 1 ? "s" : ""})`
+    : `snaps ${pct(w.snap_pct, w.snap_pct_approx)}`;
+  return `${snaps} · ${share} · red zone ${redZone(w.rz_looks, null, w.rz_unknown)}`;
 }
 
 /** The stats window a page shows, from its search params (only valid numbers pass). */
 export function windowQuery(sp: Record<string, string | string[] | undefined>): string {
-  const keep = ["season", "start_week", "end_week"].flatMap((k) => {
+  const keep = ["season", "start_week", "end_week", "usage_games"].flatMap((k) => {
     const v = sp[k];
     return typeof v === "string" && /^\d{1,4}$/.test(v) ? [`${k}=${v}`] : [];
   });

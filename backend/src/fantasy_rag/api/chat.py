@@ -103,10 +103,10 @@ def _href(call: ToolCall) -> str | None:
         return f"/league?league={league}&roster={call.args.get('roster_id')}&view=lineup"
     if call.name == "rank_waivers" and isinstance(league, int):
         return f"/league?league={league}&view=waivers"
-    if call.name == "get_usage" and ids and res.get("weeks"):
-        # The same players and weeks the tool showed, at the usage section.
-        w0, w1 = res["weeks"]
-        window = f"season={res['season']}&start_week={w0}&end_week={w1}#usage"
+    if call.name == "get_usage" and ids and res.get("through_week"):
+        # Each player's same last N games through the same week, at the usage section.
+        window = (f"season={res['season']}&end_week={res['through_week']}"
+                  f"&usage_games={res['last_n']}#usage")  # fmt: skip
         return f"/compare?ids={ids}&{window}" if "," in ids else f"/players/{ids}?{window}"
     player = res.get("player")
     if isinstance(player, dict) and player.get("id"):

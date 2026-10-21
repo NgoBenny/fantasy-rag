@@ -96,3 +96,20 @@ def test_team_snaps_exact_or_estimated() -> None:
     # no full-game player: median of round(snaps / pct) over pct >= 0.5
     assert team_snaps([(60, 0.94), (50, 0.78), (10, 0.16)]) == (64, False)
     assert team_snaps([]) == (None, False)
+
+
+def test_missing_snap_data_suppresses_snap_claims_instead_of_shrinking_the_window() -> None:
+    # Only one of the three earlier games has snap data (Codex's reproduction).
+    before = [
+        game(1, snaps=12, snap_pct=20.0),
+        game(2, snaps=None, snap_pct=None),
+        game(3, snaps=None, snap_pct=None),
+    ]
+    after = [game(w, snaps=30, snap_pct=50.0) for w in (4, 5, 6)]  # fmt: skip
+    w = window(before)
+    assert w is not None and (w["snap_pct"], w["snap_missing"]) == (None, 2)  # never 1 game's 20%
+    assert not [f for f in facts(before + after, "WR") if "Snap share" in f["text"]]
+    # Season high: an earlier game with unknown snaps could have been the high.
+    highs = [game(1, snap_pct=None, snaps=None), game(2, snap_pct=60.0),
+             game(3, snap_pct=61.0), game(4, snap_pct=70.0)]  # fmt: skip
+    assert not [f for f in facts(highs, "WR") if f["kind"] == "season_high"]
