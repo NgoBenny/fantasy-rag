@@ -11,8 +11,12 @@ from sqlalchemy import Connection, text
 
 from fantasy_rag.analytics.availability import Availability, Fetch, Tx, reconcile
 from fantasy_rag.analytics.scoring import ScoringRules
+from fantasy_rag.ingest.news import TEAMS
+from fantasy_rag.ingest.pbp import SLEEPER_TEAM
 
 SKILL = ("QB", "RB", "WR", "TE", "K")
+# Sleeper's team-defense player IDs (team codes): never ranked, so an unmapped one is harmless.
+SLEEPER_DEFENSES = frozenset(SLEEPER_TEAM.get(t, t) for t in TEAMS)
 _OFFENSE = {
     "pass_yd": 0.04,
     "pass_td": 4,
@@ -246,10 +250,20 @@ def rostered(
     }
     boundary = fetched.get(("rosters", week))
     txs = [
-        Tx(r.transaction_id, r.type, r.status, r.week, r.status_updated, r.adds, r.drops)
+        Tx(
+            r.transaction_id,
+            r.type,
+            r.status,
+            r.week,
+            r.status_updated,
+            r.adds,
+            r.drops,
+            frozenset(r.unresolved or ()),
+        )  # fmt: skip
         for r in conn.execute(
             text(
-                "SELECT transaction_id, type, status, week, status_updated, adds, drops"
+                "SELECT transaction_id, type, status, week, status_updated, adds, drops,"
+                " unresolved"
                 " FROM league_transactions WHERE league_id = :l"
             ),
             {"l": league_id},
@@ -267,6 +281,7 @@ def rostered(
         txs,
         fetches,
         now or datetime.now(UTC),
+        SLEEPER_DEFENSES,
     )
     return got, week, synced
 

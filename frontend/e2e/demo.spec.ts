@@ -47,7 +47,53 @@ test("start/sit question (recorded answer)", async ({ page }) => {
   await page.goto("/chat");
   await page.getByRole("button", { name: START_SIT }).click();
   await expect(page.getByLabel("Progress").getByRole("listitem").first()).toBeVisible();
-  await expect(page.getByLabel("Answer").getByLabel("Sources").getByRole("link").first()).toBeVisible();
+  const source = page.getByLabel("Answer").getByLabel("Sources").getByRole("link", { name: /Projections/ });
+  const href = (await source.getAttribute("href"))!;
+  expect(href).toMatch(/^\/compare\?ids=[^&]+,[^&]+&scoring=(ppr|half|std)$/);
+  await source.click();
+  // The source opens the same players' projections in the same scoring.
+  const ids = new URL(href, "http://x").searchParams.get("ids")!.split(",");
+  const scoring = new URL(href, "http://x").searchParams.get("scoring")!;
+  const api = await (await page.request.get(`${PROXY}/api/start-sit?ids=${ids.join(",")}&scoring=${scoring}`)).json();
+  const table = page.getByRole("table", { name: "Start/sit" });
+  for (const r of api.ranked) await expect(table).toContainText(r.player.name);
+  await expect(page.getByText(/Higher projection:/)).toContainText(`· ${scoring}`);
+});
+
+test("scoring toggles change the points shown", async ({ page }) => {
+  const players = await (await page.request.get(`${PROXY}/api/players?q=bijan`)).json();
+  const totals: Record<string, string> = {};
+  for (const s of ["ppr", "half", "std"]) {
+    await page.goto(`/players/${players[0].id}?scoring=${s}`);
+    const line = page.getByText(/pts \(.* per game, /);
+    await expect(line).toContainText(`, ${s})`);
+    totals[s] = (await line.textContent())!;
+  }
+  expect(new Set(Object.values(totals)).size).toBe(3);
+});
+
+test("league-free compare shows next week's projections in the chosen scoring", async ({ page }) => {
+  const players: { id: string; name: string }[] = await (await page.request.get(`${PROXY}/api/players`)).json();
+  const pick = ["Jaylen Warren", "Bucky Irving"].map((n) => players.find((p) => p.name === n)!.id);
+  await page.goto(`/compare?ids=${pick.join(",")}&scoring=std`);
+  await expect(page.getByText(/Higher projection:/)).toContainText("· std");
+  const api = await (await page.request.get(`${PROXY}/api/start-sit?ids=${pick.join(",")}&scoring=std`)).json();
+  const rows = page.getByRole("table", { name: "Start/sit" }).getByRole("row");
+  await expect(rows.nth(1)).toContainText(api.ranked[0].player.name);
+  await expect(rows.nth(1)).toContainText(String(api.ranked[0].projected_points));
+});
+
+test("a stream cut off before its answer shows an error with Retry", async ({ page }) => {
+  await page.route("**/api/chat", (route) =>
+    route.fulfill({
+      contentType: "text/event-stream",
+      body: 'id: 1\nevent: progress\ndata: {"demo":true,"stage":"context","message":"Reading","elapsed_ms":0}\n\n',
+    }),
+  );
+  await page.goto("/chat");
+  await page.getByRole("button", { name: "How many PPR points did Bijan Robinson score in week 3?" }).click();
+  const alert = page.getByRole("alert").filter({ hasText: "connection was lost" });
+  await expect(alert.getByRole("button", { name: "Retry" })).toBeVisible();
 });
 
 test("a clarification shows the failed lookup as an unlinked source", async ({ page }) => {
@@ -101,10 +147,25 @@ test("league selection, lineup with bye badge, start/sit projections and waivers
   await expect(table).toBeVisible();
   await expect(table.getByText("Questionable")).toBeVisible();
   await expect(page.getByText(/Higher projection:/)).toBeVisible();
+  // The Demo League scores a rule we can't compute: the projections say so.
+  await expect(page.getByLabel("Unscored rules")).toContainText("rec_0_4");
 
   await page.getByLabel("Views").getByRole("link", { name: "Waivers" }).click();
   await expect(page.getByLabel("Availability")).toContainText("availability: sample");
   await expect(page.getByRole("table", { name: "Waivers" })).toBeVisible();
+  await expect(page.getByLabel("Unscored rules")).toContainText("rec_0_4");
+});
+
+test("any 2-4 demo roster players can be compared, not just recorded pairs", async ({ page }) => {
+  await page.goto("/league?league=900&roster=1&view=startsit");
+  for (const name of ["Brock Purdy", "Josh Allen", "Trey McBride"])
+    await page.getByLabel("Roster players").getByRole("link", { name }).click();
+  await expect(page).toHaveURL(/ids=[^&]+(,|%2C)[^&]+(,|%2C)[^&]+/);
+  const rows = page.getByRole("table", { name: "Start/sit" }).getByRole("row");
+  await expect(rows).toHaveCount(4); // header + 3 players
+  await expect(rows.last()).toContainText("Josh Allen"); // on bye: 0, ranked last
+  await expect(rows.last()).toContainText("bye");
+  await expect(page.getByText("Something went wrong")).toHaveCount(0);
 });
 
 test("model performance lists the backtest", async ({ page }) => {

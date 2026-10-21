@@ -11,6 +11,8 @@ So the answer is "as best the source allows", never a guarantee.
 
 Algorithm: start from the snapshot (boundary B = when its /rosters request started),
 replay every *completed* transaction updated at or after B - SKEW in (time, id) order.
+A move of a player we can't map (unknown Sleeper ID) makes the result `uncertain`, unless
+the ID is known to be outside the ranked population (a team defense).
 Each transaction is atomic: a player in its adds ends on that roster even if he is also
 in its drops (a trade); a player only in its drops ends free. Replaying a transaction
 the snapshot already reflects changes nothing, so the overlap is safe.
@@ -36,6 +38,7 @@ class Tx:
     status_updated: datetime
     adds: dict[str, int]  # player ID -> roster_id
     drops: dict[str, int]
+    unresolved: frozenset[str] = frozenset()  # Sleeper IDs we couldn't map to players
 
 
 @dataclass(frozen=True)
@@ -92,12 +95,15 @@ def reconcile(
     txs: Iterable[Tx],
     fetches: Iterable[Fetch],
     now: datetime,
+    outside_ranked: frozenset[str] = frozenset(),
 ) -> Availability:
+    """`outside_ranked`: unmapped Sleeper IDs known not to be rankable players (team DEFs)."""
     owner = dict(snapshot)
     reasons: list[str] = []
     status: Status = "current"
     applied = 0
     unknown_types: set[str] = set()
+    unmapped: set[str] = set()
     if boundary is None:
         # rosters imported before the fetch log existed: no boundary to replay from
         return Availability(owner, _as_of("uncertain", None, [], None, 0, [
@@ -114,6 +120,7 @@ def reconcile(
             reasons.append(f"a transaction is dated after now + {SKEW} (clock skew?)")
         if t.type not in KNOWN_TYPES:
             unknown_types.add(t.type)
+        unmapped |= t.unresolved - outside_ranked
         for pid in t.drops.keys() - t.adds.keys():
             owner.pop(pid, None)
         owner.update(t.adds)
@@ -121,6 +128,11 @@ def reconcile(
     if unknown_types:
         status = "uncertain"
         reasons.append(f"unfamiliar transaction types: {', '.join(sorted(unknown_types))}")
+    if unmapped:
+        status = "uncertain"
+        reasons.append(
+            f"players moved since the snapshot that we can't map: {', '.join(sorted(unmapped))}"
+        )
 
     weeks = range(max(1, snapshot_week - 1), current_week + 1)
     latest = {f.week: f for f in fetches}

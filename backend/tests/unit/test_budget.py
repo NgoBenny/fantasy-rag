@@ -73,9 +73,11 @@ def test_settle_charges_the_real_cost_and_releases_the_rest() -> None:
 def test_a_failed_call_is_charged_its_full_allowance() -> None:
     msgs = FakeMessages(counted=1000, used=(0, 0), fail=True)
     budget = Budget(1.0)
+    m = llm(budget, msgs)
     with pytest.raises(RuntimeError):
-        turn(llm(budget, msgs))
+        turn(m)
     assert budget.spent == pytest.approx(allowance(1000)) and budget.reserved == 0
+    assert m.unpriced == 1 and m.usage == {}  # its real usage is unknown, not zero
 
 
 def test_an_overrun_is_charged_and_locks_the_budget() -> None:

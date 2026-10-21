@@ -130,6 +130,7 @@ export interface Projection {
   games_used: number;
   availability: Availability | null;
   last_game: { season: number; week: number; points: number } | null;
+  unscored_rules: string[];
   injury?: { source: string; status: string | null; body_part: string | null }[];
 }
 
@@ -139,7 +140,7 @@ export interface Waivers {
   week: number;
   rosters_as_of: { week: number; synced_at: string };
   availability_as_of: AvailabilityAsOf;
-  candidates: (LineupPlayer & { games_used: number })[];
+  candidates: (LineupPlayer & { games_used: number; unscored_rules: string[] })[];
   model_version: string;
 }
 
@@ -155,11 +156,16 @@ export interface ModelRun {
   };
 }
 
+export interface StartSit {
+  ranked: Projection[];
+  higher_projection: string | null;
+}
+
 export const api = {
   status: () => call<Status>("/api/status"),
-  startSit: (ids: string[], leagueId: number | null) =>
-    call<{ ranked: Projection[]; higher_projection: string | null }>(
-      `/api/start-sit?ids=${ids.map(encodeURIComponent).join(",")}${leagueId ? `&league_id=${leagueId}` : ""}`,
+  startSit: (ids: string[], leagueId: number | null, scoring: Scoring = "ppr") =>
+    call<StartSit>(
+      `/api/start-sit?ids=${ids.map(encodeURIComponent).join(",")}${leagueId ? `&league_id=${leagueId}` : `&scoring=${scoring}`}`,
     ),
   waivers: (leagueId: number) => call<Waivers>(`/api/leagues/${leagueId}/waivers`),
   modelRuns: () => call<ModelRun[]>("/api/model-runs"),

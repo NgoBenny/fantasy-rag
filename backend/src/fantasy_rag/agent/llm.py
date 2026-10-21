@@ -50,6 +50,7 @@ class AnthropicLLM:
     With a `budget`, every call is first counted (`messages.count_tokens` with the same
     request) and reserves counted input + `max_tokens` output before it starts, and the
     SDK's automatic retries are off, so no attempt runs outside a reservation.
+    `unpriced` counts calls that failed after being sent: their usage (and cost) is unknown.
     """
 
     def __init__(self, api_key: str | None = None, budget: Budget | None = None) -> None:
@@ -59,6 +60,7 @@ class AnthropicLLM:
         self.budget = budget
         self.client = anthropic.Anthropic(api_key=key, timeout=60.0, max_retries=0 if budget else 2)
         self.usage: dict[str, list[int]] = {}
+        self.unpriced = 0
 
     def _count(self, model: str, usage: Any) -> None:
         tally = self.usage.setdefault(model, [0, 0])
@@ -68,7 +70,11 @@ class AnthropicLLM:
     def _guarded(self, request: dict[str, Any], send: Callable[..., Any]) -> Any:
         """Run `send(**request)` inside a budget reservation (or directly, uncapped)."""
         if self.budget is None:
-            resp = send(**request)
+            try:
+                resp = send(**request)
+            except BaseException:
+                self.unpriced += 1
+                raise
             self._count(resp.model, resp.usage)
             return resp
         counted = {k: v for k, v in request.items() if k != "max_tokens"}
@@ -80,6 +86,7 @@ class AnthropicLLM:
             resp = send(**request)
         except BaseException:
             self.budget.settle(held, None)  # tokens may have been billed: charge it all
+            self.unpriced += 1
             raise
         p_in, p_out = price(resp.model)
         self.budget.settle(

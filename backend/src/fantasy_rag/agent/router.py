@@ -204,11 +204,14 @@ def route(
     context: str,
     on_progress: Callable[[Progress], None] = _noop,
     cancelled: Callable[[], bool] = bool,
+    calls: list[ToolCall] | None = None,
 ) -> tuple[list[ToolCall], bool]:
-    """Let the router call tools for up to MAX_ROUNDS rounds. Returns (calls, hit limit)."""
+    """Let the router call tools for up to MAX_ROUNDS rounds. Returns (calls, hit limit).
+    Each call is appended to `calls` when it finishes, so a caller keeps them if a later
+    step fails."""
     messages: list[MessageParam] = [{"role": "user", "content": f"{context}\n\n{question}"}]
     tools = tool_specs()
-    calls: list[ToolCall] = []
+    calls = [] if calls is None else calls
     for _ in range(MAX_ROUNDS):
         if cancelled():
             raise Cancelled
@@ -320,6 +323,7 @@ def ask(
     selected: int | None = None,
     on_progress: Callable[[Progress], None] = _noop,
     cancelled: Callable[[], bool] = bool,
+    calls: list[ToolCall] | None = None,
 ) -> Turn:
     """Route, write, check. A failed check gets one repair attempt; if that fails too, the
     answer is withheld (kept in `rejected` for evaluation) and the user sees why.
@@ -328,7 +332,7 @@ def ask(
     before = {m: list(v) for m, v in getattr(llm, "usage", {}).items()}
     on_progress(Progress("context", "Reading the season and your league context"))
     context = context_block(conn, leagues or [], selected)
-    calls, capped = route(conn, llm, question, context, on_progress, cancelled)
+    calls, capped = route(conn, llm, question, context, on_progress, cancelled, calls)
     content = writer_input(question, context, calls)
     srcs, failed = sources(calls), failed_ids(calls)
     if cancelled():

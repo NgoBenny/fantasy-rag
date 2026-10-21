@@ -21,12 +21,17 @@ from fantasy_rag.agent.answer import Answer
 from fantasy_rag.agent.router import WITHHELD_MESSAGE, Progress, ToolCall, Turn, tool_progress
 from fantasy_rag.analytics import queries as q
 from fantasy_rag.analytics.optimizer import Candidate, optimize
+from fantasy_rag.analytics.scoring import ScoringRules
 from fantasy_rag.api.chat import sources
 from fantasy_rag.config import REPO_ROOT
 
 OUT = REPO_ROOT / "data" / "demo" / "demo.json"
 LABEL = "Sample data from week 7, 2026, not live"
 DEMO_LEAGUE = 900
+DEMO_SCORING = "Demo League rules (half PPR)"
+# Half PPR plus a rule we can't compute yet (a short-reception bonus), so the demo shows
+# the same "projections leave out" warning a real league with such a rule gets.
+DEMO_RULES = ScoringRules.from_sleeper({**q.PRESETS["half"], "rec_0_4": 0.5})
 SAVED = {"s05": None, "n03": None, "a08": None, "a13": None, "o02": None}  # league-free
 PLAYERS = [  # (name, position) of real players shown in the demo
     ("Josh Allen", "QB"), ("Bijan Robinson", "RB"), ("Jaylen Warren", "RB"),
@@ -47,7 +52,6 @@ DEMO_ROSTER = [
     "Trey McBride",
     "Tyler Loop",
 ]
-START_SIT_PAIRS = [("Jaylen Warren", "Bucky Irving"), ("A.J. Brown", "Puka Nacua")]
 
 
 def _events_from_turn(turn: Turn, latency_ms: int) -> list[dict[str, Any]]:
@@ -118,11 +122,22 @@ def _refs(conn: Connection) -> dict[str, q.PlayerRef]:
 def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> dict[str, Any]:
     refs = _refs(conn)
     season, week = q.latest_week(conn)
-    half = tools.ScoringChoice(scoring="half")
-    window = tools.StatsWindow(season=season, scoring="half")
+    presets = ("ppr", "half", "std")
+    # Per player and preset, so the demo can serve any scoring toggle and rank any
+    # 2-4 demo players with the live ranking code (tools.rank_projections).
+    projection: dict[str, dict[str, Any]] = {
+        s: {p["player"]["id"]: p for p in tools.rank_start_sit(
+            conn, list(refs.values()), tools.ScoringChoice(scoring=s))["ranked"]}
+        for s in presets
+    }  # fmt: skip
+    # The unsupported rule is left out of the points (as live), so they equal half PPR.
+    projection[f"league:{DEMO_LEAGUE}"] = proj = {
+        pid: {**p, "scoring": DEMO_SCORING,
+              "unscored_rules": DEMO_RULES.unscored_for(p["player"]["position"] or "")}
+        for pid, p in projection["half"].items()
+    }  # fmt: skip
     roster = [refs[n] for n in DEMO_ROSTER]
-    ranked = tools.rank_start_sit(conn, roster, half)["ranked"]
-    proj = {p["player"]["id"]: p for p in ranked}
+    ranked = list(proj.values())
     # As the live lineup tool does: a player on bye or ruled out is never started.
     playable = [r for r in roster if (proj[r.id]["availability"] or {}).get("playable", True)]
     lineup = optimize(ROSTER_POSITIONS, [
@@ -141,7 +156,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
     sample_as_of = {"status": "sample", "note": "Sample data: availability is illustrative.",
                     "reasons": [], "missing_weeks": [], "applied": 0}  # fmt: skip
     waiver_refs = [refs["Justin Jefferson"], refs["Jahmyr Gibbs"], refs["CeeDee Lamb"]]
-    waiver_proj = tools.rank_start_sit(conn, waiver_refs, half)["ranked"]
+    waiver_proj = tools.rank_projections([proj[r.id] for r in waiver_refs])["ranked"]
     data = {
         "label": LABEL,
         "recorded_at": now.isoformat(),
@@ -163,13 +178,14 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
         },  # fmt: skip
         "freshness": [{"source": "sample data", "last_ok": now.isoformat(), "age_hours": 0.0}],
         "players": [{**r.model_dump(), "active": True} for r in refs.values()],
-        "player": {r.id: tools._player_block(conn, r, window) for r in refs.values()},
-        "start_sit": {
-            ",".join(sorted([refs[a].id, refs[b].id])): tools.rank_start_sit(
-                conn, [refs[a], refs[b]], half
-            )
-            for a, b in START_SIT_PAIRS
-        },
+        "player": {
+            s: {
+                r.id: tools._player_block(conn, r, tools.StatsWindow(season=season, scoring=s))
+                for r in refs.values()
+            }
+            for s in presets
+        },  # fmt: skip
+        "projection": projection,
         "trending": {"add": tools.get_trending(conn, tools.GetTrending(kind="add", limit=10))},
         "leagues": [
             {
@@ -185,7 +201,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                 "league_id": DEMO_LEAGUE,
                 "roster_id": 1,
                 "week": week + 1,
-                "scoring": "Demo League rules (half PPR)",
+                "scoring": DEMO_SCORING,
                 "label": LABEL,
                 "rosters_as_of": {"week": week + 1, "synced_at": now.isoformat()},
                 "recommended": [
@@ -199,7 +215,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                 "gain": 0.0,
                 "unhandled_slots": lineup.unhandled_slots,
                 "no_projection": [],
-                "unscored_rules": [],
+                "unscored_rules": sorted({u for r in roster for u in proj[r.id]["unscored_rules"]}),
                 "unavailable": [
                     {"name": r.name, **proj[r.id]["availability"]}
                     for r in roster
@@ -211,7 +227,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
         "waivers": {
             f"{DEMO_LEAGUE}:ALL": {
                 "league_id": DEMO_LEAGUE,
-                "scoring": "Demo League rules (half PPR)",
+                "scoring": DEMO_SCORING,
                 "week": week + 1,
                 "label": LABEL,
                 "rosters_as_of": {"week": week + 1, "synced_at": now.isoformat()},
@@ -223,7 +239,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                         "projected_points": p["projected_points"],
                         "games_used": p["games_used"],
                         "availability": p["availability"],
-                        "unscored_rules": [],
+                        "unscored_rules": p["unscored_rules"],
                     }
                     for p in waiver_proj
                 ],
@@ -247,5 +263,6 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
 
 def write(data: dict[str, Any], out: Path = OUT) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(data, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    body = json.dumps(data, indent=1, sort_keys=True) + "\n"
+    out.write_text(body, encoding="utf-8", newline="\n")
     return out

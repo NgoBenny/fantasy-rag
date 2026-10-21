@@ -79,8 +79,9 @@ def test_sync_is_idempotent_and_corrects_availability(db: str) -> None:
         unresolved = c.execute(
             text("SELECT unresolved FROM league_transactions WHERE transaction_id = 't4'")
         ).scalar_one()
-    assert week == 2 and avail.owner == {"00-5": 1}
-    assert avail.as_of["status"] == "current" and avail.as_of["applied"] == 3
+    assert week == 2 and avail.owner == {"00-5": 1} and avail.as_of["applied"] == 3
+    # The unmapped add may have taken a ranked player: never "current" while it's unknown.
+    assert avail.as_of["status"] == "uncertain" and "999" in " ".join(avail.as_of["reasons"])
     assert unresolved == ["999"]
     # Re-importing identical data changes no transaction rows.
     with eng.begin() as c:
@@ -111,3 +112,25 @@ def test_a_failed_or_malformed_week_is_recorded_and_makes_availability_stale(db:
         avail, _, _ = q.rostered(c, 1)
     assert ok == {1: False, 2: False} and count == 0  # malformed week stored nothing
     assert avail.as_of["status"] == "stale" and avail.as_of["missing_weeks"] == [1, 2]
+
+
+def test_a_resolved_retry_clears_the_uncertainty(db: str) -> None:
+    _setup(db)
+    eng = create_engine(db)
+    weeks = {1: [], 2: [_tx("t4", 5, 2, adds={"999": 1}), _tx("d", 5, 2, adds={"MIN": 1})]}
+    sync_transactions(eng, FakeSleeper(weeks))
+    with eng.begin() as c:
+        assert q.rostered(c, 1)[0].as_of["status"] == "uncertain"
+        run = c.execute(text("SELECT max(id) FROM sync_runs")).scalar_one()
+        c.execute(
+            text(
+                "INSERT INTO player_external_ids (provider, external_id, player_id, sync_run_id)"
+                " VALUES ('sleeper', '999', '00-2', :r)"
+            ),
+            {"r": run},
+        )
+    sync_transactions(eng, FakeSleeper(weeks))
+    with eng.connect() as c:
+        avail = q.rostered(c, 1)[0]
+    # The team defense (MIN) stays unmapped but is outside the ranked population.
+    assert avail.as_of["status"] == "current" and avail.owner.get("00-2") == 1

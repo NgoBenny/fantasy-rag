@@ -1,7 +1,50 @@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Lineup, LineupPlayer } from "@/lib/api";
+import type { Lineup, LineupPlayer, StartSit } from "@/lib/api";
 import { movesSummary } from "@/lib/lineup";
+
+/** Rules a projection leaves out; without this, incomplete projections look complete. */
+export function UnscoredNote({ items }: { items: { unscored_rules: string[] }[] }) {
+  const rules = [...new Set(items.flatMap((i) => i.unscored_rules))].sort();
+  if (rules.length === 0) return null;
+  return (
+    <p className="text-sm" aria-label="Unscored rules">
+      Projections leave out league rules we can&apos;t compute yet: {rules.join(", ")}.
+    </p>
+  );
+}
+
+export function StartSitTable({ result }: { result: StartSit }) {
+  return (
+    <>
+      <p className="text-sm">
+        Higher projection: <b>{result.higher_projection ?? "none (no projection)"}</b> · {result.ranked[0]?.scoring}
+      </p>
+      <UnscoredNote items={result.ranked} />
+      <Table aria-label="Start/sit">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Player</TableHead>
+            <TableHead className="text-right">Proj (wk {result.ranked[0]?.week})</TableHead>
+            <TableHead className="text-right">Last game</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {result.ranked.map((r) => (
+            <TableRow key={r.player.id}>
+              <TableCell>
+                {r.player.name}
+                <Status p={{ ...r.player, projected_points: r.projected_points, availability: r.availability }} />
+              </TableCell>
+              <TableCell className="text-right tabular-nums">{r.projected_points ?? "–"}</TableCell>
+              <TableCell className="text-right tabular-nums">{r.last_game?.points ?? "–"}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </>
+  );
+}
 
 export function Status({ p }: { p: LineupPlayer | null }) {
   const a = p?.availability;

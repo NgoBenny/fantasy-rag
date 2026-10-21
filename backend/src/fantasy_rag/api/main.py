@@ -146,8 +146,7 @@ def player(
     league_id: int | None = None,
 ) -> dict[str, Any]:
     if DEMO:
-        found: dict[str, Any] = demo.get("player", player_id)
-        return found
+        return demo.stats(player_id, scoring, season, last_n, league_id)
     ref = q.players_by_id(conn, [player_id]).get(player_id)
     if ref is None:
         raise HTTPException(404, f"no player {player_id}")
@@ -173,7 +172,7 @@ def compare(
 ) -> dict[str, Any]:
     wanted = _ids(ids)
     if DEMO:
-        return {"players": [demo.get("player", i) for i in wanted]}
+        return {"players": [demo.stats(i, scoring, season, last_n, league_id) for i in wanted]}
     refs = q.players_by_id(conn, wanted)
     if missing := [i for i in wanted if i not in refs]:
         raise HTTPException(422, f"unknown player IDs: {missing}")
@@ -192,8 +191,9 @@ def start_sit(
     agent's compare_start_sit tool)."""
     wanted = _ids(ids)
     if DEMO:
-        found: dict[str, Any] = demo.get("start_sit", ",".join(sorted(wanted)))
-        return found
+        key = f"league:{league_id}" if league_id is not None else scoring
+        saved = [demo.get("projection", key, i) for i in wanted]
+        return {**tools.rank_projections(saved), "demo": True}
     refs = q.players_by_id(conn, wanted)
     if missing := [i for i in wanted if i not in refs]:
         raise HTTPException(422, f"unknown player IDs: {missing}")

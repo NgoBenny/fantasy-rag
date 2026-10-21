@@ -35,6 +35,11 @@ test("league selection, freshness, waivers availability and start/sit projection
   await expect(page.getByRole("table", { name: "Start/sit" })).toBeVisible();
   await expect(page.getByText(/Higher projection:/)).toBeVisible();
   await expect(page.getByText(/league \d+ rules/).first()).toBeVisible();
+
+  // A chat source links here with players but no team: the projections still show.
+  url.searchParams.delete("roster");
+  await page.goto(url.pathname + url.search);
+  await expect(page.getByRole("table", { name: "Start/sit" }).getByRole("row")).toHaveCount(3);
 });
 
 test("with Claude unavailable, chat says so and stats still work", async ({ page }) => {

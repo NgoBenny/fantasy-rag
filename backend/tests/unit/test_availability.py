@@ -112,3 +112,21 @@ def test_parse_normalizes_only_null_and_rejects_malformed() -> None:
             parse_tx({**raw, "adds": bad})
     with pytest.raises(ValueError, match="malformed"):
         parse_tx({k: v for k, v in raw.items() if k != "leg"})
+
+
+def test_an_unmapped_player_movement_since_the_snapshot_is_uncertain() -> None:
+    # A completed add of a Sleeper ID we can't map: we can't know he left the free pool.
+    unmapped = Tx("u", "free_agent", "complete", WEEK, B + timedelta(minutes=10), {}, {},
+                  frozenset({"999"}))  # fmt: skip
+    got = run(SNAP, [unmapped])
+    assert got.as_of["status"] == "uncertain" and "999" in got.as_of["reasons"][0]
+    # Before the replay window it's already reflected in the snapshot; failed ones do nothing.
+    old = Tx("o", "free_agent", "complete", WEEK, B - SKEW * 2, {}, {}, frozenset({"999"}))
+    failed = Tx("f", "waiver", "failed", WEEK, B + timedelta(minutes=10), {}, {},
+                frozenset({"999"}))  # fmt: skip
+    assert run(SNAP, [old, failed]).as_of["status"] == "current"
+    # A team defense is known to be outside the ranked (QB/RB/WR/TE/K) population.
+    defense = Tx("d", "waiver", "complete", WEEK, B + timedelta(minutes=10), {}, {},
+                 frozenset({"MIN"}))  # fmt: skip
+    got = reconcile(SNAP, WEEK, B, WEEK, [defense], fresh(), NOW, frozenset({"MIN"}))
+    assert got.as_of["status"] == "current"

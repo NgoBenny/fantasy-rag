@@ -77,8 +77,7 @@ def test_every_route_serves_labelled_sample_data(demo_api: str) -> None:
     assert lineup["recommended"]
     waivers = get(f"/api/leagues/{league['id']}/waivers").json()
     assert waivers["availability_as_of"]["status"] == "sample"
-    pair = next(iter(json.loads(DEMO.read_text("utf-8"))["start_sit"]))
-    assert get("/api/start-sit", ids=pair).json()["ranked"]
+    assert get("/api/start-sit", ids=f"{pid},{players[1]['id']}").json()["ranked"]
     assert get("/api/model-runs").status_code == 200
     assert get("/api/players/not-a-demo-player").status_code == 404
 
@@ -140,3 +139,35 @@ def test_demo_fixtures_hold_no_owner_names_or_league_ids() -> None:
     body = DEMO.read_text("utf-8").lower()
     leaked = [v for v in owners | ids | names if len(v) > 3 and v.lower() in body]
     assert leaked == [], f"{len(leaked)} personal values found in demo.json"
+
+
+def test_demo_stats_follow_the_requested_scoring(demo_api: str) -> None:
+    pid = next(p["id"] for p in httpx.get(f"{demo_api}/api/players", params={"q": "bijan"}).json())
+    got = {
+        s: httpx.get(f"{demo_api}/api/players/{pid}", params={"scoring": s}).json()
+        for s in ("ppr", "half", "std")
+    }
+    assert [got[s]["scoring"] for s in got] == ["ppr", "half", "std"]
+    assert got["ppr"]["total_points"] > got["half"]["total_points"] > got["std"]["total_points"]
+    other = next(p["id"] for p in httpx.get(f"{demo_api}/api/players").json() if p["id"] != pid)
+    std = httpx.get(f"{demo_api}/api/compare", params={"ids": f"{pid},{other}", "scoring": "std"})
+    assert std.json()["players"][0] == got["std"]
+    # Controls the demo has no data for are refused, never answered with another window.
+    assert httpx.get(f"{demo_api}/api/players/{pid}", params={"last_n": 3}).status_code == 422
+
+
+def test_demo_start_sit_ranks_any_demo_players_like_the_live_code(demo_api: str) -> None:
+    from fantasy_rag.agent.tools import rank_projections
+
+    data = json.loads(DEMO.read_text("utf-8"))
+    by_name = {p["name"]: p["id"] for p in data["players"]}
+    trio = [by_name[n] for n in ("Brock Purdy", "Josh Allen", "Trey McBride")]
+    for params, key in [({"league_id": 900}, "league:900"), ({"scoring": "std"}, "std")]:
+        got = httpx.get(f"{demo_api}/api/start-sit", params={"ids": ",".join(trio), **params})
+        assert got.status_code == 200
+        expected = rank_projections([data["projection"][key][i] for i in trio])
+        assert got.json() == {**expected, "demo": True}
+    bye = got.json()["ranked"][-1]  # Josh Allen is on bye: 0, ranked below real projections
+    assert bye["player"]["name"] == "Josh Allen" and bye["projected_points"] == 0.0
+    unknown = httpx.get(f"{demo_api}/api/start-sit", params={"ids": f"{trio[0]},00-x"})
+    assert unknown.status_code == 404

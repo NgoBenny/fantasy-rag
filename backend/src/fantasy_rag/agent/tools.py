@@ -270,7 +270,12 @@ def rank_start_sit(conn: Connection, refs: list[q.PlayerRef], a: ScoringChoice) 
     projections = [_projection(conn, r, a) for r in refs]
     for p in projections:
         p["injury"] = q.injury_snapshots(conn, p["player"]["id"])
-    # None (no games) sorts last; 0.0 is a real projection and beats a negative one.
+    return rank_projections(projections)
+
+
+def rank_projections(projections: list[dict[str, Any]]) -> dict[str, Any]:
+    """The start/sit order (demo mode ranks saved projections with this too).
+    None (no games) sorts last; 0.0 is a real projection and beats a negative one."""
     ranked = sorted(
         projections,
         key=lambda p: (p["projected_points"] is None, -(p["projected_points"] or 0.0)),

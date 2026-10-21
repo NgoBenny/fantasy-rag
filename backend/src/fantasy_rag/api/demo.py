@@ -27,12 +27,22 @@ def data() -> dict[str, Any]:
     return loaded
 
 
-def get(section: str, key: str | None = None) -> Any:
+def get(section: str, *keys: str) -> Any:
     found = data().get(section)
-    if key is not None:
+    for key in keys:
         found = (found or {}).get(key)
     if found is None:
-        raise HTTPException(404, f"not in the demo data ({section}{'/' + key if key else ''})")
+        raise HTTPException(404, f"not in the demo data ({'/'.join([section, *keys])})")
+    return found
+
+
+def stats(
+    player_id: str, scoring: str, season: int | None, last_n: int | None, league_id: int | None
+) -> dict[str, Any]:
+    """Saved full-season stats in the requested preset; other windows are refused."""
+    if season is not None or last_n is not None or league_id is not None:
+        raise HTTPException(422, "the demo has full-season stats in PPR, half or std only")
+    found: dict[str, Any] = get("player", scoring, player_id)
     return found
 
 

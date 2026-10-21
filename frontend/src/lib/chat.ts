@@ -54,7 +54,10 @@ export function parseEvents(buffer: string): { events: ChatEvent[]; rest: string
   return { events, rest };
 }
 
-/** POST a question and call `onEvent` for each event; aborts with `signal`. */
+const TERMINAL = new Set(["answer", "withheld", "error"]);
+
+/** POST a question and call `onEvent` for each event; aborts with `signal`. Throws if the
+ * stream ends before its answer, withheld or error event, so a cut-off never looks finished. */
 export async function streamChat(
   body: { question: string; league_id: number | null },
   onEvent: (e: ChatEvent) => void,
@@ -69,11 +72,16 @@ export async function streamChat(
   if (!res.ok || !res.body) throw new Error(`chat request failed (${res.status})`);
   const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "";
+  let finished = false;
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
     const parsed = parseEvents(buffer + value);
     buffer = parsed.rest;
-    parsed.events.forEach(onEvent);
+    for (const e of parsed.events) {
+      finished ||= TERMINAL.has(e.event);
+      onEvent(e);
+    }
   }
+  if (!finished) throw new Error("chat stream ended before its answer");
 }

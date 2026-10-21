@@ -92,9 +92,13 @@ def _cited(turn: Turn) -> list[str]:
 
 def _href(call: ToolCall) -> str | None:
     res, league = call.result or {}, call.args.get("league_id")
-    ids = [p["id"] for p in (r.get("player") for r in res.get("ranked", [])) if p]
+    rows = res.get("ranked") or res.get("players") or []
+    ids = ",".join(p["id"] for p in (r.get("player") for r in rows) if p)
+    scoring = call.args.get("scoring", "ppr")  # the tool's default when none was given
     if call.name == "compare_start_sit" and isinstance(league, int):
-        return f"/league?league={league}&view=startsit&ids={','.join(ids)}"
+        return f"/league?league={league}&view=startsit&ids={ids}"
+    if call.name in ("compare_start_sit", "compare_players") and league is None:
+        return f"/compare?ids={ids}&scoring={scoring}"  # projections + stats, same scoring
     if call.name == "optimize_lineup" and isinstance(league, int):
         return f"/league?league={league}&roster={call.args.get('roster_id')}&view=lineup"
     if call.name == "rank_waivers" and isinstance(league, int):
@@ -195,12 +199,16 @@ def run_chat(
         emit("error", {"demo": False, "code": code, "message": msg, "retryable": retry})
 
     status, error, turn, answer_ms = "error", None, None, None
+    # Kept outside the Turn so a failure after routing still logs what was done and spent.
+    llm: LLMClient | None = None
+    calls: list[ToolCall] = []
     try:
         with svc.tools_engine.connect() as conn:
             leagues = my_leagues(conn, svc.username)
             season, last = latest_week(conn)
             llm = svc.llm()
-            turn = ask(conn, llm, req.question, leagues, req.league_id, progress, cancelled)
+            turn = ask(conn, llm, req.question, leagues, req.league_id, progress, cancelled,
+                       calls)  # fmt: skip
         answer_ms = ms()
         if turn.problems:
             status = "withheld"
@@ -228,11 +236,15 @@ def run_chat(
         error = f"{type(e).__name__}: {str(e)[:300]}"
         fail("internal")
     finally:
-        usage = turn.usage if turn else {}
+        # The client is built per request, so its tally is this request's usage.
+        usage: dict[str, list[int]] = getattr(llm, "usage", {})
+        unpriced: int = getattr(llm, "unpriced", 0)
+        # A call whose usage is unknown makes the total unknown: never log it as a number.
+        cost = round(_cost(usage), 6) if usage and not unpriced else None
         qid = _log(svc, {
             "question": req.question,
-            "tools_called": json.dumps([c.name for c in turn.calls] if turn else []),
-            "tool_inputs": json.dumps([c.args for c in turn.calls] if turn else [], default=str),
+            "tools_called": json.dumps([c.name for c in calls]),
+            "tool_inputs": json.dumps([c.args for c in calls], default=str),
             "chunk_ids": [int(i.split(":")[1]) for i in _cited(turn) if i.startswith("news:")]
             if turn and status not in ("withheld",) else [],
             "answer": turn.answer.answer if turn and status != "withheld" else None,
@@ -245,13 +257,12 @@ def run_chat(
             "error": error,
             "progress_first_ms": first[0] if first else None,
             "answer_ms": answer_ms,
-            "usage": json.dumps(usage),
-            "cost_usd": round(_cost(usage), 6) if usage else None,
+            "usage": json.dumps({"tokens": usage, "unpriced_calls": unpriced}),
+            "cost_usd": cost,
         })  # fmt: skip
         emit("done", {"demo": False, "query_id": qid, "logged": qid is not None,
                       "progress_first_ms": first[0] if first else None,
-                      "answer_ms": answer_ms,
-                      "cost_usd": round(_cost(usage), 6) if usage else None})  # fmt: skip
+                      "answer_ms": answer_ms, "cost_usd": cost})  # fmt: skip
 
 
 async def stream_chat(svc: ChatServices, req: ChatRequest) -> AsyncIterator[bytes]:

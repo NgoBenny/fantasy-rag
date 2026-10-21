@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type AvailabilityAsOf, type Lineup, type LineupPlayer, api } from "@/lib/api";
 
-import { LineupView, Status } from "./lineup-view";
+import { LineupView, StartSitTable, Status, UnscoredNote } from "./lineup-view";
 
 export const dynamic = "force-dynamic";
 
@@ -44,60 +44,41 @@ async function StartSit({
   ids,
 }: {
   leagueId: number;
-  rosterId: number;
-  lineup: Lineup;
+  rosterId: number | null;
+  lineup: Lineup | null;
   ids: string[];
 }) {
-  const roster: LineupPlayer[] = [
-    ...lineup.recommended.flatMap((s) => (s.player ? [s.player] : [])),
-    ...lineup.bench,
-  ].filter((p, i, all) => all.findIndex((q) => q.id === p.id) === i);
-  const picked = ids.filter((id) => roster.some((p) => p.id === id)).slice(0, 4);
+  const roster: LineupPlayer[] = lineup
+    ? [...lineup.recommended.flatMap((s) => (s.player ? [s.player] : [])), ...lineup.bench].filter(
+        (p, i, all) => all.findIndex((q) => q.id === p.id) === i,
+      )
+    : [];
+  // Without a team (a chat source link), show the linked players as they are.
+  const picked = (lineup ? ids.filter((id) => roster.some((p) => p.id === id)) : ids).slice(0, 4);
   const result = picked.length >= 2 ? await api.startSit(picked, leagueId) : null;
   const toggle = (id: string) => (picked.includes(id) ? picked.filter((x) => x !== id) : [...picked, id]);
-  if (roster.length === 0) return <p className="text-sm text-muted-foreground">This team has no players.</p>;
+  if (lineup && roster.length === 0) return <p className="text-sm text-muted-foreground">This team has no players.</p>;
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">Pick 2–4 of your players to compare next week&apos;s projections.</p>
-      <div className="flex flex-wrap gap-2 text-sm" aria-label="Roster players">
-        {roster.map((p) => (
-          <Link
-            key={p.id}
-            href={href({ league: leagueId, roster: rosterId, view: "startsit", ids: toggle(p.id) })}
-            className={`rounded border px-2 py-1 ${picked.includes(p.id) ? "bg-muted font-semibold" : ""}`}
-          >
-            {p.name}
-          </Link>
-        ))}
-      </div>
-      {result && (
+      {lineup ? (
         <>
-          <p className="text-sm">
-            Higher projection: <b>{result.higher_projection ?? "none (no projection)"}</b> · {result.ranked[0]?.scoring}
-          </p>
-          <Table aria-label="Start/sit">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Player</TableHead>
-                <TableHead className="text-right">Proj (wk {result.ranked[0]?.week})</TableHead>
-                <TableHead className="text-right">Last game</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {result.ranked.map((r) => (
-                <TableRow key={r.player.id}>
-                  <TableCell>
-                    {r.player.name}
-                    <Status p={{ ...r.player, projected_points: r.projected_points, availability: r.availability }} />
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">{r.projected_points ?? "–"}</TableCell>
-                  <TableCell className="text-right tabular-nums">{r.last_game?.points ?? "–"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <p className="text-sm text-muted-foreground">Pick 2–4 of your players to compare next week&apos;s projections.</p>
+          <div className="flex flex-wrap gap-2 text-sm" aria-label="Roster players">
+            {roster.map((p) => (
+              <Link
+                key={p.id}
+                href={href({ league: leagueId, roster: rosterId, view: "startsit", ids: toggle(p.id) })}
+                className={`rounded border px-2 py-1 ${picked.includes(p.id) ? "bg-muted font-semibold" : ""}`}
+              >
+                {p.name}
+              </Link>
+            ))}
+          </div>
         </>
+      ) : (
+        !result && <p className="text-sm text-muted-foreground">Pick a team.</p>
       )}
+      {result && <StartSitTable result={result} />}
     </div>
   );
 }
@@ -110,6 +91,7 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
       <p className="text-sm">
         Week {w.week} · {w.scoring} · rosters synced {new Date(w.rosters_as_of.synced_at).toLocaleString()}
       </p>
+      <UnscoredNote items={w.candidates} />
       <Table aria-label="Waivers">
         <TableHeader>
           <TableRow>
@@ -198,10 +180,10 @@ export default async function LeaguePage({ searchParams }: PageProps<"/league">)
         <p className="text-sm text-muted-foreground">Pick a league.</p>
       ) : view === "waivers" ? (
         <WaiversView leagueId={league.id} />
+      ) : view === "startsit" ? (
+        <StartSit leagueId={league.id} rosterId={rosterId} lineup={lineup} ids={ids} />
       ) : !lineup ? (
         <p className="text-sm text-muted-foreground">Pick a team.</p>
-      ) : view === "startsit" ? (
-        <StartSit leagueId={league.id} rosterId={rosterId!} lineup={lineup} ids={ids} />
       ) : (
         <LineupView lineup={lineup} />
       )}

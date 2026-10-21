@@ -258,3 +258,44 @@ def test_no_connection_is_left_checked_out(engines: Any) -> None:
         ask(c)
     tools_e, log_e, _ = engines
     assert tools_e.pool.checkedout() == 0 and log_e.pool.checkedout() == 0  # type: ignore[attr-defined]
+
+
+class Billed(FakeLLM):
+    """Bills the router turn; the writer fails (before sending, or after: usage unknown)."""
+
+    def __init__(self, writer_error: Exception, unpriced: bool) -> None:
+        super().__init__([_msg(STATS)], [])
+        self.usage: dict[str, list[int]] = {}
+        self.unpriced, self.writer_error, self.sent = 0, writer_error, unpriced
+
+    def tool_turn(self, *a: Any) -> Message:
+        tally = self.usage.setdefault("claude-haiku-5-5", [0, 0])
+        tally[0], tally[1] = tally[0] + 1000, tally[1] + 100  # two router turns: tool, then stop
+        return super().tool_turn(*a)
+
+    def structured(self, *a: Any) -> Any:
+        self.calls += 1
+        if self.sent:
+            self.unpriced += 1  # the request went out; what it cost is unknown
+        raise self.writer_error
+
+
+def test_a_failure_after_routing_keeps_the_calls_and_usage_already_incurred(engines: Any) -> None:
+    llm = Billed(BudgetExceeded("the writer's allowance would pass the cap"), unpriced=False)
+    got = ask(client_for(engines, lambda: llm))
+    assert dict(got)["error"]["code"] == "budget_exceeded"
+    row = log_rows(engines)[-1]
+    assert row.status == "budget" and row.tools_called == ["get_player_stats"]
+    assert row.tool_inputs == [STATS[1]]
+    assert row.usage == {"tokens": {"claude-haiku-5-5": [2000, 200]}, "unpriced_calls": 0}
+    assert row.cost_usd is not None and float(row.cost_usd) > 0
+    assert dict(got)["done"]["cost_usd"] == pytest.approx(float(row.cost_usd))
+
+
+def test_a_call_with_unknown_usage_leaves_the_cost_unknown_not_zero(engines: Any) -> None:
+    llm = Billed(LLMUnavailable("connection reset mid-request"), unpriced=True)
+    got = ask(client_for(engines, lambda: llm))
+    row = log_rows(engines)[-1]
+    assert row.status == "error" and row.tools_called == ["get_player_stats"]
+    assert row.usage == {"tokens": {"claude-haiku-5-5": [2000, 200]}, "unpriced_calls": 1}
+    assert row.cost_usd is None and dict(got)["done"]["cost_usd"] is None

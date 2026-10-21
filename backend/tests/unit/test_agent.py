@@ -382,3 +382,14 @@ def test_sync_times_from_tools_are_not_false_failures() -> None:
     assert problems(a, router.sources([news]), "") == []
     a.limitations = ["News last synced 2026-10-21 02:00:42 UTC."]  # a wrong second still fails
     assert problems(a, router.sources([news]), "") == ["limitations: 42 not in news:15"]
+
+
+def test_start_sit_order_puts_zero_above_negative_and_missing_last() -> None:
+    from fantasy_rag.agent.tools import rank_projections
+
+    proj = [{"player": {"name": n}, "projected_points": p}
+            for n, p in [("none", None), ("neg", -1.5), ("bye", 0.0), ("top", 12.0)]]  # fmt: skip
+    got = rank_projections(proj)
+    assert [p["player"]["name"] for p in got["ranked"]] == ["top", "bye", "neg", "none"]
+    assert got["higher_projection"] == "top"
+    assert rank_projections(proj[:1])["higher_projection"] is None  # nothing projected
