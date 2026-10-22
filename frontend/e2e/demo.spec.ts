@@ -213,3 +213,31 @@ test("usage context: start/sit and waivers show it beside the projection, player
   await expect(usage.getByRole("row").last()).toContainText(`${last.target_share_pct.toFixed(1)}%`);
   await expect(page.getByText(/completed games through week \d+/)).toBeVisible();
 });
+
+test("waiver position tabs filter the list, keep league and team in the URL, and show empty results", async ({ page }) => {
+  await page.goto("/league?league=900&roster=1&view=waivers");
+  await expect(page.getByLabel("Waiver list")).toHaveText(
+    "Highest projected points across positions (not ranked for your roster)",
+  );
+  const tabs = page.getByLabel("Positions");
+  await tabs.getByRole("link", { name: "WR", exact: true }).click();
+  await expect(page).toHaveURL(/league=900&roster=1&view=waivers&pos=WR/);
+  await expect(page.getByLabel("Waiver list")).toHaveText("Unrostered WRs by projected points");
+  const rows = page.getByRole("table", { name: "Waivers" }).locator("tbody tr");
+  await expect(rows).not.toHaveCount(0);
+  for (const pos of await rows.locator("td:nth-child(2)").allTextContents()) expect(pos).toBe("WR");
+  // Warnings stay visible under every filter.
+  await expect(page.getByLabel("Availability")).toBeVisible();
+  await expect(page.getByLabel("Unscored rules")).toContainText("rec_0_4");
+
+  await tabs.getByRole("link", { name: "QB", exact: true }).click();
+  await expect(page).toHaveURL(/pos=QB/);
+  await expect(page.getByRole("table", { name: "Waivers" })).toContainText(
+    "No unrostered QB with a projection this week.",
+  );
+  await expect(page.getByLabel("Availability")).toBeVisible();
+
+  await tabs.getByRole("link", { name: "All", exact: true }).click();
+  await expect(page).toHaveURL(/view=waivers$/);
+  await expect(rows).not.toHaveCount(0);
+});

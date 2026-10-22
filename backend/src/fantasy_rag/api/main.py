@@ -260,7 +260,10 @@ def waivers(
 ) -> dict[str, Any]:
     """Best unrostered players by projection, with how current availability is."""
     if DEMO:
-        found: dict[str, Any] = demo.get("waivers", f"{league_id}:{position or 'ALL'}")
+        found: dict[str, Any] = demo.get("waivers", f"{league_id}:ALL")
+        if position:  # the sample list, filtered the way the live tool filters
+            found = {**found, "candidates": [c for c in found["candidates"]
+                                              if c["position"] == position]}  # fmt: skip
         return found
     args = tools.RankWaivers(league_id=league_id, position=position, limit=limit)
     return _guard(tools.rank_waivers, conn, args)
