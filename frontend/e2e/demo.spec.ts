@@ -237,6 +237,10 @@ test("waiver position tabs filter the list, keep league and team in the URL, and
   );
   await expect(page.getByLabel("Availability")).toBeVisible();
 
+  await tabs.getByRole("link", { name: "K", exact: true }).click();
+  await expect(page).toHaveURL(/pos=K$/);
+  await expect(page.getByLabel("Waiver list")).toHaveText("Unrostered kickers by projected points");
+
   await tabs.getByRole("link", { name: "All", exact: true }).click();
   await expect(page).toHaveURL(/view=waivers$/);
   await expect(rows).not.toHaveCount(0);
