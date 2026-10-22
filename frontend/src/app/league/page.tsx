@@ -112,7 +112,7 @@ async function WaiversView({ leagueId, rosterId, pos }: { leagueId: number; rost
       </nav>
       <p className="text-sm font-medium" aria-label="Waiver list">
         {pos
-          ? `Unrostered ${pos}s by projected points`
+          ? `Unrostered ${pos === "K" ? "kickers" : `${pos}s`} by projected points`
           : "Highest projected points across positions (not ranked for your roster)"}
       </p>
       <AvailabilityNote as_of={w.availability_as_of} />

@@ -147,7 +147,7 @@ export interface Projection {
   usage?: Usage;
 }
 
-export const WAIVER_POSITIONS = ["QB", "RB", "WR", "TE"] as const;
+export const WAIVER_POSITIONS = ["QB", "RB", "WR", "TE", "K"] as const;
 export type WaiverPosition = (typeof WAIVER_POSITIONS)[number];
 
 export interface Waivers {
