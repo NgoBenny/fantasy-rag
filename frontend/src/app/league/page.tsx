@@ -2,7 +2,14 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type AvailabilityAsOf, type Lineup, type LineupPlayer, api } from "@/lib/api";
+import {
+  type AvailabilityAsOf,
+  type Lineup,
+  type LineupPlayer,
+  WAIVER_POSITIONS,
+  type WaiverPosition,
+  api,
+} from "@/lib/api";
 import { UsageAsOfLine, UsageContext, UsageNote } from "@/components/usage";
 import { rostersLabel } from "@/lib/lineup";
 
@@ -18,12 +25,19 @@ const VIEWS = [
 ] as const;
 type View = (typeof VIEWS)[number][0];
 
-function href(p: { league?: number; roster?: number | null; view?: View; ids?: string[] }): string {
+function href(p: {
+  league?: number;
+  roster?: number | null;
+  view?: View;
+  ids?: string[];
+  pos?: WaiverPosition | null;
+}): string {
   const q = new URLSearchParams();
   if (p.league) q.set("league", String(p.league));
   if (p.roster) q.set("roster", String(p.roster));
   if (p.view) q.set("view", p.view);
   if (p.ids?.length) q.set("ids", p.ids.join(","));
+  if (p.pos) q.set("pos", p.pos);
   return `/league?${q}`;
 }
 
@@ -79,10 +93,28 @@ async function StartSit({
   );
 }
 
-async function WaiversView({ leagueId }: { leagueId: number }) {
-  const w = await api.waivers(leagueId);
+async function WaiversView({ leagueId, rosterId, pos }: { leagueId: number; rosterId: number | null; pos: WaiverPosition | null }) {
+  const w = await api.waivers(leagueId, pos ?? undefined);
+  const tabs: [WaiverPosition | null, string][] = [[null, "All"], ...WAIVER_POSITIONS.map((p) => [p, p] as [WaiverPosition, string])];
   return (
     <div className="space-y-3">
+      <nav className="flex gap-2 text-sm" aria-label="Positions">
+        {tabs.map(([p, label]) => (
+          <Link
+            key={label}
+            href={href({ league: leagueId, roster: rosterId, view: "waivers", pos: p })}
+            aria-current={p === pos ? "page" : undefined}
+            className={`rounded border px-2 py-1 ${p === pos ? "bg-muted font-semibold" : ""}`}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <p className="text-sm font-medium" aria-label="Waiver list">
+        {pos
+          ? `Unrostered ${pos}s by projected points`
+          : "Highest projected points across positions (not ranked for your roster)"}
+      </p>
       <AvailabilityNote as_of={w.availability_as_of} />
       <p className="text-sm">
         Week {w.week} · {w.scoring} · {rostersLabel(w.rosters_as_of)}
@@ -100,6 +132,13 @@ async function WaiversView({ leagueId }: { leagueId: number }) {
           </TableRow>
         </TableHeader>
         <TableBody>
+          {w.candidates.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="text-muted-foreground">
+                No unrostered {pos ?? "players"} with a projection this week.
+              </TableCell>
+            </TableRow>
+          )}
           {w.candidates.map((c) => (
             <TableRow key={c.id}>
               <TableCell>
@@ -129,6 +168,7 @@ export default async function LeaguePage({ searchParams }: PageProps<"/league">)
   const leagueId = Number(sp.league) || null;
   const view: View = VIEWS.some(([v]) => v === sp.view) ? (sp.view as View) : "lineup";
   const ids = typeof sp.ids === "string" ? sp.ids.split(",").filter(Boolean) : [];
+  const pos = WAIVER_POSITIONS.find((p) => p === sp.pos) ?? null;
   const leagues = await api.leagues();
   if (leagues.length === 0) {
     return (
@@ -186,7 +226,7 @@ export default async function LeaguePage({ searchParams }: PageProps<"/league">)
       {!league ? (
         <p className="text-sm text-muted-foreground">Pick a league.</p>
       ) : view === "waivers" ? (
-        <WaiversView leagueId={league.id} />
+        <WaiversView leagueId={league.id} rosterId={rosterId} pos={pos} />
       ) : view === "startsit" ? (
         <StartSit leagueId={league.id} rosterId={rosterId} lineup={lineup} ids={ids} />
       ) : !lineup ? (

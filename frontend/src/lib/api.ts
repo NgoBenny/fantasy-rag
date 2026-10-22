@@ -147,6 +147,9 @@ export interface Projection {
   usage?: Usage;
 }
 
+export const WAIVER_POSITIONS = ["QB", "RB", "WR", "TE"] as const;
+export type WaiverPosition = (typeof WAIVER_POSITIONS)[number];
+
 export interface Waivers {
   league_id: number;
   scoring: string;
@@ -233,7 +236,8 @@ export const api = {
     call<StartSit>(
       `/api/start-sit?ids=${ids.map(encodeURIComponent).join(",")}${leagueId ? `&league_id=${leagueId}` : `&scoring=${scoring}`}`,
     ),
-  waivers: (leagueId: number) => call<Waivers>(`/api/leagues/${leagueId}/waivers`),
+  waivers: (leagueId: number, position?: WaiverPosition) =>
+    call<Waivers>(`/api/leagues/${leagueId}/waivers${position ? `?position=${position}` : ""}`),
   modelRuns: () => call<ModelRun[]>("/api/model-runs"),
   forwardRuns: () => call<ForwardRuns>("/api/forward-runs"),
   forwardResults: (scoring: Scoring) => call<ForwardResults>(`/api/forward-results?scoring=${scoring}`),
