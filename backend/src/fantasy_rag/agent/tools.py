@@ -511,16 +511,14 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         if not pid:
             return None
         s = projected.get(pid)
+        playable = avail.get(pid, {}).get("playable", True)
         return {
             **refs[pid].model_dump(),
-            "projected_points": points.get(
-                pid,
-                0.0 if not avail.get(pid, {}).get("playable", True) else s.points if s else None,
-            ),
+            "projected_points": points.get(pid, s.points if playable else 0.0) if s else None,
             "availability": avail.get(pid),
             "game_started_at": started.get(pid),
             "policy": s.policy if s else None,
-            "range_80": s.range_80 if s and pid in points else None,
+            "range_80": s.range_80 if s and pid in points and playable else None,
         }
 
     current_total = round(sum(points.get(g or "", 0.0) for g in current.values()), 2)

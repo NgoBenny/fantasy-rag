@@ -1,6 +1,7 @@
 """A partial Thursday week must not advance forecasts or unlock played players."""
 
 import json
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -11,6 +12,7 @@ from fantasy_rag.agent.tools import run_tool
 from fantasy_rag.analytics import queries as q
 from fantasy_rag.api.main import status
 from fantasy_rag.db import get_readonly_engine
+from fantasy_rag.ml import serve
 
 pytestmark = pytest.mark.db
 NOW = datetime(2026, 10, 23, 12, tzinfo=UTC)
@@ -167,6 +169,25 @@ def test_started_flex_stays_even_without_history_or_with_negative_points(thursda
     assert lineup["gain"] == 0
     if pid == "00-7":
         assert flex["player"]["projected_points"] == -2.0
+    if pid == "00-8":
+        assert flex["player"]["projected_points"] is None
+
+
+def test_out_locked_starter_does_not_keep_a_healthy_scoring_range(thursday, monkeypatch) -> None:
+    original = serve.project
+
+    def with_ranges(*args, **kwargs):
+        return {
+            pid: replace(p, range_80=(2.0, 20.0)) if p else None
+            for pid, p in original(*args, **kwargs).items()
+        }
+
+    monkeypatch.setattr(serve, "project", with_ranges)
+    with get_readonly_engine(thursday).connect() as c:
+        lineup = run_tool(c, "optimize_lineup", {"league_id": 1, "roster_id": 1})
+    starter = lineup["recommended"][0]
+    assert starter["locked"] and starter["player"]["projected_points"] == 0
+    assert starter["player"]["range_80"] is None
 
 
 def test_projection_week_uses_schedule_before_and_after_final_game(thursday: str) -> None:
