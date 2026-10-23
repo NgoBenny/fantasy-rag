@@ -3,7 +3,7 @@
 import json
 import re
 import unicodedata
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from pydantic import BaseModel
@@ -71,6 +71,43 @@ def latest_week(conn: Connection) -> tuple[int, int]:
         )
     ).one()
     return int(season), int(week)
+
+
+def projection_week(conn: Connection, now: datetime | None = None) -> tuple[int, int]:
+    """Keep the whole scheduled week active, independent of partial player-stat imports.
+
+    Like usage's completed-week cutoff, allow four hours after the final kickoff.
+    Unknown kickoff times keep a week open; without a schedule use the stats fallback.
+    """
+    season, last = latest_week(conn)
+    weeks = conn.execute(
+        text(
+            "SELECT week, max(kickoff_at) AS last_kickoff,"
+            " bool_or(kickoff_at IS NULL) AS unknown FROM schedules"
+            " WHERE season = :s AND game_type = 'REG' GROUP BY week ORDER BY week"
+        ),
+        {"s": season},
+    ).all()
+    cutoff = (now or datetime.now(UTC)) - timedelta(hours=4)
+    for row in weeks:
+        if row.unknown or row.last_kickoff > cutoff:
+            return season, int(row.week)
+    return season, int(weeks[-1].week) if weeks else min(last + 1, 18)
+
+
+def started_players(
+    conn: Connection, refs: list[PlayerRef], season: int, week: int
+) -> dict[str, datetime]:
+    """Kickoff locks apply to starters AND bench players, even before stats arrive."""
+    rows = conn.execute(
+        text(
+            "SELECT home_team, away_team, kickoff_at FROM schedules"
+            " WHERE season = :s AND week = :w AND game_type = 'REG' AND kickoff_at <= :now"
+        ),
+        {"s": season, "w": week, "now": datetime.now(UTC)},
+    )
+    teams = {team: r.kickoff_at for r in rows for team in (r.home_team, r.away_team)}
+    return {r.id: teams[r.team] for r in refs if r.team in teams}
 
 
 def resolve_player(

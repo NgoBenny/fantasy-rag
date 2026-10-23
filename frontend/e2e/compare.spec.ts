@@ -42,7 +42,8 @@ test("lineup shows moves, recommended slots and the bench", async ({ page }) => 
   await expect(page.getByText(/^(Start: |No changes)/)).toBeVisible();
   await expect(page.getByRole("table", { name: "Recommended lineup" })).toBeVisible();
   await expect(page.getByRole("table", { name: "Bench" })).toBeVisible();
-  await expect(page.getByText(/project 0 and never start/)).toBeVisible();
+  await expect(page.getByText(/project 0 and are not added to the lineup/)).toBeVisible();
+  await expect(page.getByText(/Totals are projections, not live scores/)).toBeVisible();
 });
 
 test("Try again recovers once the API is back", async ({ page, request }) => {

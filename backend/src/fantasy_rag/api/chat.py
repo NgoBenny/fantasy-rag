@@ -42,7 +42,7 @@ from fantasy_rag.agent.router import (
     ask,
     my_leagues,
 )
-from fantasy_rag.analytics.queries import latest_week
+from fantasy_rag.analytics.queries import projection_week
 
 WORKERS = 4  # shortcut: per-process pool and cap; one uvicorn worker is assumed
 _pool = ThreadPoolExecutor(max_workers=WORKERS, thread_name_prefix="chat")
@@ -210,7 +210,7 @@ def run_chat(
     try:
         with svc.tools_engine.connect() as conn:
             leagues = my_leagues(conn, svc.username)
-            season, last = latest_week(conn)
+            season, week = projection_week(conn)
             llm = svc.llm()
             turn = ask(conn, llm, req.question, leagues, req.league_id, progress, cancelled,
                        calls)  # fmt: skip
@@ -225,7 +225,7 @@ def run_chat(
                 status = "clarification"
             emit("answer", {"demo": False, "status": "repaired" if turn.first_problems else "ok",
                             "answer": turn.answer.model_dump(), "sources": sources(turn),
-                            "as_of": {"season": season, "next_week": last + 1}})  # fmt: skip
+                            "as_of": {"season": season, "next_week": week}})  # fmt: skip
     except Cancelled:
         status = "cancelled"
     except BudgetExceeded as e:

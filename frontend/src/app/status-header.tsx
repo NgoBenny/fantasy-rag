@@ -51,7 +51,7 @@ export async function StatusHeader() {
       )}
       <div className="mx-auto flex max-w-5xl flex-wrap gap-x-4">
         <span>
-          {s.season} season · stats through week {s.latest_week} · next games week {s.next_week}
+          {s.season} season · stats available through week {s.latest_week} (may be partial) · projection week {s.next_week}
         </span>
         {Object.entries(s.sources).map(([k, v]) => (
           <span key={k} className={v && Number(v.age_hours) > 24 ? "text-destructive" : undefined}>

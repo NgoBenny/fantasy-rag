@@ -12,7 +12,7 @@ test("every page shows the demo label and the data status", async ({ page }) => 
   for (const path of ["/", "/players", "/compare", "/chat", "/league", "/model"]) {
     await page.goto(path);
     await expect(page.getByRole("note")).toContainText("Demo: sample data, not live");
-    await expect(page.getByLabel("Data status")).toContainText(/season · stats through week \d+/);
+    await expect(page.getByLabel("Data status")).toContainText(/season · stats available through week \d+/);
     await expect(page.getByLabel("Data status")).toContainText("adds/drops:");
   }
 });

@@ -54,7 +54,7 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
         </div>
       </div>
       <section className="space-y-2">
-        <h2 className="font-semibold">Next week&apos;s projections</h2>
+        <h2 className="font-semibold">Week {projections.ranked[0]?.week} projections</h2>
         <StartSitTable result={projections} />
       </section>
       <h2 className="font-semibold">

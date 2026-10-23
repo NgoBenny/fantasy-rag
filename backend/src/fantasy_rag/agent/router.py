@@ -20,7 +20,7 @@ from fantasy_rag.agent.answer import Answer, problems
 from fantasy_rag.agent.llm import LLMClient
 from fantasy_rag.agent.prompts import ROUTER_SYSTEM, WRITER_SYSTEM
 from fantasy_rag.agent.tools import TOOLS, run_tool
-from fantasy_rag.analytics.queries import latest_week, league_roster
+from fantasy_rag.analytics.queries import latest_week, league_roster, projection_week
 
 MAX_ROUNDS = 4
 
@@ -98,9 +98,11 @@ def my_leagues(conn: Connection, username: str) -> list[MyLeague]:
 
 def context_block(conn: Connection, leagues: list[MyLeague], selected: int | None) -> str:
     season, week = latest_week(conn)
+    _, target = projection_week(conn)
     lines = [
-        f"Season {season}. Stats are complete through week {week}; the next games are"
-        f" week {week + 1}.",
+        f"Season {season}. Stats are available through week {week} (possibly partial)."
+        f" Projection week: {target}. Started players cannot be moved into or out of"
+        " their current lineup slots; optimizer totals are projections, not live scores.",
         "The user's leagues:" if leagues else "No leagues are known for this user.",
     ]
     lines += [f"- {lg.model_dump_json()}" for lg in leagues]

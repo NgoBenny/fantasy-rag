@@ -58,6 +58,20 @@ flowchart LR
    - A trained policy serves a position only after a reviewed code change.
    - Every projection carries an 80% range calibrated on its own policy's recorded errors.
 
+### In-progress weeks and lineup locks
+
+Live tools, the header and chat use the same schedule-based projection week. A partial
+Thursday stat import cannot advance it. A week remains active until four hours after
+its final scheduled kickoff (the same completion estimate used by usage); unknown kickoff
+times keep the week open. If no schedule is loaded, the fallback is the latest stats week
+plus one, capped at week 18. Historical stats and the immutable Tuesday forward log are unchanged.
+
+At a player's scheduled kickoff, the lineup optimizer fixes a current starter in that
+exact slot and excludes started bench players from new assignments. Those locks also
+preserve starters with no projection, a negative projection or an Out designation. The
+page labels locked slots and started bench players. Totals remain projections, not live
+scores. Locks depend on the imported roster and schedule, so source freshness still matters.
+
 ## Forward log (Phase 8)
 
 Every Tuesday at 10:30 ET, `predict` predicts the coming week with both the baseline and TE Ridge.

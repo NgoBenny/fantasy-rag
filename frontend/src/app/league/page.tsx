@@ -78,7 +78,7 @@ async function StartSit({
     <div className="space-y-3">
       {lineup ? (
         <>
-          <p className="text-sm text-muted-foreground">Pick 2–4 of your players to compare next week&apos;s projections.</p>
+          <p className="text-sm text-muted-foreground">Pick 2–4 of your players to compare this week&apos;s projections.</p>
           <RosterPicker
             players={roster}
             picked={picked}
