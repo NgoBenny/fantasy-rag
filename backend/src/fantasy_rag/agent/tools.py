@@ -15,7 +15,7 @@ from sqlalchemy import Connection
 
 from fantasy_rag.analytics import queries as q
 from fantasy_rag.analytics import usage as u
-from fantasy_rag.analytics.optimizer import Candidate, optimize
+from fantasy_rag.analytics.optimizer import ELIGIBLE, Candidate, optimize
 from fantasy_rag.analytics.scoring import score
 from fantasy_rag.index.embedder import Embedder
 from fantasy_rag.ml import baseline, serve
@@ -276,20 +276,20 @@ def get_trending(conn: Connection, a: GetTrending) -> dict[str, Any]:
 
 
 def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[str, Any]:
-    season, last = q.latest_week(conn)
+    season, week = q.projection_week(conn)
     rules, label = q.rules_for(conn, a.league_id, a.scoring)
     rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
     games = baseline.scored_history(rows, rules).get(ref.id, [])
     key = serve.scoring_key(a.league_id, a.scoring)
-    got = serve.project(conn, [ref], rules, key, season, last + 1)[ref.id]
-    avail = q.availability(conn, [ref.id], season, last + 1).get(ref.id)
+    got = serve.project(conn, [ref], rules, key, season, week)[ref.id]
+    avail = q.availability(conn, [ref.id], season, week).get(ref.id)
     projected, rng = (got.points, got.range_80) if got else (None, None)
     if avail and not avail["playable"]:
         projected, rng = 0.0, None  # bye or ruled out: he won't score
     return {
         "player": ref.model_dump(),
         "season": season,
-        "week": last + 1,
+        "week": week,
         "scoring": label,
         "projected_points": projected,
         "games_used": got.games_used if got else 0,
@@ -346,7 +346,7 @@ def rank_projections(projections: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
-    season, last = q.latest_week(conn)
+    season, week = q.projection_week(conn)
     avail_now, roster_week, synced = q.rostered(conn, a.league_id)
     taken = avail_now.rostered
     if roster_week is None:
@@ -362,8 +362,8 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
     active = {r["player_id"] for r in rows if r["season"] == season}
     refs = q.players_by_id(conn, sorted(active))
     key = serve.scoring_key(a.league_id, None)
-    served = serve.project(conn, list(refs.values()), rules, key, season, last + 1)
-    avail = q.availability(conn, [p for p, s in served.items() if s], season, last + 1)
+    served = serve.project(conn, list(refs.values()), rules, key, season, week)
+    avail = q.availability(conn, [p for p, s in served.items() if s], season, week)
     picks = [
         (0.0 if not avail.get(p, {}).get("playable", True) else s.points, s.games_used, p)
         for p, s in served.items()
@@ -375,7 +375,7 @@ def rank_waivers(conn: Connection, a: RankWaivers) -> dict[str, Any]:
     return {
         "league_id": a.league_id,
         "scoring": label,
-        "week": last + 1,
+        "week": week,
         # synced_at: when the roster data last changed; checked_at: when Sleeper was last asked
         "rosters_as_of": {
             "week": roster_week,
@@ -461,24 +461,13 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
 
 
 def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
-    season, last = q.latest_week(conn)
+    season, week = q.projection_week(conn)
     roster = q.league_roster(conn, a.league_id, a.roster_id)
     slots: list[str] = roster["roster_positions"]
     ids: list[str] = roster["player_ids"]
     rules, label = q.rules_for(conn, a.league_id, None)
     refs = q.players_by_id(conn, ids)
     key = serve.scoring_key(a.league_id, None)
-    projected = serve.project(conn, list(refs.values()), rules, key, season, last + 1)
-    avail = q.availability(conn, ids, season, last + 1)
-    # Players on bye or ruled out can't score this week, so they never start.
-    candidates = [
-        Candidate(
-            pid, refs[pid].position or "", got.points, tuple(refs[pid].fantasy_positions or ())
-        )
-        for pid, got in projected.items()
-        if got and pid in refs and avail.get(pid, {}).get("playable", True)
-    ]
-
     # Sleeper's starters list follows the non-bench slots in order; "0" is an empty slot.
     starting_idx = [i for i, s in enumerate(slots) if s not in ("BN", "IR", "TAXI")]
     starters = [str(x) for x in roster["starters"] or []]
@@ -486,16 +475,35 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     current = {idx: to_gsis.get(sid) for idx, sid in zip(starting_idx, starters, strict=False)}
     # A starter can be missing from player_ids (e.g. moved since); still name him.
     refs |= q.players_by_id(conn, [g for g in current.values() if g and g not in refs])
-    locks = {}
+    projected = serve.project(conn, list(refs.values()), rules, key, season, week)
+    avail = q.availability(conn, list(refs), season, week)
+    started = q.started_players(conn, list(refs.values()), season, week)
+    frozen = {i: pid for i, pid in current.items() if pid in started}
+    # Unsupported slots (DEF/IDP) are preserved below, outside the assignment solver.
+    locks = {pid: i for i, pid in frozen.items() if slots[i] in ELIGIBLE}
     for pid in a.locked_player_ids:
         idx = next((i for i, g in current.items() if g == pid), None)
         if idx is None:
             raise ValueError(f"locked player {pid} is not a current starter")
         locks[pid] = idx
+    candidates = [
+        Candidate(
+            pid,
+            refs[pid].position or "",
+            got.points if got and avail.get(pid, {}).get("playable", True) else 0.0,
+            tuple(refs[pid].fantasy_positions or ()),
+        )
+        for pid, got in projected.items()
+        if pid in locks
+        or (got and pid in ids and pid not in started and avail.get(pid, {}).get("playable", True))
+    ]
     prefer = {g: i for i, g in current.items() if g}
     lineup = optimize(slots, candidates, locks, prefer)
     points = {c.id: c.points for c in candidates}
-    picks = [(i, s, pid) for i, (s, pid, _) in zip(starting_idx, lineup.slots, strict=True)]
+    picks = [
+        (i, s, frozen.get(i, pid))
+        for i, (s, pid, _) in zip(starting_idx, lineup.slots, strict=True)
+    ]
     starting = {pid for _, _, pid in picks if pid}
     now_starting = {g for g in current.values() if g}
 
@@ -505,8 +513,12 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
         s = projected.get(pid)
         return {
             **refs[pid].model_dump(),
-            "projected_points": points.get(pid, 0.0 if pid in avail else None),
+            "projected_points": points.get(
+                pid,
+                0.0 if not avail.get(pid, {}).get("playable", True) else s.points if s else None,
+            ),
             "availability": avail.get(pid),
+            "game_started_at": started.get(pid),
             "policy": s.policy if s else None,
             "range_80": s.range_80 if s and pid in points else None,
         }
@@ -515,7 +527,7 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
     return {
         "league_id": a.league_id,
         "roster_id": a.roster_id,
-        "week": last + 1,
+        "week": week,
         "scoring": label,
         "rosters_as_of": {
             "week": roster["week"],
@@ -523,7 +535,12 @@ def optimize_lineup(conn: Connection, a: OptimizeLineup) -> dict[str, Any]:
             "checked_at": q.roster_checked_at(conn, a.league_id, roster["week"]),
         },
         "recommended": [
-            {"slot": s, "player": named(pid), "current": named(current.get(i))}
+            {
+                "slot": s,
+                "player": named(pid),
+                "current": named(current.get(i)),
+                "locked": i in frozen or i in locks.values(),
+            }
             for i, s, pid in picks
         ],
         "bench": sorted(
@@ -620,7 +637,7 @@ TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, An
     "project_player": (
         ProjectPlayer,
         project_player,
-        "Baseline fantasy-point projection for next week.",
+        "Fantasy-point projection for the current scheduled week (which may be in progress).",
     ),
     "compare_start_sit": (
         CompareStartSit,
@@ -630,7 +647,8 @@ TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, An
     "optimize_lineup": (
         OptimizeLineup,
         optimize_lineup,
-        "Best legal lineup for a roster by projection, vs the current one; keeps locks.",
+        "Best legal lineup for a roster by projection, vs the current one; automatically"
+        " keeps started players in their current slots and started bench players on the bench.",
     ),
     "search_news": (
         SearchNews,

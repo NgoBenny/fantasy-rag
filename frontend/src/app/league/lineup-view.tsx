@@ -103,6 +103,7 @@ export function LineupView({ lineup }: { lineup: Lineup }) {
                       <TableCell>
                         {s.player?.name ?? (lineup.unhandled_slots.includes(s.slot) ? "not optimized" : "empty")}
                         <Status p={s.player} />
+                        {s.locked && <Badge variant="outline" className="ml-2">Locked</Badge>}
                         {changed && s.player && (
                           <Badge className="ml-2" variant="secondary">
                             change
@@ -137,6 +138,7 @@ export function LineupView({ lineup }: { lineup: Lineup }) {
                       <TableCell>
                         {b.name}
                         <Status p={b} />
+                        {b.game_started_at && <Badge variant="outline" className="ml-2">Game started</Badge>}
                       </TableCell>
                       <TableCell>{b.position}</TableCell>
                       <TableCell className="text-right tabular-nums">{b.projected_points ?? "–"}</TableCell>
@@ -147,8 +149,10 @@ export function LineupView({ lineup }: { lineup: Lineup }) {
             </>
           )}
           <p className="text-xs text-muted-foreground">
+            Players whose games have started stay in their current slots; started bench players cannot enter.
+            Totals are projections, not live scores.{" "}
             Model {lineup.model_version}: weighted recent games. Players on bye or ruled out (Out, IR) project 0
-            and never start; Questionable and Doubtful are flagged but not discounted.
+            and are not added to the lineup; Questionable and Doubtful are flagged but not discounted.
             {lineup.unhandled_slots.length > 0 && ` Not optimized: ${lineup.unhandled_slots.join(", ")}.`}
             {lineup.no_projection.length > 0 && ` No projection: ${lineup.no_projection.join(", ")}.`}
             {lineup.unscored_rules.length > 0 &&

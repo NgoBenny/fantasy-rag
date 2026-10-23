@@ -122,7 +122,7 @@ def status(conn: Conn) -> dict[str, Any]:
         "demo": False,
         "season": season,
         "latest_week": week,
-        "next_week": week + 1,
+        "next_week": q.projection_week(conn)[1],
         "sources": {k: last.get(src) for k, src in STATUS_SOURCES.items()},
         # fresh / stale / failing per source: the header warns on anything not fresh
         "health": source_health(conn, datetime.now(UTC)),
@@ -203,7 +203,7 @@ def start_sit(
     league_id: int | None = None,
     scoring: Scoring = "ppr",
 ) -> dict[str, Any]:
-    """Next week's projections, league-scored, with bye/injury status (same code as the
+    """Current scheduled week's projections, with league scoring and bye/injury status (the
     agent's compare_start_sit tool)."""
     wanted = _ids(ids)
     if DEMO:

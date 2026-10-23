@@ -172,6 +172,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
     """`extra_chats`: live recordings (load_recorded()), placed after the saved answers."""
     refs = _refs(conn)
     season, week = q.latest_week(conn)
+    _, target = q.projection_week(conn)
     presets = ("ppr", "half", "std")
     # Per player and preset, so the demo can serve any scoring toggle and rank any
     # 2-4 demo players with the live ranking code (tools.rank_projections).
@@ -215,7 +216,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
             "label": LABEL,
             "season": season,
             "latest_week": week,
-            "next_week": week + 1,
+            "next_week": target,
             "sources": {
                 k: {"last_ok": (now - timedelta(hours=h)).isoformat(), "age_hours": h}
                 for k, h in [
@@ -251,10 +252,10 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
             f"{DEMO_LEAGUE}:1": {
                 "league_id": DEMO_LEAGUE,
                 "roster_id": 1,
-                "week": week + 1,
+                "week": target,
                 "scoring": DEMO_SCORING,
                 "label": LABEL,
-                "rosters_as_of": {"week": week + 1, "synced_at": now.isoformat()},
+                "rosters_as_of": {"week": target, "synced_at": now.isoformat()},
                 "recommended": [
                     {"slot": s, "player": slot_player(pid), "current": slot_player(pid)}
                     for s, pid, _ in lineup.slots
@@ -279,9 +280,9 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
             f"{DEMO_LEAGUE}:ALL": {
                 "league_id": DEMO_LEAGUE,
                 "scoring": DEMO_SCORING,
-                "week": week + 1,
+                "week": target,
                 "label": LABEL,
-                "rosters_as_of": {"week": week + 1, "synced_at": now.isoformat()},
+                "rosters_as_of": {"week": target, "synced_at": now.isoformat()},
                 "availability_as_of": sample_as_of,
                 "rostered_players_excluded": len(DEMO_ROSTER),
                 "candidates": [

@@ -5,12 +5,13 @@ import { expect, test } from "@playwright/test";
 test("league selection, freshness, waivers availability and start/sit projections", async ({ page }) => {
   test.setTimeout(240_000); // may walk past eliminated (empty) guillotine teams in dev mode
   await page.goto("/league");
-  await expect(page.getByLabel("Data status")).toContainText(/season · stats through week \d+/);
+  await expect(page.getByLabel("Data status")).toContainText(/season · stats available through week \d+/);
   await expect(page.getByLabel("Data status")).toContainText("adds/drops:");
   await page.getByLabel("Leagues").getByRole("link").first().click();
   await expect(page).toHaveURL(/league=\d+/);
 
   await page.getByLabel("Views").getByRole("link", { name: "Waivers" }).click();
+  await expect(page).toHaveURL(/view=waivers/, { timeout: 30_000 });
   await expect(page.getByLabel("Availability")).toContainText(/availability: (current|stale|uncertain)/);
   await expect(page.getByRole("table", { name: "Waivers" })).toBeVisible();
 

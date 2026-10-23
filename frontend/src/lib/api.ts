@@ -73,6 +73,7 @@ export interface Availability {
 export type LineupPlayer = PlayerRef & {
   projected_points: number | null;
   availability: Availability | null;
+  game_started_at?: string | null;
   policy?: string | null;
   range_80?: [number, number] | null;
 };
@@ -81,6 +82,7 @@ export interface LineupSlot {
   slot: string;
   player: LineupPlayer | null;
   current: LineupPlayer | null;
+  locked?: boolean;
 }
 
 export interface Lineup {
