@@ -123,6 +123,21 @@ def test_upstream_overload_is_retried_then_reported() -> None:
         ).tool_turn("s", q, [])
 
 
+def test_object_arguments_sent_as_json_text_are_decoded() -> None:
+    args = json.dumps({
+        "player": '{"name": "Josh Allen", "team": "BUF"}', "query": "{not json", "note": "{x}",
+    })  # fmt: skip
+    calls = [{"id": "c1", "function": {"name": "t", "arguments": args}}]
+    schema = {"properties": {"player": {"$ref": "#/$defs/P"}, "note": {"type": "string"}}}
+    tools = [{"name": "t", "description": "d", "input_schema": schema}]
+    msg = client(ok({"content": None, "tool_calls": calls})).tool_turn("s", [], tools)  # type: ignore[list-item]
+    assert msg.content[0].input == {
+        "player": {"name": "Josh Allen", "team": "BUF"},  # decoded
+        "query": "{not json",  # not JSON: left as sent
+        "note": "{x}",  # declared a string: never touched
+    }
+
+
 def test_only_free_models_are_allowed() -> None:
     with pytest.raises(ValueError, match="only free"):
         OpenRouterLLM("k", "vendor/paid-model", FREE)
