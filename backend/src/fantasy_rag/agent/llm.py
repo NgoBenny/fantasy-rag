@@ -191,6 +191,25 @@ def _json_object(text: str) -> str:
     return text[start : end + 1] if start != -1 and end > start else text
 
 
+def _decode_nested(args: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
+    """Some free models send an object argument as JSON text ('{"name": ...}'); decode it
+    when the tool's schema doesn't declare that argument a string."""
+    props = schema.get("properties", {})
+    out = dict(args)
+    for key, value in args.items():
+        if not (isinstance(value, str) and value.lstrip()[:1] in ("{", "[")):
+            continue
+        if props.get(key, {}).get("type") == "string":
+            continue
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(decoded, dict | list):
+            out[key] = decoded
+    return out
+
+
 class OpenRouterLLM:
     """OpenRouter's free models: one routes (tool calls), one writes (JSON answers).
 
@@ -286,6 +305,7 @@ class OpenRouterLLM:
             reasoning={"effort": "low"},
         )
         msg = body["choices"][0]["message"]
+        schemas: dict[str, Any] = {t["name"]: t["input_schema"] for t in tools}
         content: list[dict[str, Any]] = []
         if msg.get("content"):
             content.append({"type": "text", "text": msg["content"]})
@@ -297,6 +317,8 @@ class OpenRouterLLM:
                 args = None
             if not isinstance(args, dict):  # never run a tool on defaults it wasn't given
                 args = {INVALID_ARGS: raw}
+            else:
+                args = _decode_nested(args, schemas.get(c["function"]["name"], {}))
             content.append(
                 {
                     "type": "tool_use",

@@ -115,9 +115,10 @@ def resolve_player(
 ) -> PlayerRef:
     """Name -> one player via trigram similarity; ambiguity is an error, never a guess.
 
-    Fantasy positions only (unless `position` is given). Among equally good name matches,
-    a player with stats this season wins; if that still leaves several, the caller must
-    narrow it with `position` or `team`.
+    Fantasy positions only (unless `position` is given). The name decides; `team` only
+    breaks near-ties, so a stale team (a traded player) can't swap in a teammate who
+    shares a name word. Among the rest, a player with stats this season wins; if that
+    still leaves several, the caller must narrow it with `position` or `team`.
     """
     season, _ = latest_week(conn)
     rows = conn.execute(
@@ -131,8 +132,7 @@ def resolve_player(
             FROM players p
             WHERE (p.search_name % :q OR :q <% p.search_name)
               AND (CAST(:pos AS text) IS NULL AND p.position = ANY(:skill) OR p.position = :pos)
-              AND (CAST(:team AS text) IS NULL OR p.team = :team)
-            ORDER BY sim DESC, active DESC
+            ORDER BY sim DESC, coalesce(p.team = CAST(:team AS text), false) DESC, active DESC
             LIMIT 10
             """
         ),
@@ -148,6 +148,8 @@ def resolve_player(
         raise AmbiguousPlayer(name, [])
     best = rows[0].sim
     top = [r for r in rows if r.sim >= best - 0.05]  # near-ties on the name
+    if team is not None and len(top) > 1 and any(r.team == team for r in top):
+        top = [r for r in top if r.team == team]
     if len(top) > 1 and any(r.active for r in top):
         top = [r for r in top if r.active]
     if len(top) != 1:

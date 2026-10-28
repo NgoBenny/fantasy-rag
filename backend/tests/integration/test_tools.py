@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
 
 from fantasy_rag.agent.tools import run_tool
-from fantasy_rag.analytics.queries import AmbiguousPlayer, weekly_rows
+from fantasy_rag.analytics.queries import AmbiguousPlayer, resolve_player, weekly_rows
 from fantasy_rag.db import get_readonly_engine
 
 pytestmark = pytest.mark.db
@@ -24,6 +24,31 @@ def test_names_resolve_by_fantasy_position_and_ambiguity_is_an_error(db: str) ->
             conn, "get_player_stats", {"player": {"name": "Mike Williams", "position": "TE"}}
         )
         assert narrowed["player"]["id"] == "00-4"
+        by_team = run_tool(
+            conn, "get_player_stats", {"player": {"name": "Mike Williams", "team": "NYJ"}}
+        )
+        assert by_team["player"]["id"] == "00-3"
+
+
+def test_a_wrong_team_never_swaps_in_another_player(db: str) -> None:
+    # A stale team hint (player traded) must not pick a teammate who shares a name word.
+    with get_readonly_engine(db).connect() as conn:
+        r = run_tool(conn, "get_player_stats", {"player": {"name": "Zero Guy", "team": "LV"}})
+        assert r["player"]["id"] == "00-6"
+        r = run_tool(
+            conn, "get_player_stats", {"player": {"name": "Justin Jefferson", "team": "WAS"}}
+        )
+        assert r["player"]["id"] == "00-1"
+
+
+def test_no_team_hint_never_picks_a_player_with_no_team(db: str) -> None:
+    # Omitted hint (None) must not "match" a player whose team is unknown (None).
+    with create_engine(db).connect() as conn, conn.begin() as tx:
+        conn.execute(text("UPDATE players SET team = NULL WHERE id = '00-3'"))
+        with pytest.raises(AmbiguousPlayer) as err:
+            resolve_player(conn, "Mike Williams")
+        assert {c.id for c in err.value.candidates} == {"00-3", "00-4"}
+        tx.rollback()
 
 
 def test_waivers_exclude_rostered_players(db: str) -> None:
