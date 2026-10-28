@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from sqlalchemy import Connection, text
 
 from fantasy_rag.agent.answer import Answer, problems
-from fantasy_rag.agent.llm import LLMClient
+from fantasy_rag.agent.llm import INVALID_ARGS, Cancelled, LLMClient
 from fantasy_rag.agent.prompts import ROUTER_SYSTEM, WRITER_SYSTEM
 from fantasy_rag.agent.tools import TOOLS, run_tool
 from fantasy_rag.analytics.queries import latest_week, league_roster, projection_week
@@ -146,10 +146,6 @@ class Progress:
     ok: bool | None = None
 
 
-class Cancelled(Exception):
-    """The client went away; no further model or tool call is started."""
-
-
 def _noop(_: Progress) -> None:
     return None
 
@@ -228,6 +224,8 @@ def route(
                 raise Cancelled
             call = ToolCall(f"r{len(calls) + 1}", b.name, dict(b.input))
             try:
+                if INVALID_ARGS in call.args:
+                    raise ValueError("tool arguments were not valid JSON; nothing was run")
                 call.result = run_tool(conn, b.name, call.args)
             except ValueError as e:  # bad input, unknown tool, ambiguous player, no data
                 call.error = str(e)

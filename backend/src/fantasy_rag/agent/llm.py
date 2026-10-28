@@ -26,6 +26,10 @@ WRITER_MAX_TOKENS = 3000
 T = TypeVar("T", bound=BaseModel)
 
 
+class Cancelled(Exception):
+    """The client went away; no further model or tool call is started."""
+
+
 class LLMUnavailable(RuntimeError):
     """No API key is configured, so no model call can be made."""
 
@@ -129,6 +133,8 @@ class AnthropicLLM:
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 USER_AGENT = "fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)"
 RETRY_WAITS = (5.0, 15.0)  # seconds before retrying a temporary upstream failure
+# A tool call whose arguments weren't JSON: the router fails it instead of running defaults.
+INVALID_ARGS = "__invalid_arguments__"
 JSON_ONLY = (
     "\n\nReply with only one JSON object (no prose, no code fences) that matches this"
     " JSON Schema:\n"
@@ -218,9 +224,13 @@ class OpenRouterLLM:
         self.usage: dict[str, list[int]] = {}
         self.unpriced = 0  # free calls cost 0 even when they fail, so none are unpriced
         self.sleep = time.sleep  # tests replace it
+        # Set by the chat worker: no request (first try or retry) starts after a disconnect.
+        self.cancelled: Callable[[], bool] = bool
 
     def _chat(self, model: str, messages: list[dict[str, Any]], **extra: Any) -> dict[str, Any]:
         for wait in (*RETRY_WAITS, None):
+            if self.cancelled():  # checked before every request, retries included
+                raise Cancelled
             try:
                 r = self.client.post(
                     OPENROUTER_URL,
@@ -235,9 +245,17 @@ class OpenRouterLLM:
             if r.status_code < 400 and not err and body.get("choices"):
                 break
             msg = err.get("message") if isinstance(err, dict) else err
-            # Free providers are often briefly overloaded; 4xx (rate limits, access) won't clear.
-            if wait is None or 400 <= r.status_code < 500:
-                raise LLMUnavailable(f"OpenRouter {r.status_code} ({model}): {msg or 'no choices'}")
+            # The error code can sit inside an HTTP 200 body; it decides, not the HTTP status.
+            code = err.get("code") if isinstance(err, dict) else None
+            # An error body without a code (seen live: "Upstream error ... overloaded") is upstream.
+            code = (
+                code if isinstance(code, int) else (r.status_code if r.status_code >= 400 else 502)
+            )
+            # Only upstream failures (5xx, or a reply with no choices) are temporary;
+            # 4xx (rate limits, access) won't clear by waiting.
+            temporary = code >= 500 or (code < 400 and not err)
+            if wait is None or not temporary:
+                raise LLMUnavailable(f"OpenRouter {code} ({model}): {msg or 'no choices'}")
             self.sleep(wait)
         u = body.get("usage") or {}
         tally = self.usage.setdefault(model, [0, 0])
@@ -272,16 +290,19 @@ class OpenRouterLLM:
         if msg.get("content"):
             content.append({"type": "text", "text": msg["content"]})
         for i, c in enumerate(msg.get("tool_calls") or []):
+            raw = c["function"].get("arguments") or "{}"
             try:
-                args = json.loads(c["function"].get("arguments") or "{}")
+                args = json.loads(raw)
             except json.JSONDecodeError:
-                args = {}  # the tool's Pydantic check then reports the bad input to the model
+                args = None
+            if not isinstance(args, dict):  # never run a tool on defaults it wasn't given
+                args = {INVALID_ARGS: raw}
             content.append(
                 {
                     "type": "tool_use",
                     "id": c.get("id") or f"call_{i}",
                     "name": c["function"]["name"],
-                    "input": args if isinstance(args, dict) else {},
+                    "input": args,
                 }
             )
         uses = any(b["type"] == "tool_use" for b in content)

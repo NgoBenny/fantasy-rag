@@ -7,7 +7,15 @@ import httpx
 import pytest
 from pydantic import BaseModel
 
-from fantasy_rag.agent.llm import LLMUnavailable, OpenRouterLLM, price, to_openai
+from fantasy_rag.agent.llm import (
+    INVALID_ARGS,
+    Cancelled,
+    LLMUnavailable,
+    OpenRouterLLM,
+    price,
+    to_openai,
+)
+from fantasy_rag.agent.router import route
 
 FREE = "vendor/model:free"
 
@@ -66,7 +74,10 @@ def test_tool_turn_returns_tool_use_blocks() -> None:
     assert msg.stop_reason == "tool_use"
     a, b = msg.content
     assert (a.type, a.id, a.name, a.input) == ("tool_use", "c9", "get_trending", {"limit": 2})
-    assert (b.id, b.input) == ("call_1", {})  # unparseable arguments: the tool check reports it
+    assert (b.id, b.input) == (
+        "call_1",
+        {INVALID_ARGS: "not json"},
+    )  # unparseable arguments: the tool check reports it
     assert seen[0]["tools"][0]["function"]["parameters"] == {"type": "object"}
     assert llm.usage == {FREE: [7, 3]} and llm.cost_usd() == 0.0 and price(FREE) == (0.0, 0.0)
 
@@ -115,3 +126,59 @@ def test_upstream_overload_is_retried_then_reported() -> None:
 def test_only_free_models_are_allowed() -> None:
     with pytest.raises(ValueError, match="only free"):
         OpenRouterLLM("k", "vendor/paid-model", FREE)
+
+
+def test_rate_limit_inside_a_200_body_is_not_retried() -> None:
+    sent: list[dict[str, Any]] = []
+    limited = httpx.Response(200, json={"error": {"code": 429, "message": "Rate limit exceeded"}})
+    llm = client(limited, ok({"content": "unused"}), seen=sent)
+    with pytest.raises(LLMUnavailable, match="429"):
+        llm.tool_turn("s", [{"role": "user", "content": "q"}], [])
+    assert len(sent) == 1
+
+
+def test_disconnect_during_a_retry_wait_stops_further_requests() -> None:
+    sent: list[dict[str, Any]] = []
+    overloaded = httpx.Response(200, json={"error": {"code": 502, "message": "overloaded"}})
+    llm = client(overloaded, ok({"content": "unused"}), seen=sent)
+    gone: list[bool] = []
+    llm.cancelled = lambda: bool(gone)
+    llm.sleep = lambda s: gone.append(True)  # the client disconnects while we wait
+    with pytest.raises(Cancelled):
+        llm.tool_turn("s", [{"role": "user", "content": "q"}], [])
+    assert len(sent) == 1
+
+
+def test_disconnect_before_the_json_repair_retry_stops_it() -> None:
+    sent: list[dict[str, Any]] = []
+    llm = client(ok({"content": "not json"}), ok({"content": '{"answer": "y", "n": 1}'}), seen=sent)
+    llm.cancelled = lambda: len(sent) >= 1
+    with pytest.raises(Cancelled):
+        llm.structured("s", "q", Ans)
+    assert len(sent) == 1
+
+
+@pytest.mark.parametrize("raw", ["not json", "[1, 2]"])
+def test_malformed_tool_arguments_fail_the_call_instead_of_running_defaults(raw: str) -> None:
+    calls = [{"id": "c1", "function": {"name": "get_trending", "arguments": raw}}]
+    msg = client(ok({"content": None, "tool_calls": calls})).tool_turn(
+        "s", [{"role": "user", "content": "q"}], []
+    )
+    assert msg.content[0].input == {INVALID_ARGS: raw}
+    done = client(ok({"content": "no tools"}))
+    got, _ = route(None, Replay(msg, done), "q", "ctx")  # type: ignore[arg-type]
+    assert got[0].result is None and "not valid JSON" in (got[0].error or "")
+
+
+class Replay:
+    """First a canned tool turn, then whatever `rest` answers."""
+
+    def __init__(self, first: Any, rest: OpenRouterLLM) -> None:
+        self.first, self.rest = first, rest
+
+    def tool_turn(self, system: str, messages: Any, tools: Any) -> Any:
+        first, self.first = self.first, None
+        return first or self.rest.tool_turn(system, messages, tools)
+
+    def structured(self, system: str, content: str, schema: Any) -> Any:
+        raise NotImplementedError
