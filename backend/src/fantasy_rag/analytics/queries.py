@@ -132,7 +132,7 @@ def resolve_player(
             FROM players p
             WHERE (p.search_name % :q OR :q <% p.search_name)
               AND (CAST(:pos AS text) IS NULL AND p.position = ANY(:skill) OR p.position = :pos)
-            ORDER BY sim DESC, p.team IS NOT DISTINCT FROM CAST(:team AS text) DESC, active DESC
+            ORDER BY sim DESC, coalesce(p.team = CAST(:team AS text), false) DESC, active DESC
             LIMIT 10
             """
         ),
@@ -148,7 +148,7 @@ def resolve_player(
         raise AmbiguousPlayer(name, [])
     best = rows[0].sim
     top = [r for r in rows if r.sim >= best - 0.05]  # near-ties on the name
-    if len(top) > 1 and any(r.team == team for r in top):
+    if team is not None and len(top) > 1 and any(r.team == team for r in top):
         top = [r for r in top if r.team == team]
     if len(top) > 1 and any(r.active for r in top):
         top = [r for r in top if r.active]
