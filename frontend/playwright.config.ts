@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
-// Live, unpaid: the real API (dev Postgres with ingested data) on its own port with the
-// Anthropic key blanked, so no test here can spend money; Next reaches it through
+// Live, unpaid: the real API (dev Postgres with ingested data) on its own port with both
+// model keys blanked, so no test here can call a model; Next reaches it through
 // e2e/proxy.mjs (8011) so tests can simulate an outage. Nothing is reused: stop your own
 // `next dev` first (two dev servers in one folder conflict).
 export default defineConfig({
@@ -17,7 +17,8 @@ export default defineConfig({
       url: "http://localhost:8012/api/health",
       reuseExistingServer: false,
       timeout: 120_000,
-      env: { ANTHROPIC_API_KEY: "" },
+      // Both providers blanked: offline tests can never reach a paid or free model.
+      env: { ANTHROPIC_API_KEY: "", OPENROUTER_API_KEY: "", LLM_PROVIDER: "anthropic" },
     },
     {
       command: "node e2e/proxy.mjs",

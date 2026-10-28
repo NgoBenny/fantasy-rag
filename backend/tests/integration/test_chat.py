@@ -299,3 +299,29 @@ def test_a_call_with_unknown_usage_leaves_the_cost_unknown_not_zero(engines: Any
     assert row.status == "error" and row.tools_called == ["get_player_stats"]
     assert row.usage == {"tokens": {"claude-haiku-5-5": [2000, 200]}, "unpriced_calls": 1}
     assert row.cost_usd is None and dict(got)["done"]["cost_usd"] is None
+
+
+def test_disconnect_stops_openrouter_retries_in_the_chat_worker(
+    engines: tuple[Engine, Engine, Engine],
+) -> None:
+    """The worker hands its cancel flag to the client, so a retry wait ends the request."""
+    from fantasy_rag.agent.llm import OpenRouterLLM
+    from fantasy_rag.api.chat import ChatRequest, run_chat
+
+    sent: list[httpx.Request] = []
+
+    def overloaded(request: httpx.Request) -> httpx.Response:
+        sent.append(request)
+        return httpx.Response(200, json={"error": {"code": 502, "message": "overloaded"}})
+
+    llm = OpenRouterLLM(
+        "k", "v/m:free", "v/m:free", httpx.Client(transport=httpx.MockTransport(overloaded))
+    )
+    gone: list[bool] = []
+    llm.sleep = lambda s: gone.append(True)  # the browser disconnects during the first wait
+    tools_e, _, _ = engines
+    out: list[tuple[str, dict[str, Any]]] = []
+    run_chat(ChatServices(tools_e, None, lambda: llm, ""), ChatRequest(question="q"),
+             lambda e, d: out.append((e, d)), lambda: bool(gone))  # fmt: skip
+    assert len(sent) == 1
+    assert [e for e, _ in out] == ["progress", "done"]  # cancelled: no answer, no error

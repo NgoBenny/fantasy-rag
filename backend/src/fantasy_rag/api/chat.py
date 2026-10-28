@@ -29,11 +29,10 @@ from sqlalchemy import Engine, text
 from sqlalchemy.exc import OperationalError
 
 from fantasy_rag.agent.budget import Budget, BudgetExceeded
-from fantasy_rag.agent.llm import LLMClient, LLMUnavailable, price
+from fantasy_rag.agent.llm import Cancelled, LLMClient, LLMUnavailable, OpenRouterLLM, price
 from fantasy_rag.agent.router import (
     TOOL_LABELS,
     WITHHELD_MESSAGE,
-    Cancelled,
     Progress,
     ToolCall,
     Turn,
@@ -212,6 +211,8 @@ def run_chat(
             leagues = my_leagues(conn, svc.username)
             season, week = projection_week(conn)
             llm = svc.llm()
+            if isinstance(llm, OpenRouterLLM):  # its retries wait; stop them on disconnect
+                llm.cancelled = cancelled
             turn = ask(conn, llm, req.question, leagues, req.league_id, progress, cancelled,
                        calls)  # fmt: skip
         answer_ms = ms()
