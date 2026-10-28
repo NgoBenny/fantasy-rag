@@ -23,5 +23,5 @@ class Settings(BaseSettings):
     anthropic_api_key: SecretStr = SecretStr("")
     openrouter_api_key: SecretStr = SecretStr("")
     openrouter_router_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
-    openrouter_writer_model: str = "thinkingmachines/inkling:free"
+    openrouter_writer_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
     llm_budget_usd: float | None = None  # per-process spending cap for chat; unset = none

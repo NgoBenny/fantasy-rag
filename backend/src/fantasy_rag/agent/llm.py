@@ -4,6 +4,7 @@ Two providers: the Anthropic API (paid) and OpenRouter's free models (`LLM_PROVI
 """
 
 import json
+import time
 from collections.abc import Callable
 from typing import Any, Protocol, TypeVar
 
@@ -127,6 +128,7 @@ class AnthropicLLM:
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 USER_AGENT = "fantasy-rag/0.1 (+https://github.com/NgoBenny/fantasy-rag)"
+RETRY_WAITS = (5.0, 15.0)  # seconds before retrying a temporary upstream failure
 JSON_ONLY = (
     "\n\nReply with only one JSON object (no prose, no code fences) that matches this"
     " JSON Schema:\n"
@@ -215,22 +217,28 @@ class OpenRouterLLM:
         }
         self.usage: dict[str, list[int]] = {}
         self.unpriced = 0  # free calls cost 0 even when they fail, so none are unpriced
+        self.sleep = time.sleep  # tests replace it
 
     def _chat(self, model: str, messages: list[dict[str, Any]], **extra: Any) -> dict[str, Any]:
-        try:
-            r = self.client.post(
-                OPENROUTER_URL,
-                headers=self.headers,
-                json={"model": model, "messages": messages, **extra},
-            )
-            body: dict[str, Any] = r.json() if r.content else {}
-        except (httpx.HTTPError, ValueError) as e:
-            raise LLMUnavailable(f"OpenRouter request failed: {type(e).__name__}") from e
-        # OpenRouter also reports upstream failures as a 200 with an "error" body.
-        err = body.get("error")
-        if r.status_code >= 400 or err or not body.get("choices"):
+        for wait in (*RETRY_WAITS, None):
+            try:
+                r = self.client.post(
+                    OPENROUTER_URL,
+                    headers=self.headers,
+                    json={"model": model, "messages": messages, **extra},
+                )
+                body: dict[str, Any] = r.json() if r.content else {}
+            except (httpx.HTTPError, ValueError) as e:
+                raise LLMUnavailable(f"OpenRouter request failed: {type(e).__name__}") from e
+            # OpenRouter also reports upstream failures as a 200 with an "error" body.
+            err = body.get("error")
+            if r.status_code < 400 and not err and body.get("choices"):
+                break
             msg = err.get("message") if isinstance(err, dict) else err
-            raise LLMUnavailable(f"OpenRouter {r.status_code} ({model}): {msg or 'no choices'}")
+            # Free providers are often briefly overloaded; 4xx (rate limits, access) won't clear.
+            if wait is None or 400 <= r.status_code < 500:
+                raise LLMUnavailable(f"OpenRouter {r.status_code} ({model}): {msg or 'no choices'}")
+            self.sleep(wait)
         u = body.get("usage") or {}
         tally = self.usage.setdefault(model, [0, 0])
         tally[0] += u.get("prompt_tokens", 0)

@@ -20,9 +20,9 @@ def client(*replies: httpx.Response, seen: list[dict[str, Any]] | None = None) -
             seen.append(json.loads(request.content))
         return queue.pop(0)
 
-    return OpenRouterLLM(
-        "test-key", FREE, FREE, httpx.Client(transport=httpx.MockTransport(handle))
-    )
+    llm = OpenRouterLLM("test-key", FREE, FREE, httpx.Client(transport=httpx.MockTransport(handle)))
+    llm.sleep = lambda s: None
+    return llm
 
 
 def ok(message: dict[str, Any]) -> httpx.Response:
@@ -93,12 +93,23 @@ def test_structured_strips_wrapping_and_retries_once() -> None:
 
 @pytest.mark.parametrize("reply", [
     httpx.Response(429, json={"error": {"message": "Rate limit exceeded: free-models-per-day"}}),
-    httpx.Response(200, json={"error": {"message": "Provider returned error", "code": 502}}),
-    httpx.Response(200, json={"choices": []}),
+    httpx.Response(403, json={"error": {"message": "only available on agentic harnesses"}}),
 ])  # fmt: skip
-def test_rate_limits_and_upstream_errors_are_unavailable(reply: httpx.Response) -> None:
+def test_client_errors_are_unavailable_without_retry(reply: httpx.Response) -> None:
     with pytest.raises(LLMUnavailable):
         client(reply).tool_turn("sys", [{"role": "user", "content": "q"}], [])
+
+
+def test_upstream_overload_is_retried_then_reported() -> None:
+    overloaded = httpx.Response(200, json={"error": {"message": "Service temporarily overloaded"}})
+    q = [{"role": "user", "content": "q"}]
+    assert (
+        client(overloaded, httpx.Response(502), ok({"content": "hi"})).tool_turn("s", q, []).content
+    )
+    with pytest.raises(LLMUnavailable, match="overloaded"):
+        client(
+            httpx.Response(502), httpx.Response(200, json={"choices": []}), overloaded
+        ).tool_turn("s", q, [])
 
 
 def test_only_free_models_are_allowed() -> None:
