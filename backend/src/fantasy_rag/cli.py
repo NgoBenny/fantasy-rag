@@ -214,14 +214,14 @@ def _tool(name: str, raw_args: str) -> None:
 def _record_demo(question: str, cap: float | None) -> None:
     """Paid: one live answer under a hard cap; saved only if it passed every check."""
     from fantasy_rag.agent.budget import Budget
-    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.agent.llm import make_llm
     from fantasy_rag.db import get_readonly_engine
     from fantasy_rag.demo_record import record_question, save_recorded
 
     if cap is None:
         raise SystemExit("--record-question spends money: pass --budget-usd")
     budget = Budget(cap)
-    llm = AnthropicLLM(budget=budget)
+    llm = make_llm(budget)
     try:
         with get_readonly_engine().connect() as conn:
             chat = record_question(conn, llm, question)
@@ -236,12 +236,12 @@ def _record_demo(question: str, cap: float | None) -> None:
 def _ask(question: str, league_id: int | None) -> None:
     import json
 
-    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.agent.llm import make_llm
     from fantasy_rag.agent.router import ask, my_leagues
     from fantasy_rag.config import Settings
     from fantasy_rag.db import get_readonly_engine
 
-    llm = AnthropicLLM()
+    llm = make_llm()
     with get_readonly_engine().connect() as conn:
         turn = ask(conn, llm, question, my_leagues(conn, Settings().sleeper_username), league_id)
     print(turn.answer.answer)
@@ -259,7 +259,7 @@ def _eval_answers(only: str | None, rescore_path: str | None) -> None:
     from pathlib import Path
 
     from fantasy_rag.agent.evaluate import rescore, run_golden
-    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.agent.llm import make_llm
     from fantasy_rag.config import REPO_ROOT, Settings
     from fantasy_rag.db import get_readonly_engine
 
@@ -269,7 +269,7 @@ def _eval_answers(only: str | None, rescore_path: str | None) -> None:
             report = rescore(conn, saved, Settings().sleeper_username)
         else:
             ids = set(only.split(",")) if only else None
-            report = run_golden(conn, AnthropicLLM(), Settings().sleeper_username, ids)
+            report = run_golden(conn, make_llm(), Settings().sleeper_username, ids)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     kind = "rescored" if rescore_path else "answers"
     path = REPO_ROOT / "data" / "logs" / f"eval_{kind}_{stamp}.json"
@@ -285,11 +285,11 @@ def _eval_grounding(report_path: str, only: str | None) -> None:
     from pathlib import Path
 
     from fantasy_rag.agent.grounding import audit_saved
-    from fantasy_rag.agent.llm import AnthropicLLM
+    from fantasy_rag.agent.llm import make_llm
     from fantasy_rag.config import REPO_ROOT
 
     saved = json.loads(Path(report_path).read_text(encoding="utf-8-sig"))
-    llm = AnthropicLLM()
+    llm = make_llm()
     ids = {s.strip() for s in only.split(",")} if only else None
     report = audit_saved(saved, llm, ids)
     report["source_report"] = str(Path(report_path).resolve())

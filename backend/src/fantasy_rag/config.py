@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Literal
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -17,5 +18,10 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://fantasy:fantasy@127.0.0.1:5432/fantasy"
     demo_mode: bool = False
     sleeper_username: str = ""
+    # Which provider answers chat: the paid Anthropic API or OpenRouter's free models.
+    llm_provider: Literal["anthropic", "openrouter"] = "anthropic"
     anthropic_api_key: SecretStr = SecretStr("")
+    openrouter_api_key: SecretStr = SecretStr("")
+    openrouter_router_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
+    openrouter_writer_model: str = "thinkingmachines/inkling:free"
     llm_budget_usd: float | None = None  # per-process spending cap for chat; unset = none

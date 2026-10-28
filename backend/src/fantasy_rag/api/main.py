@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import Connection, Engine, text
 
 from fantasy_rag.agent import tools
-from fantasy_rag.agent.llm import AnthropicLLM, LLMClient
+from fantasy_rag.agent.llm import LLMClient, make_llm
 from fantasy_rag.analytics import queries as q
 from fantasy_rag.api import demo
 from fantasy_rag.api.chat import ChatRequest, ChatServices, process_budget, stream_chat
@@ -328,7 +328,7 @@ def chat_samples() -> list[dict[str, Any]]:
 
 
 def _llm() -> LLMClient:
-    return AnthropicLLM(budget=process_budget(Settings().llm_budget_usd))
+    return make_llm(process_budget(Settings().llm_budget_usd))
 
 
 def chat_services() -> ChatServices | None:

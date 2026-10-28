@@ -22,7 +22,7 @@ from typing import Any
 import yaml
 from sqlalchemy import Connection
 
-from fantasy_rag.agent.llm import AnthropicLLM
+from fantasy_rag.agent.llm import ChatLLM, LLMUnavailable
 from fantasy_rag.agent.router import MyLeague, ToolCall, Turn, ask, my_leagues
 from fantasy_rag.agent.tools import TOOLS, run_tool
 from fantasy_rag.config import REPO_ROOT
@@ -203,11 +203,11 @@ def _rate(rows: list[dict[str, Any]], key: str) -> float | None:
 
 
 def run_golden(
-    conn: Connection, llm: AnthropicLLM, username: str, only: set[str] | None = None
+    conn: Connection, llm: ChatLLM, username: str, only: set[str] | None = None
 ) -> dict[str, Any]:
     leagues = my_leagues(conn, username)
     mine = {lg.league_id: lg.roster_id for lg in leagues}
-    rows = []
+    rows, stopped = [], None
     for q in golden_questions():
         if only and q["id"] not in only and q["set"] not in only:
             continue
@@ -215,9 +215,14 @@ def run_golden(
         if "golden_call" in q:
             golden = _identity(run_tool(conn, *q["golden_call"]))  # direct call, no LLM
         scoped, selected = _context(q, leagues)
-        turn = ask(conn, llm, q["question"], scoped, selected)
+        try:
+            turn = ask(conn, llm, q["question"], scoped, selected)
+        except LLMUnavailable as e:  # e.g. a free model's daily limit: keep what was graded
+            stopped = f"{q['id']}: {e}"
+            break
         rows.append(grade(q, turn, golden, mine))
-    summary = _summary(rows) | {"tokens": llm.usage, "cost_usd": round(llm.cost_usd(), 4)}
+    summary = _summary(rows) | {"tokens": llm.usage, "cost_usd": round(llm.cost_usd(), 4),
+                                "models": sorted(llm.usage), "stopped": stopped}  # fmt: skip
     return {"summary": summary, "rows": rows}
 
 
