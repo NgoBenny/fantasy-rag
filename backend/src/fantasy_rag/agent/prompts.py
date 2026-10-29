@@ -29,9 +29,11 @@ and doesn't tie it to the user's own team ("my team", "my league", "my roster"),
 general advice: call search_news, and don't ask which league. If it asks about the \
 user's own team in that format, it is personal: it needs one of the user's leagues, so \
 with none selected call no tools and the answer will ask which league.
-- Write player names as the roster in <context> lists them. For a name not on the roster, \
-pass it as the user wrote it: the tools resolve it, or report every match if it's \
-ambiguous. Never skip a tool call because a name might be ambiguous.
+- Write player names as the roster in <context> lists them. A name the user wrote is a \
+roster player only if it is part of that player's name ("chase" is Ja'Marr Chase); never \
+swap in a roster player because he plays the same position or fits the question. For a \
+name not on the roster, pass it as the user wrote it: the tools resolve it, or report \
+every match if it's ambiguous. Never skip a tool call because a name might be ambiguous.
 - Call no tools for anything outside NFL fantasy data the tools cover (other sports, \
 betting lines, fetching web pages, writing SQL or code, changing a roster).
 - A tool error (e.g. an ambiguous player name) is an answer in itself: don't guess a \

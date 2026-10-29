@@ -7,6 +7,7 @@ citations and numbers that no tool result contains are reported, never hidden.
 """
 
 import json
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -20,7 +21,14 @@ from fantasy_rag.agent.answer import Answer, problems
 from fantasy_rag.agent.llm import INVALID_ARGS, Cancelled, LLMClient
 from fantasy_rag.agent.prompts import ROUTER_SYSTEM, WRITER_SYSTEM
 from fantasy_rag.agent.tools import TOOLS, run_tool
-from fantasy_rag.analytics.queries import latest_week, league_roster, projection_week
+from fantasy_rag.analytics.queries import (
+    AmbiguousPlayer,
+    latest_week,
+    league_roster,
+    projection_week,
+    resolve_player,
+)
+from fantasy_rag.analytics.queries import _normalize as normalize_name
 
 MAX_ROUNDS = 4
 
@@ -196,6 +204,83 @@ def tool_progress(call: ToolCall) -> Progress:
     return Progress("tool", f"Looked up {label}{who}{rules}", call.name, True)
 
 
+# Surnames of active fantasy players that are also everyday question words ("would love
+# to", "is he a lock"). shortcut: a hand list from the 2026 surnames; extend when a new
+# player's surname reads as an ordinary word.
+COMMON_WORDS = frozenset({
+    "all", "bass", "black", "bond", "branch", "brooks", "brown", "cook", "cooks", "dart", "downs",
+    "fields", "flowers", "folk", "gay", "golden", "gray", "hall", "helm", "hill", "homer", "horn",
+    "knight", "lamb", "lane", "lemon", "likely", "little", "lock", "long", "love", "marks",
+    "muse", "price", "reed", "rice", "rivers", "rush", "sample", "sharp", "smack", "steele",
+    "strand", "strange", "strong", "swift", "white", "woods", "worthy", "young",
+})  # fmt: skip
+
+
+def _named_players(args: dict[str, Any]) -> list[dict[str, Any]]:
+    many = args.get("players")
+    found: list[Any] = [args.get("player"), *(many if isinstance(many, list) else [])]
+    # The tools accept a bare name too (PlayerName._name_only), so check both forms.
+    found = [{"name": p} if isinstance(p, str) else p for p in found]
+    return [p for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
+
+
+def _question_words(question: str) -> set[str]:
+    """Words normalized like players.search_name, possessives dropped ("Jefferson's")."""
+    return set(normalize_name(re.sub(r"['\u2019]s\b", "", question)).split())
+
+
+def _surname(name: str) -> str:
+    parts = normalize_name(name).split()  # suffixes (Jr., III) are already gone
+    return parts[-1] if parts else ""
+
+
+def swapped_player(
+    conn: Connection,
+    question: str,
+    args: dict[str, Any],
+    covered: set[str] | None = None,
+) -> str | None:
+    """A looked-up player the question never names, while it does name another player of
+    his position by surname ("is loop safe?" answered with the roster's other kicker).
+    `covered`: surnames of players other calls already resolved successfully; a named
+    player covered there (or in this same call) makes the roster player a fair comparison.
+
+    Only a same-position, exact-surname match counts, and surnames that are everyday
+    words are skipped, so ordinary questions don't trigger it.
+    """
+    words = _question_words(question)
+    named = _named_players(args)
+    in_call = {_surname(p["name"]) for p in named}  # all resolve, or the call fails
+    surnames = words - COMMON_WORDS - in_call - (covered or set())
+    if not surnames or not named:
+        return None
+    season, _ = latest_week(conn)
+    for p in named:
+        if _surname(p["name"]) in words:
+            continue  # the question names him (a shared first name doesn't count)
+        try:
+            ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
+        except (AmbiguousPlayer, ValueError):
+            continue
+        other = conn.execute(
+            text(
+                "SELECT p.full_name, p.position, p.team FROM players p"
+                " WHERE p.position = :pos AND p.id <> :id"
+                " AND split_part(p.search_name, ' ', -1) = ANY(:words)"
+                " AND EXISTS (SELECT 1 FROM player_week_stats s"
+                "             WHERE s.player_id = p.id AND s.season = :season)"
+                " ORDER BY p.full_name LIMIT 1"
+            ),
+            {"pos": ref.position, "id": ref.id, "words": sorted(surnames), "season": season},
+        ).first()
+        if other is not None:
+            return (
+                f"The question names {other.full_name} ({other.position}, {other.team}), not"
+                f" {ref.name}; nothing was run. Call this tool again for {other.full_name}."
+            )
+    return None
+
+
 def route(
     conn: Connection,
     llm: LLMClient,
@@ -218,27 +303,36 @@ def route(
         uses = [b for b in resp.content if b.type == "tool_use"]
         if not uses or resp.stop_reason != "tool_use":
             return calls, False
-        results: list[ToolResultBlockParam] = []
-        for b in uses:
+        done: dict[str, ToolResultBlockParam] = {}
+
+        def covered() -> set[str]:  # only lookups that succeeded count
+            return {_surname(n) for c in calls if c.result for n in _resolved_names(c.result)}
+
+        # A call that looks like a swap waits until this round's other calls ran: one of
+        # them may resolve the named player, which makes it a fair comparison.
+        first = [b for b in uses if INVALID_ARGS in b.input
+                 or not swapped_player(conn, question, dict(b.input), covered())]  # fmt: skip
+        for b in first + [b for b in uses if b not in first]:
             if cancelled():
                 raise Cancelled
             call = ToolCall(f"r{len(calls) + 1}", b.name, dict(b.input))
             try:
                 if INVALID_ARGS in call.args:
                     raise ValueError("tool arguments were not valid JSON; nothing was run")
+                if swap := swapped_player(conn, question, call.args, covered()):
+                    raise ValueError(swap)
                 call.result = run_tool(conn, b.name, call.args)
             except ValueError as e:  # bad input, unknown tool, ambiguous player, no data
                 call.error = str(e)
             calls.append(call)
             on_progress(tool_progress(call))
-            results.append(
-                {
-                    "type": "tool_result",
-                    "tool_use_id": b.id,
-                    "content": call.error or _as_data(call.result),
-                    "is_error": call.error is not None,
-                }
-            )
+            done[b.id] = {
+                "type": "tool_result",
+                "tool_use_id": b.id,
+                "content": call.error or _as_data(call.result),
+                "is_error": call.error is not None,
+            }
+        results = [done[b.id] for b in uses]
         messages += [
             {"role": "assistant", "content": resp.content},
             {"role": "user", "content": results},

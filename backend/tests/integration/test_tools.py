@@ -1,6 +1,9 @@
 """Agent tools on a synthetic database: ID-safe names, read-only role, waivers, validation."""
 
+from typing import Any
+
 import pytest
+from anthropic.types import Message
 from pydantic import ValidationError
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
@@ -134,3 +137,103 @@ def test_bye_and_ruled_out_players_project_zero_and_never_start(db: str) -> None
         assert free_agent["projected_points"] == 0.0  # healthy but on bye
         lineup = run_tool(conn, "optimize_lineup", {"league_id": 1, "roster_id": 1})
         assert lineup["recommended"][0]["player"]["name"] == "Justin Jefferson"  # Q still starts
+
+
+def test_router_refuses_a_player_the_question_does_not_name(db: str) -> None:
+    from fantasy_rag.agent.router import swapped_player
+
+    swap = {"player": {"name": "Free Agent"}}  # a roster WR, while the question names another
+    with get_readonly_engine(db).connect() as conn:
+        msg = swapped_player(conn, "is jefferson actually a safe start?", swap)
+        assert msg is not None and "Justin Jefferson (WR, MIN)" in msg
+        # The tools also take a bare name: it must not skip the check.
+        assert swapped_player(conn, "is jefferson a safe start?", {"player": "Free Agent"})
+        assert swapped_player(conn, "is jefferson a safe start?", {"players": ["Free Agent"]})
+        for q in ("How is Jefferson's outlook?", "How is Jefferson’s outlook?"):
+            assert swapped_player(conn, q, swap), q  # possessives name him too
+        assert swapped_player(conn, "is my receiver a safe start?", swap) is None
+        assert swapped_player(conn, "is jefferson better than agent?", swap) is None
+        # The named player already resolved by another call: a fair comparison.
+        assert (
+            swapped_player(conn, "start jefferson over my guy?", swap, {"justin", "jefferson"})
+            is None
+        )
+        assert (
+            swapped_player(
+                conn, "start jefferson over my tight end?", {"player": {"name": "Zero Guy"}}
+            )
+            is None
+        )  # different position: never a swap
+
+
+class _Router:
+    """Replays tool-use turns, then stops."""
+
+    def __init__(self, *turns: list[tuple[str, dict[str, Any]]]) -> None:
+        self.turns = list(turns)
+
+    def tool_turn(self, system: str, messages: Any, tools: Any) -> Message:
+        uses = self.turns.pop(0) if self.turns else []
+        content = [
+            {"type": "tool_use", "id": f"t{i}", "name": n, "input": a}
+            for i, (n, a) in enumerate(uses)
+        ] or [{"type": "text", "text": "done"}]
+        return Message.model_validate(
+            {
+                "id": "m",
+                "type": "message",
+                "role": "assistant",
+                "model": "fake",
+                "content": content,
+                "stop_reason": "tool_use" if uses else "end_turn",
+                "stop_sequence": None,
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            }
+        )
+
+    def structured(self, system: str, content: str, schema: Any) -> Any:
+        raise NotImplementedError
+
+
+def test_only_a_successful_lookup_covers_the_named_player(db: str) -> None:
+    from fantasy_rag.agent.router import route
+
+    q = "start jefferson over my guy?"
+    stats = "get_player_stats"
+    with get_readonly_engine(db).connect() as conn:
+        # The named player's lookup fails (bad week), so the roster player isn't a comparison.
+        bad = (stats, {"player": {"name": "Justin Jefferson"}, "start_week": 99})
+        calls, _ = route(conn, _Router([bad, (stats, {"player": "Free Agent"})]), q, "")
+        assert calls[0].error and "names Justin Jefferson" in (calls[1].error or "")
+        # Listed after the named player in the same round, or in an earlier round: allowed.
+        ok = (stats, {"player": {"name": "Justin Jefferson"}})
+        calls, _ = route(conn, _Router([(stats, {"player": "Free Agent"}), ok]), q, "")
+        assert all(c.result for c in calls), [c.error for c in calls]
+        calls, _ = route(conn, _Router([ok], [(stats, {"player": "Free Agent"})]), q, "")
+        assert all(c.result for c in calls), [c.error for c in calls]
+
+
+def test_a_shared_first_name_does_not_hide_a_swap(db: str) -> None:
+    from fantasy_rag.agent.router import swapped_player
+
+    with create_engine(db).connect() as conn, conn.begin() as tx:
+        run = conn.execute(text("SELECT min(id) FROM sync_runs")).scalar()
+        conn.execute(  # another active receiver who shares Justin Jefferson's first name
+            text(
+                "INSERT INTO players (id, full_name, search_name, position, team, sync_run_id)"
+                " VALUES ('00-99', 'Justin Agent', 'justin agent', 'WR', 'NE', :r)"
+            ),
+            {"r": run},
+        )
+        conn.execute(
+            text(
+                "INSERT INTO player_week_stats (season, week, season_type, player_id, opponent,"
+                " stats, sync_run_id) VALUES (2026, 1, 'REG', '00-99', 'DAL', '{}', :r)"
+            ),
+            {"r": run},
+        )
+        other = {"player": {"name": "Justin Agent"}}
+        msg = swapped_player(conn, "Is Justin Jefferson a safe start?", other)
+        assert msg is not None and "Justin Jefferson" in msg  # "Justin" doesn't name Agent
+        assert swapped_player(conn, "Is Justin Agent a safe start?", other) is None
+        tx.rollback()
