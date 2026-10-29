@@ -2,19 +2,21 @@
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import pytest
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import Engine, create_engine, text
+from sqlalchemy import Connection, Engine, create_engine, text
+from sqlalchemy.exc import DBAPIError
 
 from fantasy_rag.agent import tools
 from fantasy_rag.index.embedder import DIM
 from fantasy_rag.ingest import news
 from fantasy_rag.ingest.news_job import run_news
+from fantasy_rag.retrieval import snapshot
 from fantasy_rag.retrieval.hybrid import search
 
 pytestmark = pytest.mark.db
@@ -101,16 +103,41 @@ def test_keyword_vector_and_fusion(engine: Engine) -> None:
         assert len(lions) == 1
 
 
-def test_through_document_hides_later_stories(engine: Engine) -> None:
+def test_snapshot_ignores_later_stories_and_edits(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
     emb = FakeEmbedder()
+    monkeypatch.setattr(tools, "news_embedder", FakeEmbedder)
+    henry = "https://fixtures.invalid/news/2"
+    with engine.begin() as c:
+        first = c.execute(text("SELECT id FROM documents WHERE url = :u"), {"u": henry}).scalar()
+        snapshot.capture(c, "t", first)  # stories 1-2 only (IDs follow insertion order)
+        with pytest.raises(ValueError, match="never rebuilt"):
+            snapshot.capture(c, "t", first)
+
+    def graded(c: Connection) -> tuple[list[str], list[str]]:
+        found = search(c, emb, "Derrick Henry rushing", limit=10, snapshot="t")
+        monkeypatch.setattr(tools, "NEWS_AS_OF", (datetime(2026, 10, 22, tzinfo=UTC), "t"))
+        via_tool = tools.run_tool(c, "search_news", {"query": "Derrick Henry", "days": 2})
+        return [h.url for h in found], [x["url"] for x in via_tool["results"]]
+
     with engine.connect() as c:
-        first, body = c.execute(
-            text("SELECT document_id, text FROM chunks ORDER BY document_id LIMIT 1")
-        ).one()
-        for mode in ("vector", "keyword", "hybrid"):
-            found = search(c, emb, body, limit=10, mode=mode, through_document=first)
-            assert found and {h.document_id for h in found} == {first}
-        assert len({h.document_id for h in search(c, emb, body, limit=10)}) > 1
+        before = graded(c)
+    assert henry in before[0] and henry in before[1]
+    assert {u.rsplit("/", 1)[1] for u in before[0]} <= {"1", "2"}  # later stories invisible
+    with engine.begin() as c:  # a feed revises the story: new date (outside the window), text
+        c.execute(text("UPDATE documents SET published_at = '2020-01-01' WHERE url = :u"),
+                  {"u": henry})  # fmt: skip
+        c.execute(text("UPDATE chunks SET published_at = '2020-01-01', text = 'unrelated'"
+                       " WHERE document_id = :d"), {"d": first})  # fmt: skip
+    with engine.connect() as c:
+        assert graded(c) == before
+        # ...whereas the live corpus moved: the revised date drops the story from the window.
+        monkeypatch.setattr(tools, "NEWS_AS_OF", (datetime(2026, 10, 22, tzinfo=UTC), None))
+        live = tools.run_tool(c, "search_news", {"query": "Derrick Henry", "days": 2})
+        assert henry not in [x["url"] for x in live["results"]]
+    with engine.begin() as c, pytest.raises(DBAPIError, match="insert-only"):
+        c.execute(text("UPDATE news_eval_chunks SET text = 'x'"))
 
 
 def test_player_filter_fill_and_reranker(engine: Engine) -> None:

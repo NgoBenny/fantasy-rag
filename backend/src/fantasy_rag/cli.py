@@ -46,7 +46,7 @@ def main(argv: list[str] | None = None) -> None:
     dm.add_argument("--record-question", help="ask one league-free question live (paid)")
     dm.add_argument("--budget-usd", type=float, help="spending cap; required to record")
     ev = sub.add_parser("eval", help="evaluate retrieval on the labelled questions")
-    ev.add_argument("what", choices=["news", "answers", "grounding"])
+    ev.add_argument("what", choices=["news", "news-snapshot", "answers", "grounding"])
     ev.add_argument("--only", help="answers: comma-separated question ids or sets")
     ev.add_argument("--rescore", help="answers: grade a saved report again (no API calls)")
     ev.add_argument("--report", help="grounding: saved full answer report (paid review only)")
@@ -86,7 +86,8 @@ def _lock_for(args: argparse.Namespace) -> int | None:
         ("predict", None): locks.STRUCTURED,
         ("calibration-seed", None): locks.STRUCTURED,
         ("backup", None): locks.BACKUP,
-    }.get((args.command, what if args.command in ("ingest", "league") else None))
+        ("eval", "news-snapshot"): locks.NEWS,  # copies stories: no news run mid-copy
+    }.get((args.command, what if args.command in ("ingest", "league", "eval") else None))
 
 
 def _dispatch(args: argparse.Namespace) -> None:
@@ -184,6 +185,20 @@ def _dispatch(args: argparse.Namespace) -> None:
         _eval_answers(args.only, args.rescore)
     elif args.command == "eval" and args.what == "grounding":
         _eval_grounding(args.report, args.only)
+    elif args.command == "eval" and args.what == "news-snapshot":
+        import yaml
+
+        from fantasy_rag.db import get_engine
+        from fantasy_rag.retrieval import evaluate as ev
+        from fantasy_rag.retrieval import snapshot
+
+        wanted = {ev.as_of(yaml.safe_load(f.read_text("utf-8")))[1:] for f in ev.golden_files()}
+        with get_engine().begin() as conn:  # one transaction: all snapshots or none
+            for name, through in sorted(wanted):
+                if snapshot.exists(conn, name):
+                    print(f"news snapshot {name!r} already exists (never rebuilt)")
+                else:
+                    print(snapshot.capture(conn, name, through))
     elif args.command == "eval":
         import json
 

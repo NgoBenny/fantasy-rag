@@ -10,18 +10,23 @@ from sqlalchemy import Connection
 from fantasy_rag.analytics.queries import AmbiguousPlayer, resolve_player
 from fantasy_rag.config import REPO_ROOT
 from fantasy_rag.index.embedder import Embedder
+from fantasy_rag.retrieval import snapshot
 from fantasy_rag.retrieval.hybrid import Mode, Reranker, search
 
 GOLDEN = REPO_ROOT / "backend" / "tests" / "eval" / "golden_news.yaml"
 MODES: tuple[Mode, ...] = ("hybrid", "vector", "keyword")
 
 
-def _as_of(doc: dict[str, Any]) -> tuple[datetime, int]:
-    """A golden file's labelling time and last stored document: the corpus it is graded on,
-    so stories that arrive later can't change its score."""
+def as_of(doc: dict[str, Any]) -> tuple[datetime, str, int]:
+    """A golden file's labelling time, its frozen corpus (snapshot name) and the last
+    document that corpus holds: later stories or edits can't change its score."""
     a = doc["as_of"]
     t = a["time"] if isinstance(a["time"], datetime) else datetime.fromisoformat(a["time"])
-    return t, int(a["through_document"])
+    return t, str(a["snapshot"]), int(a["through_document"])
+
+
+def golden_files() -> list[Path]:
+    return [GOLDEN, HELDOUT]
 
 
 def evaluate(
@@ -32,7 +37,8 @@ def evaluate(
     reranker: Reranker | None = None,
 ) -> dict[str, Any]:
     doc = yaml.safe_load(golden.read_text(encoding="utf-8"))
-    items, (_, through) = doc["news"], _as_of(doc)
+    items, (_, snap, _) = doc["news"], as_of(doc)
+    snapshot.require(conn, snap)
     named = [it["id"] for it in items if it.get("player_name")]
     out: dict[str, Any] = {"k": k, "questions": len(items), "player_name_questions": len(named)}
     runs: list[tuple[str, Mode, Reranker | None]] = [(m, m, None) for m in MODES]
@@ -43,7 +49,7 @@ def evaluate(
         for it in items:
             found = search(
                 conn, embedder, it["question"], limit=10, mode=mode, reranker=rr,
-                through_document=through,
+                snapshot=snap,
             )  # fmt: skip
             rank[it["id"]] = next(
                 (i for i, h in enumerate(found, start=1) if h.url in it["relevant"]), None
@@ -77,7 +83,7 @@ def evaluate(
             ids = [resolve_player(conn, it["name_query"]).id] if use_filter else None
             found = search(
                 conn, embedder, it["name_query"], limit=10, mode=mode, prefer_players=ids,
-                through_document=through,
+                snapshot=snap,
             )  # fmt: skip
             ranks.append(next((i for i, h in enumerate(found, 1) if h.url in it["relevant"]), None))
         out.setdefault("name_only", {"questions": len(by_name)})[label] = {
@@ -101,8 +107,10 @@ def evaluate_heldout(
     from fantasy_rag.agent import tools
 
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    labelled, snap, _ = as_of(doc)
+    snapshot.require(conn, snap)
     saved = tools.NEWS_RERANKER, tools.NEWS_AS_OF
-    tools.NEWS_RERANKER, tools.NEWS_AS_OF = reranker, _as_of(doc)
+    tools.NEWS_RERANKER, tools.NEWS_AS_OF = reranker, (labelled, snap)
     try:
         return _heldout(doc["heldout"], tools.run_tool, conn)
     finally:
