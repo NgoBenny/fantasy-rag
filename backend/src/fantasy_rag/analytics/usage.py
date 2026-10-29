@@ -177,7 +177,10 @@ def window(games: list[dict[str, Any]], n: int = WINDOW) -> dict[str, Any] | Non
     if not last:
         return None
     missing = [g for g in last if g["snaps"] is None or not g["team_snaps"]]
-    looks = [g["rz_looks"] for g in last]
+
+    def pbp(key: str) -> int | None:  # one game without play-by-play: unknown, never partial
+        return None if any(g[key] is None for g in last) else sum(g[key] for g in last)
+
     return {
         "games": len(last),
         "weeks": [g["week"] for g in last],
@@ -192,11 +195,11 @@ def window(games: list[dict[str, Any]], n: int = WINDOW) -> dict[str, Any] | Non
         "carries": sum(g["carries"] for g in last),
         "carry_share_pct": pct(sum(g["carries"] for g in last),
                                sum(g["team_carries"] for g in last)),
-        "rz_looks": None if any(x is None for x in looks) else sum(looks),
-        "rz_targets": None if any(x is None for x in looks) else sum(g["rz_targets"] for g in last),
-        "rz_carries": None if any(x is None for x in looks) else sum(g["rz_carries"] for g in last),
-        "gl_carries": sum(g["gl_carries"] or 0 for g in last),
-        "rz_unknown": sum(g["rz_unknown"] or 0 for g in last),
+        "rz_looks": pbp("rz_looks"),
+        "rz_targets": pbp("rz_targets"),
+        "rz_carries": pbp("rz_carries"),
+        "gl_carries": pbp("gl_carries"),
+        "rz_unknown": pbp("rz_unknown"),
     }  # fmt: skip
 
 

@@ -95,6 +95,13 @@ def test_get_usage_shares_coverage_and_facts(season: str) -> None:
     assert total["rz_looks"] == (None if None in looks else sum(looks))
     if total["rz_looks"] is not None:  # the split is totalled too, so it isn't added up
         assert total["rz_targets"] + total["rz_carries"] == total["rz_looks"]
+    with get_readonly_engine(season).connect() as conn:  # 5 games reach week 4 (no pbp)
+        five = run_tool(conn, "get_usage", {"players": [{"name": "Justin Jefferson"}],
+                                            "last_n": 5})["players"][0]["shown_totals"]  # fmt: skip
+    assert five["weeks"] == [4, 5, 6, 7, 8] and five["targets"] == sum(TARGETS[w] for w in
+                                                                       range(4, 9))  # fmt: skip
+    for key in ("rz_looks", "rz_targets", "rz_carries", "gl_carries", "rz_unknown"):
+        assert five[key] is None, key  # unknown for the window, never a partial sum or 0
     texts = [f["text"] for f in p["facts"]]
     assert "Targets rose in each of the last 3 games: 6, 8, 10 (weeks 6, 7, 8)" in texts
     with get_readonly_engine(season).connect() as conn:
