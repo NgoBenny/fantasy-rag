@@ -47,10 +47,19 @@ _FILTER = """
     (CAST(:players AS text[]) IS NULL OR c.player_ids && CAST(:players AS text[]))
     AND (CAST(:since AS timestamptz) IS NULL OR c.published_at >= :since)
 """
-_SELECT = """
-    SELECT c.id, d.id, d.url, d.title, d.source, c.published_at, c.text, c.player_ids
-    FROM chunks c JOIN documents d ON d.id = c.document_id
-"""
+_COLUMNS = "SELECT c.id, d.id, d.url, d.title, d.source, c.published_at, c.text, c.player_ids"
+_LIVE = " FROM chunks c JOIN documents d ON d.id = c.document_id"
+# A frozen evaluation corpus (snapshot.py): same columns, never updated.
+_SNAPSHOT = (
+    " FROM news_eval_chunks c JOIN news_eval_documents d"
+    " ON d.snapshot = c.snapshot AND d.id = c.document_id AND c.snapshot = :snapshot"
+)
+
+
+def _select(params: dict[str, object]) -> str:
+    return _COLUMNS + (_LIVE if params["snapshot"] is None else _SNAPSHOT)
+
+
 Row = tuple[Any, ...]
 
 
@@ -59,7 +68,7 @@ def _vector(conn: Connection, qvec: list[float], params: dict[str, object]) -> l
         text(
             f"""
             SELECT * FROM ({
-                _SELECT.replace(
+                _select(params).replace(
                     "c.player_ids", "c.player_ids, 1 - (c.embedding <=> CAST(:q AS vector)) AS sim"
                 )
             }
@@ -80,7 +89,7 @@ def _keyword(conn: Connection, query: str, params: dict[str, object]) -> list[Ro
             f"""
             WITH q AS (SELECT CAST(replace(plainto_tsquery('english', :query)::text, '&', '|')
                                AS tsquery) AS tq)
-            {_SELECT}, q WHERE q.tq::text <> '' AND c.tsv @@ q.tq AND {_FILTER}
+            {_select(params)}, q WHERE q.tq::text <> '' AND c.tsv @@ q.tq AND {_FILTER}
             ORDER BY ts_rank_cd(c.tsv, q.tq) DESC, c.published_at DESC NULLS LAST LIMIT :n
             """
         ),
@@ -111,15 +120,21 @@ def search(
     mode: Mode = "hybrid",
     reranker: Reranker | None = None,
     prefer_players: list[str] | None = None,
+    snapshot: str | None = None,
 ) -> list[Hit]:
     """Top `limit` stories for `query`.
 
     `player_ids` is a hard filter. `prefer_players` only boosts stories tagged with those
     players: every story is still a candidate, and the RESERVE best overall matches always
     stay in the results, so an untagged story about the player is never hidden by tagged
-    ones.
+    ones. `snapshot` searches that frozen evaluation corpus instead of the live stories.
     """
-    params: dict[str, object] = {"players": player_ids or None, "since": since, "n": POOL}
+    params: dict[str, object] = {
+        "players": player_ids or None,
+        "since": since,
+        "snapshot": snapshot,
+        "n": POOL,
+    }
     vec, kw = _lists(conn, embedder, query, params, mode)
     base: dict[int, float] = {}
     rows: dict[int, Row] = {}

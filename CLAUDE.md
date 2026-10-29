@@ -57,6 +57,7 @@ backend/
   alembic/versions/0009_calibration.py  # calibration_errors (insert-only), projections.effective_policy
   alembic/versions/0010_calibration_fingerprint.py  # calibration errors keyed by scoring-rules fingerprint
   alembic/versions/0011_usage.py        # player_week_pbp_usage (targets/carries/red zone), pbp_games (coverage)
+  alembic/versions/0012_news_eval_snapshot.py  # news_eval_documents/chunks: frozen news-eval corpus (insert-only)
   src/fantasy_rag/config.py             # pydantic-settings, DEMO_MODE
   src/fantasy_rag/cli.py                # `fantasy-rag` entry point
   src/fantasy_rag/db.py                 # engine; read-only engine for tools (SET ROLE fantasy_reader)
@@ -72,6 +73,7 @@ backend/
   src/fantasy_rag/index/chunker.py, embedder.py  # ~300-word chunks; Embedder protocol + local bge-small
   src/fantasy_rag/retrieval/hybrid.py   # vector + full-text, RRF, player/recency filters, dedupe
   src/fantasy_rag/retrieval/rerank.py, evaluate.py  # optional bge-reranker; `eval news`
+  src/fantasy_rag/retrieval/snapshot.py # capture a named frozen news corpus once; evals search it
   src/fantasy_rag/ingest/pbp.py         # play-by-play -> team DEF + special-teams stats (pure)
   src/fantasy_rag/analytics/scoring.py  # Sleeper scoring keys (incl. team DEF) -> points
   src/fantasy_rag/analytics/scoring_check.py  # our points vs Sleeper's players_points
@@ -178,7 +180,8 @@ uv run fantasy-rag usage-check          # pbp targets/carries vs nflverse stats 
 uv run fantasy-rag forward-check        # exit 1 if this week's on-time forward run is missing near/after the deadline
 uv run fantasy-rag backup               # verified dump + roles + manifest to %USERPROFILE%antasy-rag-backups (BACKUP_DIR)
 uv run fantasy-rag backup --verify-latest   # restore newest dump into a fresh container; compare with its manifest
-uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode (--rerank: 1 GB model)
+uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode, on the frozen snapshot named in the YAML's `as_of` (--rerank: 1 GB model)
+uv run fantasy-rag eval news-snapshot  # once per snapshot: copy the labelled corpus into news_eval_* (refused if it exists)
 uv run fantasy-rag ask "bucky irving or jaylen warren?" --league-id 1   # one cited answer (Claude API, ~1-3 cents)
 uv run fantasy-rag eval answers        # golden set through router + writer (~$1-2); --only mixed,a05; report in data/logs/
 uv run fantasy-rag eval answers --rescore ../data/logs/<report>.json   # re-grade a saved run under the current rubric (no API calls)

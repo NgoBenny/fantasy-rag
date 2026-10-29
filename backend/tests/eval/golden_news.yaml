@@ -5,6 +5,14 @@
 # the way a tool call often searches. Questions are paraphrased, not copied from headlines.
 # Drafted for review with the user.
 
+# Graded on a frozen copy of the corpus (`fantasy-rag eval news-snapshot`, table
+# news_eval_*), so later stories or edits can't change the score. It holds the stories
+# stored by labelling time (`through_document`: IDs follow insertion order; dates don't,
+# because feeds revise them), as they read when captured on Oct 28, 2026: earlier
+# revisions of those stories were overwritten and can't be recovered. `time` is when the
+# labels were written; `days` windows count back from it.
+as_of: {time: "2026-10-21T00:12:49+00:00", snapshot: news-2026-10-20, through_document: 21922}
+
 news:
   - id: n01
     question: How long is Davante Adams going to be out?
