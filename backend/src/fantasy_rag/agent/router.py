@@ -7,6 +7,7 @@ citations and numbers that no tool result contains are reported, never hidden.
 """
 
 import json
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -20,7 +21,13 @@ from fantasy_rag.agent.answer import Answer, problems
 from fantasy_rag.agent.llm import INVALID_ARGS, Cancelled, LLMClient
 from fantasy_rag.agent.prompts import ROUTER_SYSTEM, WRITER_SYSTEM
 from fantasy_rag.agent.tools import TOOLS, run_tool
-from fantasy_rag.analytics.queries import latest_week, league_roster, projection_week
+from fantasy_rag.analytics.queries import (
+    AmbiguousPlayer,
+    latest_week,
+    league_roster,
+    projection_week,
+    resolve_player,
+)
 
 MAX_ROUNDS = 4
 
@@ -196,6 +203,76 @@ def tool_progress(call: ToolCall) -> Progress:
     return Progress("tool", f"Looked up {label}{who}{rules}", call.name, True)
 
 
+# Surnames of active fantasy players that are also everyday question words ("would love
+# to", "is he a lock"). shortcut: a hand list from the 2026 surnames; extend when a new
+# player's surname reads as an ordinary word.
+COMMON_WORDS = frozenset({
+    "all", "bass", "black", "bond", "branch", "brooks", "brown", "cook", "cooks", "dart", "downs",
+    "fields", "flowers", "folk", "gay", "golden", "gray", "hall", "helm", "hill", "homer", "horn",
+    "knight", "lamb", "lane", "lemon", "likely", "little", "lock", "long", "love", "marks",
+    "muse", "price", "reed", "rice", "rivers", "rush", "sample", "sharp", "smack", "steele",
+    "strand", "strange", "strong", "swift", "white", "woods", "worthy", "young",
+})  # fmt: skip
+
+
+def _named_players(args: dict[str, Any]) -> list[dict[str, Any]]:
+    many = args.get("players")
+    found: list[Any] = [args.get("player"), *(many if isinstance(many, list) else [])]
+    return [p for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
+
+
+def _words(text_: str) -> set[str]:
+    return set(re.findall(r"[a-z][a-z'.-]{2,}", text_.lower()))
+
+
+def swapped_player(
+    conn: Connection,
+    question: str,
+    args: dict[str, Any],
+    also: list[dict[str, Any]] | None = None,
+) -> str | None:
+    """A looked-up player the question never names, while it does name another player of
+    his position by surname ("is loop safe?" answered with the roster's other kicker).
+    `also`: the args of the router's other calls; a named player looked up there is fine.
+
+    Only a same-position, exact-surname match counts, and surnames that are everyday
+    words are skipped, so ordinary questions don't trigger it.
+    """
+    words = _words(question)
+    named = _named_players(args)
+    looked_up = {
+        w for a in [args, *(also or [])] for p in _named_players(a) for w in _words(p["name"])
+    }
+    surnames = words - COMMON_WORDS - looked_up
+    if not surnames or not named:
+        return None
+    season, _ = latest_week(conn)
+    for p in named:
+        if words & _words(p["name"]):
+            continue  # the question names him
+        try:
+            ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
+        except (AmbiguousPlayer, ValueError):
+            continue
+        other = conn.execute(
+            text(
+                "SELECT p.full_name, p.position, p.team FROM players p"
+                " WHERE p.position = :pos AND p.id <> :id"
+                " AND split_part(p.search_name, ' ', -1) = ANY(:words)"
+                " AND EXISTS (SELECT 1 FROM player_week_stats s"
+                "             WHERE s.player_id = p.id AND s.season = :season)"
+                " ORDER BY p.full_name LIMIT 1"
+            ),
+            {"pos": ref.position, "id": ref.id, "words": sorted(surnames), "season": season},
+        ).first()
+        if other is not None:
+            return (
+                f"The question names {other.full_name} ({other.position}, {other.team}), not"
+                f" {ref.name}; nothing was run. Call this tool again for {other.full_name}."
+            )
+    return None
+
+
 def route(
     conn: Connection,
     llm: LLMClient,
@@ -219,6 +296,8 @@ def route(
         if not uses or resp.stop_reason != "tool_use":
             return calls, False
         results: list[ToolResultBlockParam] = []
+        round_args = [dict(b.input) for b in uses]
+        earlier = [c.args for c in calls]
         for b in uses:
             if cancelled():
                 raise Cancelled
@@ -226,6 +305,8 @@ def route(
             try:
                 if INVALID_ARGS in call.args:
                     raise ValueError("tool arguments were not valid JSON; nothing was run")
+                if swap := swapped_player(conn, question, call.args, round_args + earlier):
+                    raise ValueError(swap)
                 call.result = run_tool(conn, b.name, call.args)
             except ValueError as e:  # bad input, unknown tool, ambiguous player, no data
                 call.error = str(e)

@@ -134,3 +134,23 @@ def test_bye_and_ruled_out_players_project_zero_and_never_start(db: str) -> None
         assert free_agent["projected_points"] == 0.0  # healthy but on bye
         lineup = run_tool(conn, "optimize_lineup", {"league_id": 1, "roster_id": 1})
         assert lineup["recommended"][0]["player"]["name"] == "Justin Jefferson"  # Q still starts
+
+
+def test_router_refuses_a_player_the_question_does_not_name(db: str) -> None:
+    from fantasy_rag.agent.router import swapped_player
+
+    swap = {"player": {"name": "Free Agent"}}  # a roster WR, while the question names another
+    with get_readonly_engine(db).connect() as conn:
+        msg = swapped_player(conn, "is jefferson actually a safe start?", swap)
+        assert msg is not None and "Justin Jefferson (WR, MIN)" in msg
+        assert swapped_player(conn, "is my receiver a safe start?", swap) is None
+        assert swapped_player(conn, "is jefferson better than agent?", swap) is None
+        # Named player looked up in another call: the roster player is a fair comparison.
+        also = [{"player": {"name": "Justin Jefferson"}}]
+        assert swapped_player(conn, "start jefferson over my guy?", swap, also) is None
+        assert (
+            swapped_player(
+                conn, "start jefferson over my tight end?", {"player": {"name": "Zero Guy"}}
+            )
+            is None
+        )  # different position: never a swap
