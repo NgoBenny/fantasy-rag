@@ -28,6 +28,7 @@ from fantasy_rag.analytics.queries import (
     projection_week,
     resolve_player,
 )
+from fantasy_rag.analytics.queries import _normalize as normalize_name
 
 MAX_ROUNDS = 4
 
@@ -223,8 +224,14 @@ def _named_players(args: dict[str, Any]) -> list[dict[str, Any]]:
     return [p for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
 
 
-def _words(text_: str) -> set[str]:
-    return set(re.findall(r"[a-z][a-z'.-]{2,}", text_.lower()))
+def _question_words(question: str) -> set[str]:
+    """Words normalized like players.search_name, possessives dropped ("Jefferson's")."""
+    return set(normalize_name(re.sub(r"['\u2019]s\b", "", question)).split())
+
+
+def _surname(name: str) -> str:
+    parts = normalize_name(name).split()  # suffixes (Jr., III) are already gone
+    return parts[-1] if parts else ""
 
 
 def swapped_player(
@@ -235,22 +242,22 @@ def swapped_player(
 ) -> str | None:
     """A looked-up player the question never names, while it does name another player of
     his position by surname ("is loop safe?" answered with the roster's other kicker).
-    `covered`: name words of players other calls already resolved successfully; a named
+    `covered`: surnames of players other calls already resolved successfully; a named
     player covered there (or in this same call) makes the roster player a fair comparison.
 
     Only a same-position, exact-surname match counts, and surnames that are everyday
     words are skipped, so ordinary questions don't trigger it.
     """
-    words = _words(question)
+    words = _question_words(question)
     named = _named_players(args)
-    in_call = {w for p in named for w in _words(p["name"])}  # all resolve, or the call fails
+    in_call = {_surname(p["name"]) for p in named}  # all resolve, or the call fails
     surnames = words - COMMON_WORDS - in_call - (covered or set())
     if not surnames or not named:
         return None
     season, _ = latest_week(conn)
     for p in named:
-        if words & _words(p["name"]):
-            continue  # the question names him
+        if _surname(p["name"]) in words:
+            continue  # the question names him (a shared first name doesn't count)
         try:
             ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
         except (AmbiguousPlayer, ValueError):
@@ -299,8 +306,7 @@ def route(
         done: dict[str, ToolResultBlockParam] = {}
 
         def covered() -> set[str]:  # only lookups that succeeded count
-            return {w for c in calls if c.result for n in _resolved_names(c.result)
-                    for w in _words(n)}  # fmt: skip
+            return {_surname(n) for c in calls if c.result for n in _resolved_names(c.result)}
 
         # A call that looks like a swap waits until this round's other calls ran: one of
         # them may resolve the named player, which makes it a fair comparison.

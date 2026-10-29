@@ -149,6 +149,8 @@ def test_router_refuses_a_player_the_question_does_not_name(db: str) -> None:
         # The tools also take a bare name: it must not skip the check.
         assert swapped_player(conn, "is jefferson a safe start?", {"player": "Free Agent"})
         assert swapped_player(conn, "is jefferson a safe start?", {"players": ["Free Agent"]})
+        for q in ("How is Jefferson's outlook?", "How is Jefferson’s outlook?"):
+            assert swapped_player(conn, q, swap), q  # possessives name him too
         assert swapped_player(conn, "is my receiver a safe start?", swap) is None
         assert swapped_player(conn, "is jefferson better than agent?", swap) is None
         # The named player already resolved by another call: a fair comparison.
@@ -209,3 +211,29 @@ def test_only_a_successful_lookup_covers_the_named_player(db: str) -> None:
         assert all(c.result for c in calls), [c.error for c in calls]
         calls, _ = route(conn, _Router([ok], [(stats, {"player": "Free Agent"})]), q, "")
         assert all(c.result for c in calls), [c.error for c in calls]
+
+
+def test_a_shared_first_name_does_not_hide_a_swap(db: str) -> None:
+    from fantasy_rag.agent.router import swapped_player
+
+    with create_engine(db).connect() as conn, conn.begin() as tx:
+        run = conn.execute(text("SELECT min(id) FROM sync_runs")).scalar()
+        conn.execute(  # another active receiver who shares Justin Jefferson's first name
+            text(
+                "INSERT INTO players (id, full_name, search_name, position, team, sync_run_id)"
+                " VALUES ('00-99', 'Justin Agent', 'justin agent', 'WR', 'NE', :r)"
+            ),
+            {"r": run},
+        )
+        conn.execute(
+            text(
+                "INSERT INTO player_week_stats (season, week, season_type, player_id, opponent,"
+                " stats, sync_run_id) VALUES (2026, 1, 'REG', '00-99', 'DAL', '{}', :r)"
+            ),
+            {"r": run},
+        )
+        other = {"player": {"name": "Justin Agent"}}
+        msg = swapped_player(conn, "Is Justin Jefferson a safe start?", other)
+        assert msg is not None and "Justin Jefferson" in msg  # "Justin" doesn't name Agent
+        assert swapped_player(conn, "Is Justin Agent a safe start?", other) is None
+        tx.rollback()
