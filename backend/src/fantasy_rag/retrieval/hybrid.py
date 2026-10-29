@@ -46,6 +46,7 @@ class Hit:
 _FILTER = """
     (CAST(:players AS text[]) IS NULL OR c.player_ids && CAST(:players AS text[]))
     AND (CAST(:since AS timestamptz) IS NULL OR c.published_at >= :since)
+    AND (CAST(:through AS bigint) IS NULL OR d.id <= :through)
 """
 _SELECT = """
     SELECT c.id, d.id, d.url, d.title, d.source, c.published_at, c.text, c.player_ids
@@ -111,15 +112,23 @@ def search(
     mode: Mode = "hybrid",
     reranker: Reranker | None = None,
     prefer_players: list[str] | None = None,
+    through_document: int | None = None,
 ) -> list[Hit]:
     """Top `limit` stories for `query`.
 
     `player_ids` is a hard filter. `prefer_players` only boosts stories tagged with those
     players: every story is still a candidate, and the RESERVE best overall matches always
     stay in the results, so an untagged story about the player is never hidden by tagged
-    ones.
+    ones. `through_document` limits the corpus to stories first stored up to that document
+    ID (IDs follow insertion order; dates don't, since feeds revise them): evaluations
+    use it to replay the corpus a golden set was labelled on.
     """
-    params: dict[str, object] = {"players": player_ids or None, "since": since, "n": POOL}
+    params: dict[str, object] = {
+        "players": player_ids or None,
+        "since": since,
+        "through": through_document,
+        "n": POOL,
+    }
     vec, kw = _lists(conn, embedder, query, params, mode)
     base: dict[int, float] = {}
     rows: dict[int, Row] = {}

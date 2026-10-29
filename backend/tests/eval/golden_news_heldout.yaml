@@ -12,6 +12,11 @@
 #   ambiguous - the player name is shared; the tool must refuse to guess
 # `avoid`: a story that must not come first (an older, contradicted report).
 
+# Graded on the corpus as it stood when labelled (later stories are invisible to the
+# evaluation): `through_document` is the last document ID stored by then. IDs follow
+# insertion order; story dates don't, because feeds revise them.
+as_of: {time: "2026-10-21T00:12:49+00:00", through_document: 21922}
+
 heldout:
   # Untagged relevant stories among many tagged ones (another active Lamar Jackson
   # leaves Falcons-site stories untagged; 19 other Lamar stories are tagged).

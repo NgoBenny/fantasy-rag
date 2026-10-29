@@ -1,5 +1,6 @@
 """`fantasy-rag eval news`: recall@k of each search mode on the labelled news questions."""
 
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,14 @@ GOLDEN = REPO_ROOT / "backend" / "tests" / "eval" / "golden_news.yaml"
 MODES: tuple[Mode, ...] = ("hybrid", "vector", "keyword")
 
 
+def _as_of(doc: dict[str, Any]) -> tuple[datetime, int]:
+    """A golden file's labelling time and last stored document: the corpus it is graded on,
+    so stories that arrive later can't change its score."""
+    a = doc["as_of"]
+    t = a["time"] if isinstance(a["time"], datetime) else datetime.fromisoformat(a["time"])
+    return t, int(a["through_document"])
+
+
 def evaluate(
     conn: Connection,
     embedder: Embedder,
@@ -22,7 +31,8 @@ def evaluate(
     golden: Path = GOLDEN,
     reranker: Reranker | None = None,
 ) -> dict[str, Any]:
-    items = yaml.safe_load(golden.read_text(encoding="utf-8"))["news"]
+    doc = yaml.safe_load(golden.read_text(encoding="utf-8"))
+    items, (_, through) = doc["news"], _as_of(doc)
     named = [it["id"] for it in items if it.get("player_name")]
     out: dict[str, Any] = {"k": k, "questions": len(items), "player_name_questions": len(named)}
     runs: list[tuple[str, Mode, Reranker | None]] = [(m, m, None) for m in MODES]
@@ -31,7 +41,10 @@ def evaluate(
     for label, mode, rr in runs:
         rank: dict[str, int | None] = {}  # 1-based rank of the first relevant story in top 10
         for it in items:
-            found = search(conn, embedder, it["question"], limit=10, mode=mode, reranker=rr)
+            found = search(
+                conn, embedder, it["question"], limit=10, mode=mode, reranker=rr,
+                through_document=through,
+            )  # fmt: skip
             rank[it["id"]] = next(
                 (i for i, h in enumerate(found, start=1) if h.url in it["relevant"]), None
             )
@@ -63,8 +76,9 @@ def evaluate(
         for it in by_name:
             ids = [resolve_player(conn, it["name_query"]).id] if use_filter else None
             found = search(
-                conn, embedder, it["name_query"], limit=10, mode=mode, prefer_players=ids
-            )
+                conn, embedder, it["name_query"], limit=10, mode=mode, prefer_players=ids,
+                through_document=through,
+            )  # fmt: skip
             ranks.append(next((i for i, h in enumerate(found, 1) if h.url in it["relevant"]), None))
         out.setdefault("name_only", {"questions": len(by_name)})[label] = {
             "recall_at_k": round(sum(1 for x in ranks if x and x <= k) / len(ranks), 3),
@@ -86,15 +100,16 @@ def evaluate_heldout(
     """
     from fantasy_rag.agent import tools
 
-    saved, tools.NEWS_RERANKER = tools.NEWS_RERANKER, reranker
+    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    saved = tools.NEWS_RERANKER, tools.NEWS_AS_OF
+    tools.NEWS_RERANKER, tools.NEWS_AS_OF = reranker, _as_of(doc)
     try:
-        return _heldout(conn, path, tools.run_tool)
+        return _heldout(doc["heldout"], tools.run_tool, conn)
     finally:
-        tools.NEWS_RERANKER = saved
+        tools.NEWS_RERANKER, tools.NEWS_AS_OF = saved
 
 
-def _heldout(conn: Connection, path: Path, run_tool: Any) -> dict[str, Any]:
-    items = yaml.safe_load(path.read_text(encoding="utf-8"))["heldout"]
+def _heldout(items: list[dict[str, Any]], run_tool: Any, conn: Connection) -> dict[str, Any]:
     results: dict[str, dict[str, Any]] = {}
     for it in items:
         if it["expect"] == "phase6":  # judged on the written answer, not on retrieval

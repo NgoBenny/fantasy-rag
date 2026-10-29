@@ -178,7 +178,7 @@ uv run fantasy-rag usage-check          # pbp targets/carries vs nflverse stats 
 uv run fantasy-rag forward-check        # exit 1 if this week's on-time forward run is missing near/after the deadline
 uv run fantasy-rag backup               # verified dump + roles + manifest to %USERPROFILE%antasy-rag-backups (BACKUP_DIR)
 uv run fantasy-rag backup --verify-latest   # restore newest dump into a fresh container; compare with its manifest
-uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode (--rerank: 1 GB model)
+uv run fantasy-rag eval news           # recall@5 / recall@1 / MRR per search mode, on the corpus as labelled (`as_of` in the YAML; --rerank: 1 GB model)
 uv run fantasy-rag ask "bucky irving or jaylen warren?" --league-id 1   # one cited answer (Claude API, ~1-3 cents)
 uv run fantasy-rag eval answers        # golden set through router + writer (~$1-2); --only mixed,a05; report in data/logs/
 uv run fantasy-rag eval answers --rescore ../data/logs/<report>.json   # re-grade a saved run under the current rubric (no API calls)

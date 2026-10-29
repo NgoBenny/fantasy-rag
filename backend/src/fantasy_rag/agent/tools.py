@@ -411,6 +411,8 @@ def _versions(served: dict[str, serve.Served | None]) -> str:
 # Optional cross-encoder for search_news (retrieval.rerank.LocalBGEReranker). Off until
 # `fantasy-rag eval news --rerank` shows a top-1 gain worth its latency.
 NEWS_RERANKER: Reranker | None = None
+# Evaluation only: (labelling time, last stored document ID) to replay a frozen corpus.
+NEWS_AS_OF: tuple[datetime, int] | None = None
 
 
 @cache
@@ -425,7 +427,8 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
     from fantasy_rag.retrieval.hybrid import search
 
     refs = [q.resolve_player(conn, **p.model_dump()) for p in a.players]
-    since = datetime.now(UTC) - timedelta(days=a.days)
+    now, through = NEWS_AS_OF or (datetime.now(UTC), None)
+    since = now - timedelta(days=a.days)
     hits = search(
         conn,
         news_embedder(),
@@ -435,6 +438,7 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
         a.limit,
         prefer_players=[r.id for r in refs] or None,
         reranker=NEWS_RERANKER,
+        through_document=through,
     )
     return {
         "query": a.query,

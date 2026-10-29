@@ -101,6 +101,18 @@ def test_keyword_vector_and_fusion(engine: Engine) -> None:
         assert len(lions) == 1
 
 
+def test_through_document_hides_later_stories(engine: Engine) -> None:
+    emb = FakeEmbedder()
+    with engine.connect() as c:
+        first, body = c.execute(
+            text("SELECT document_id, text FROM chunks ORDER BY document_id LIMIT 1")
+        ).one()
+        for mode in ("vector", "keyword", "hybrid"):
+            found = search(c, emb, body, limit=10, mode=mode, through_document=first)
+            assert found and {h.document_id for h in found} == {first}
+        assert len({h.document_id for h in search(c, emb, body, limit=10)}) > 1
+
+
 def test_player_filter_fill_and_reranker(engine: Engine) -> None:
     emb = FakeEmbedder()
     with engine.connect() as c:

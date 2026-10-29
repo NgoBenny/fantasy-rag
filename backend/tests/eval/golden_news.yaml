@@ -5,6 +5,11 @@
 # the way a tool call often searches. Questions are paraphrased, not copied from headlines.
 # Drafted for review with the user.
 
+# Graded on the corpus as it stood when labelled (later stories are invisible to the
+# evaluation): `through_document` is the last document ID stored by then. IDs follow
+# insertion order; story dates don't, because feeds revise them.
+as_of: {time: "2026-10-21T00:12:49+00:00", through_document: 21922}
+
 news:
   - id: n01
     question: How long is Davante Adams going to be out?
