@@ -218,6 +218,8 @@ COMMON_WORDS = frozenset({
 def _named_players(args: dict[str, Any]) -> list[dict[str, Any]]:
     many = args.get("players")
     found: list[Any] = [args.get("player"), *(many if isinstance(many, list) else [])]
+    # The tools accept a bare name too (PlayerName._name_only), so check both forms.
+    found = [{"name": p} if isinstance(p, str) else p for p in found]
     return [p for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
 
 
@@ -229,21 +231,20 @@ def swapped_player(
     conn: Connection,
     question: str,
     args: dict[str, Any],
-    also: list[dict[str, Any]] | None = None,
+    covered: set[str] | None = None,
 ) -> str | None:
     """A looked-up player the question never names, while it does name another player of
     his position by surname ("is loop safe?" answered with the roster's other kicker).
-    `also`: the args of the router's other calls; a named player looked up there is fine.
+    `covered`: name words of players other calls already resolved successfully; a named
+    player covered there (or in this same call) makes the roster player a fair comparison.
 
     Only a same-position, exact-surname match counts, and surnames that are everyday
     words are skipped, so ordinary questions don't trigger it.
     """
     words = _words(question)
     named = _named_players(args)
-    looked_up = {
-        w for a in [args, *(also or [])] for p in _named_players(a) for w in _words(p["name"])
-    }
-    surnames = words - COMMON_WORDS - looked_up
+    in_call = {w for p in named for w in _words(p["name"])}  # all resolve, or the call fails
+    surnames = words - COMMON_WORDS - in_call - (covered or set())
     if not surnames or not named:
         return None
     season, _ = latest_week(conn)
@@ -295,31 +296,37 @@ def route(
         uses = [b for b in resp.content if b.type == "tool_use"]
         if not uses or resp.stop_reason != "tool_use":
             return calls, False
-        results: list[ToolResultBlockParam] = []
-        round_args = [dict(b.input) for b in uses]
-        earlier = [c.args for c in calls]
-        for b in uses:
+        done: dict[str, ToolResultBlockParam] = {}
+
+        def covered() -> set[str]:  # only lookups that succeeded count
+            return {w for c in calls if c.result for n in _resolved_names(c.result)
+                    for w in _words(n)}  # fmt: skip
+
+        # A call that looks like a swap waits until this round's other calls ran: one of
+        # them may resolve the named player, which makes it a fair comparison.
+        first = [b for b in uses if INVALID_ARGS in b.input
+                 or not swapped_player(conn, question, dict(b.input), covered())]  # fmt: skip
+        for b in first + [b for b in uses if b not in first]:
             if cancelled():
                 raise Cancelled
             call = ToolCall(f"r{len(calls) + 1}", b.name, dict(b.input))
             try:
                 if INVALID_ARGS in call.args:
                     raise ValueError("tool arguments were not valid JSON; nothing was run")
-                if swap := swapped_player(conn, question, call.args, round_args + earlier):
+                if swap := swapped_player(conn, question, call.args, covered()):
                     raise ValueError(swap)
                 call.result = run_tool(conn, b.name, call.args)
             except ValueError as e:  # bad input, unknown tool, ambiguous player, no data
                 call.error = str(e)
             calls.append(call)
             on_progress(tool_progress(call))
-            results.append(
-                {
-                    "type": "tool_result",
-                    "tool_use_id": b.id,
-                    "content": call.error or _as_data(call.result),
-                    "is_error": call.error is not None,
-                }
-            )
+            done[b.id] = {
+                "type": "tool_result",
+                "tool_use_id": b.id,
+                "content": call.error or _as_data(call.result),
+                "is_error": call.error is not None,
+            }
+        results = [done[b.id] for b in uses]
         messages += [
             {"role": "assistant", "content": resp.content},
             {"role": "user", "content": results},

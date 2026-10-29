@@ -1,6 +1,9 @@
 """Agent tools on a synthetic database: ID-safe names, read-only role, waivers, validation."""
 
+from typing import Any
+
 import pytest
+from anthropic.types import Message
 from pydantic import ValidationError
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
@@ -143,14 +146,66 @@ def test_router_refuses_a_player_the_question_does_not_name(db: str) -> None:
     with get_readonly_engine(db).connect() as conn:
         msg = swapped_player(conn, "is jefferson actually a safe start?", swap)
         assert msg is not None and "Justin Jefferson (WR, MIN)" in msg
+        # The tools also take a bare name: it must not skip the check.
+        assert swapped_player(conn, "is jefferson a safe start?", {"player": "Free Agent"})
+        assert swapped_player(conn, "is jefferson a safe start?", {"players": ["Free Agent"]})
         assert swapped_player(conn, "is my receiver a safe start?", swap) is None
         assert swapped_player(conn, "is jefferson better than agent?", swap) is None
-        # Named player looked up in another call: the roster player is a fair comparison.
-        also = [{"player": {"name": "Justin Jefferson"}}]
-        assert swapped_player(conn, "start jefferson over my guy?", swap, also) is None
+        # The named player already resolved by another call: a fair comparison.
+        assert (
+            swapped_player(conn, "start jefferson over my guy?", swap, {"justin", "jefferson"})
+            is None
+        )
         assert (
             swapped_player(
                 conn, "start jefferson over my tight end?", {"player": {"name": "Zero Guy"}}
             )
             is None
         )  # different position: never a swap
+
+
+class _Router:
+    """Replays tool-use turns, then stops."""
+
+    def __init__(self, *turns: list[tuple[str, dict[str, Any]]]) -> None:
+        self.turns = list(turns)
+
+    def tool_turn(self, system: str, messages: Any, tools: Any) -> Message:
+        uses = self.turns.pop(0) if self.turns else []
+        content = [
+            {"type": "tool_use", "id": f"t{i}", "name": n, "input": a}
+            for i, (n, a) in enumerate(uses)
+        ] or [{"type": "text", "text": "done"}]
+        return Message.model_validate(
+            {
+                "id": "m",
+                "type": "message",
+                "role": "assistant",
+                "model": "fake",
+                "content": content,
+                "stop_reason": "tool_use" if uses else "end_turn",
+                "stop_sequence": None,
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            }
+        )
+
+    def structured(self, system: str, content: str, schema: Any) -> Any:
+        raise NotImplementedError
+
+
+def test_only_a_successful_lookup_covers_the_named_player(db: str) -> None:
+    from fantasy_rag.agent.router import route
+
+    q = "start jefferson over my guy?"
+    stats = "get_player_stats"
+    with get_readonly_engine(db).connect() as conn:
+        # The named player's lookup fails (bad week), so the roster player isn't a comparison.
+        bad = (stats, {"player": {"name": "Justin Jefferson"}, "start_week": 99})
+        calls, _ = route(conn, _Router([bad, (stats, {"player": "Free Agent"})]), q, "")
+        assert calls[0].error and "names Justin Jefferson" in (calls[1].error or "")
+        # Listed after the named player in the same round, or in an earlier round: allowed.
+        ok = (stats, {"player": {"name": "Justin Jefferson"}})
+        calls, _ = route(conn, _Router([(stats, {"player": "Free Agent"}), ok]), q, "")
+        assert all(c.result for c in calls), [c.error for c in calls]
+        calls, _ = route(conn, _Router([ok], [(stats, {"player": "Free Agent"})]), q, "")
+        assert all(c.result for c in calls), [c.error for c in calls]
