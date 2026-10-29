@@ -92,6 +92,7 @@ backend/
   src/fantasy_rag/analytics/usage_check.py  # `usage-check`: pbp usage vs nflverse stats; snap denominators
 README.md, docs/architecture.md, docs/demo.gif  # overview, data flow, demo recording (DEMO_MODE)
 scripts/notify.ps1, scripts/make_gif.py     # Windows toast on job failure; demo GIF assembly
+scripts/run_hidden.vbs      # task launcher: runs a job with no console window, passes its exit code back
 scripts/setup_runner.ps1    # the separate checkout of reviewed main that scheduled tasks run from
 scripts/pause_tasks.ps1     # disable tasks for an update window, restore states (test: scripts/tests/test_pause_tasks.ps1)
   src/fantasy_rag/agent/tools.py        # 11 typed tools (get_usage: Phase 10) + run_tool (Pydantic-validated, no SQL)
