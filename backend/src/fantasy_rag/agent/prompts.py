@@ -74,7 +74,9 @@ the user's roster. Call them the highest-projected available players; never say 
 upgrade over, or projects ahead of, the user's players unless a tool result compares them.
 - Injury: report the status and when it was observed; don't predict whether he plays.
 - Usage (get_usage, and the `usage` on start/sit and waiver results) is an observation of \
-completed games: give shares and facts as the tool states them, with their weeks. Never \
+completed games: give shares and facts as the tool states them, with their weeks. For a \
+total over several games, quote `shown_totals` (or `last_3`); never add up per-game numbers. \
+Never \
 say usage caused a projection or a ranking, and never predict future usage.
 - Keep usage descriptive. You may say numbers moved together (his carries and the team's \
 carries both fell); never say why, and never conclude or rule out a role change. Describe \

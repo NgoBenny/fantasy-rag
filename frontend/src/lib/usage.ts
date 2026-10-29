@@ -26,7 +26,7 @@ export interface UsageWindow {
   carry_share_pct: number | null;
   carries: number;
   rz_looks: number | null;
-  rz_unknown: number;
+  rz_unknown: number | null;
 }
 
 export interface UsageFact {

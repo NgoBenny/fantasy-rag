@@ -581,6 +581,8 @@ def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
         players.append({
             "player": r.model_dump(),
             "games": shown,
+            # Totals and shares over exactly the games shown, so no answer has to add them up.
+            "shown_totals": u.window(shown, len(shown)),
             "window": u.window_meta(games, shown, schedule, through) if through else None,
             "last_3": got[r.id]["window"],
             "facts": got[r.id]["facts"],
@@ -604,7 +606,9 @@ USAGE_DEFINITIONS = (
     "+ carries inside the opponent's 20 (goal-line carries, inside the 5, are a subset); null "
     "means no play-by-play for that game. `games` shows only the last `last_n` recorded games: "
     "earlier games are outside the requested window (window.season_games_recorded, "
-    "games_outside_requested_window), not missing. window.weeks_without_a_game labels each "
+    "games_outside_requested_window), not missing. shown_totals sums exactly the games shown "
+    "(targets, carries, red-zone looks; shares as totals): quote it, never add up `games`. "
+    "window.weeks_without_a_game labels each "
     "week inside the window with no recorded game: bye (his team had no game), no recorded "
     "appearance, or unknown; nothing else about why. Facts are observations, not causes."
 )
