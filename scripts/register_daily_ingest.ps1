@@ -5,8 +5,15 @@
 # Remove with: Unregister-ScheduledTask -TaskName "fantasy-rag ingest" -Confirm:$false
 #   (and "fantasy-rag news", "fantasy-rag forward", "fantasy-rag forward-check", "fantasy-rag backup")
 $script = Join-Path $PSScriptRoot "ingest_daily.ps1"
-$action = New-ScheduledTaskAction -Execute "powershell.exe" `
-    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
+$hidden = Join-Path $PSScriptRoot "run_hidden.vbs"
+# Every job runs through run_hidden.vbs: no console window pops up, and the task still records
+# the job's exit code. Failure toasts (notify.ps1) still show.
+function JobAction([string]$Job) {
+    $arg = "`"$hidden`" powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$script`""
+    if ($Job) { $arg += " -Job $Job" }
+    New-ScheduledTaskAction -Execute "wscript.exe" -Argument $arg
+}
+$action = JobAction ""
 $triggers = @(
     New-ScheduledTaskTrigger -Daily -At 6:00pm
     New-ScheduledTaskTrigger -Weekly -DaysOfWeek Wednesday, Thursday, Friday, Saturday -At 2:00pm
@@ -17,8 +24,7 @@ Register-ScheduledTask -TaskName "fantasy-rag ingest" -Action $action -Trigger $
     -Settings $settings -Description "fantasy-rag: nflverse + Sleeper ingest and injury snapshots" -Force
 
 # News: every hour while the PC is on (PLAN: every 30-60 minutes in season).
-$newsAction = New-ScheduledTaskAction -Execute "powershell.exe" `
-    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job news"
+$newsAction = JobAction "news"
 $hourly = New-ScheduledTaskTrigger -Once -At (Get-Date).Date `
     -RepetitionInterval (New-TimeSpan -Hours 1) -RepetitionDuration (New-TimeSpan -Days 3650)
 $newsSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew `
@@ -32,8 +38,7 @@ Register-ScheduledTask -TaskName "fantasy-rag news" -Action $newsAction -Trigger
 $eastern = [System.TimeZoneInfo]::FindSystemTimeZoneById("Eastern Standard Time")
 $today = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(10).AddMinutes(30), "Unspecified")
 $local = [System.TimeZoneInfo]::ConvertTime($today, $eastern, [System.TimeZoneInfo]::Local)
-$forwardAction = New-ScheduledTaskAction -Execute "powershell.exe" `
-    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job forward"
+$forwardAction = JobAction "forward"
 $tuesday = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $local.ToString("HH:mm")
 $forwardSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -WakeToRun `
     -ExecutionTimeLimit (New-TimeSpan -Hours 1)
@@ -43,8 +48,7 @@ Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -T
 # Pre-deadline check: Tuesdays 11:30 ET (30 minutes before the forward run's deadline).
 $check = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(11).AddMinutes(30), "Unspecified")
 $checkLocal = [System.TimeZoneInfo]::ConvertTime($check, $eastern, [System.TimeZoneInfo]::Local)
-$checkAction = New-ScheduledTaskAction -Execute "powershell.exe" `
-    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job forward-check"
+$checkAction = JobAction "forward-check"
 Register-ScheduledTask -TaskName "fantasy-rag forward-check" -Action $checkAction `
     -Trigger (New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $checkLocal.ToString("HH:mm")) `
     -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 10)) `
@@ -52,8 +56,7 @@ Register-ScheduledTask -TaskName "fantasy-rag forward-check" -Action $checkActio
 
 # Backup: daily 7 PM, outside the repo (%USERPROFILE%antasy-rag-backups or BACKUP_DIR);
 # on Sundays the job also restores the newest dump into a fresh container and checks it.
-$backupAction = New-ScheduledTaskAction -Execute "powershell.exe" `
-    -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -Job backup"
+$backupAction = JobAction "backup"
 Register-ScheduledTask -TaskName "fantasy-rag backup" -Action $backupAction `
     -Trigger (New-ScheduledTaskTrigger -Daily -At 7:00pm) `
     -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 30)) `
