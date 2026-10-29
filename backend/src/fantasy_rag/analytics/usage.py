@@ -193,6 +193,8 @@ def window(games: list[dict[str, Any]], n: int = WINDOW) -> dict[str, Any] | Non
         "carry_share_pct": pct(sum(g["carries"] for g in last),
                                sum(g["team_carries"] for g in last)),
         "rz_looks": None if any(x is None for x in looks) else sum(looks),
+        "rz_targets": None if any(x is None for x in looks) else sum(g["rz_targets"] for g in last),
+        "rz_carries": None if any(x is None for x in looks) else sum(g["rz_carries"] for g in last),
         "gl_carries": sum(g["gl_carries"] or 0 for g in last),
         "rz_unknown": sum(g["rz_unknown"] or 0 for g in last),
     }  # fmt: skip

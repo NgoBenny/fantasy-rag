@@ -85,6 +85,16 @@ def test_get_usage_shares_coverage_and_facts(season: str) -> None:
     assert by_week[8]["rz_looks"] == 0 and by_week[7]["rz_looks"] == 2  # known zero vs count
     # Window share is totals: (6 + 8 + 10) / 120 = 20.0%; snaps (48+51+54)/180 = 85.0%.
     assert (p["last_3"]["target_share_pct"], p["last_3"]["snap_pct"]) == (20.0, 85.0)
+    # shown_totals covers exactly the 4 games shown, so an answer quotes it instead of adding.
+    total = p["shown_totals"]
+    assert total["games"] == 4 and total["weeks"] == [5, 6, 7, 8]
+    assert total["targets"] == sum(g["targets"] for g in p["games"])
+    assert total["targets"] != p["last_3"]["targets"]  # a different window than last_3
+    # A game without play-by-play makes the red-zone total unknown, never a partial sum.
+    looks = [g["rz_looks"] for g in p["games"]]
+    assert total["rz_looks"] == (None if None in looks else sum(looks))
+    if total["rz_looks"] is not None:  # the split is totalled too, so it isn't added up
+        assert total["rz_targets"] + total["rz_carries"] == total["rz_looks"]
     texts = [f["text"] for f in p["facts"]]
     assert "Targets rose in each of the last 3 games: 6, 8, 10 (weeks 6, 7, 8)" in texts
     with get_readonly_engine(season).connect() as conn:
