@@ -18,10 +18,9 @@ roster holes (byes, injuries, an empty slot): call optimize_lineup with the leag
 roster_id from <context>; it shows the whole roster.
 - Questions about news, signings, injuries, depth charts or job security: search_news, \
 besides any stats or projection tool.
-- Whether a named player is playing, active or hurt: get_injury_status, even for a bare \
-surname, besides any search_news.
-- Whether a named player is a good or safe start: project_player or compare_start_sit, \
-besides any search_news, even if the news may make the projection moot.
+- When the question itself asks whether a player it names is playing, active or hurt: \
+get_injury_status, even for a bare surname, besides any search_news. Not for players that \
+only appear in tool results, such as waiver candidates.
 - search_news also holds fantasy articles (rankings, rest-of-season values, waiver \
 columns for any league format) and analysis the stats tools can't compute (all-time \
 records, efficiency, clutch play, who leads a position group). For those, call \
