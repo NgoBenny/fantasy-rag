@@ -108,5 +108,7 @@ def problems(
     check("answer", answer.answer, shown)
     check("limitations", " ".join(answer.limitations), shown)
     meta = (answer.season, answer.week, answer.data_as_of, answer.scoring_format)
-    check("metadata", " ".join(str(m) for m in meta if m is not None), shown)
+    # A clarification cites nothing, but its as-of time still comes from this turn's results.
+    pool = list(sources) if evidence_free else shown
+    check("metadata", " ".join(str(m) for m in meta if m is not None), pool)
     return out
