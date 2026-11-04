@@ -165,6 +165,60 @@ def test_a_usage_citation_shows_each_players_own_games(season: str) -> None:
     assert page == shown
 
 
+def test_last_weeks_is_calendar_weeks_and_last_n_is_games(season: str) -> None:
+    """Free Agent (00-5, NE: no NE game before week 9) has a bye inside the window, Jefferson
+    (00-1, MIN) misses week 7 while his team plays: fewer games than weeks, each labelled."""
+    eng = create_engine(season)
+    with eng.begin() as c:
+        run = c.execute(text("SELECT min(id) FROM sync_runs")).scalar_one()
+        for week in (6, 8):
+            c.execute(text(
+                "INSERT INTO player_week_stats (season, week, season_type, player_id, game_id,"
+                " team, opponent, stats, sync_run_id) VALUES (2026, :w, 'REG', '00-5', :g,"
+                " 'NE', 'NYJ', '{\"targets\": 3}', :r)"),
+                {"w": week, "g": f"ne{week}", "r": run})  # fmt: skip
+        for table in ("player_week_stats", "snap_counts"):
+            c.execute(text(f"DELETE FROM {table} WHERE player_id = '00-1' AND week = 7"))
+    eng.dispose()
+
+    def usage(name: str, **window: int) -> dict[str, Any]:
+        args = {"players": [{"name": name}], **window}
+        with get_readonly_engine(season).connect() as conn:
+            r: dict[str, Any] = run_tool(conn, "get_usage", args)
+        return r
+
+    def weeks(r: dict[str, Any]) -> list[int]:
+        return [g["week"] for g in r["players"][0]["games"]]
+
+    def without(r: dict[str, Any]) -> list[dict[str, Any]]:
+        got: list[dict[str, Any]] = r["players"][0]["window"]["weeks_without_a_game"]
+        return got
+
+    by_weeks = usage("Free Agent", last_weeks=3)
+    assert "last_3" not in by_weeks["players"][0]  # no games-based total to quote by mistake
+    assert weeks(by_weeks) == [6, 8] and weeks(usage("Free Agent", last_n=3)) == [2, 6, 8]
+    assert by_weeks["players"][0]["shown_totals"]["targets"] == 6
+    assert without(by_weeks) == [{"week": 7, "status": "bye"}]
+    assert without(usage("Free Agent", last_weeks=2)) == [{"week": 7, "status": "bye"}]  # 1st week
+
+    missed = usage("Justin Jefferson", last_weeks=3)
+    assert weeks(missed) == [6, 8]
+    assert without(missed) == [{"week": 7, "status": "no recorded appearance"}]
+    assert weeks(usage("Justin Jefferson", last_n=3)) == [5, 6, 8]
+    assert weeks(usage("Justin Jefferson")) == [4, 5, 6, 8]  # default: 4 games
+
+    # The citation opens those weeks, and the page shows those games.
+    r = usage("Justin Jefferson", last_weeks=3)
+    assert _href(ToolCall("r1", "get_usage", {}, r)) == (
+        "/players/00-1?season=2026&start_week=6&end_week=8#usage")  # fmt: skip
+    with get_readonly_engine(season).connect() as conn:
+        ref = players_by_id(conn, ["00-1"])["00-1"]
+        page = _player_block(conn, ref, StatsWindow(season=2026, start_week=6, end_week=8))
+        with pytest.raises(ValueError, match="not both"):
+            run_tool(conn, "get_usage", {"players": [{"name": "Xy"}], "last_n": 3, "last_weeks": 3})
+    assert [g["week"] for g in page["usage"]["games"]] == weeks(r)
+
+
 def test_usage_citation_opens_the_same_players_and_weeks() -> None:
     one = {"players": [{"player": {"id": "00-1"}}], "season": 2026, "through_week": 8,
            "last_n": 4}  # fmt: skip

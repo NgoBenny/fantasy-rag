@@ -94,7 +94,21 @@ class CompareStartSit(ScoringChoice):
 class GetUsage(BaseModel):
     players: list[PlayerName] = Field(min_length=1, max_length=4)
     season: int | None = Field(default=None, ge=2022, le=2030)
-    last_n: int = Field(default=4, ge=1, le=8, description="completed games to show")
+    last_n: int | None = Field(
+        default=None, ge=1, le=8, description='"last N games": his last N games played (default 4)'
+    )
+    last_weeks: int | None = Field(
+        default=None,
+        ge=1,
+        le=18,
+        description='"last N weeks": the N latest completed calendar weeks, byes included',
+    )
+
+    @model_validator(mode="after")
+    def _one_window(self) -> "GetUsage":
+        if self.last_n and self.last_weeks:
+            raise ValueError("use last_n or last_weeks, not both")
+        return self
 
 
 class RankWaivers(BaseModel):
@@ -574,24 +588,30 @@ def get_usage(conn: Connection, a: GetUsage) -> dict[str, Any]:
     got, when = _usage(conn, refs, a.season)
     through = when["through_week"]
     schedule = u.team_weeks(conn, when["season"], through) if through else {}
+    start = max(1, through - a.last_weeks + 1) if a.last_weeks and through else None
+    last_n = None if a.last_weeks else a.last_n or 4
     players = []
     for r in refs:
         games = got[r.id]["games"]
-        shown = games[-a.last_n :]
+        shown = games[-last_n:] if last_n else [g for g in games if g["week"] >= (start or 1)]
         players.append({
             "player": r.model_dump(),
             "games": shown,
             # Totals and shares over exactly the games shown, so no answer has to add them up.
             "shown_totals": u.window(shown, len(shown)),
-            "window": u.window_meta(games, shown, schedule, through) if through else None,
-            "last_3": got[r.id]["window"],
+            "window": u.window_meta(games, shown, schedule, through, start) if through else None,
+            # Absent for a week window: a last-3-games total beside it reads as its answer.
+            **({} if a.last_weeks else {"last_3": got[r.id]["window"]}),
             "facts": got[r.id]["facts"],
         })  # fmt: skip
     return {
         "players": players,
         "season": when["season"],
-        "last_n": a.last_n,
-        # Each player's own last `last_n` games through this week (a page shows the same).
+        "last_n": last_n,
+        "last_weeks": a.last_weeks,
+        "start_week": start,
+        # Each player's own last `last_n` games through this week, or every game from
+        # `start_week` to it (a page shows the same).
         "through_week": when["through_week"],
         "as_of": when,
         "definitions": USAGE_DEFINITIONS,
@@ -604,7 +624,9 @@ USAGE_DEFINITIONS = (
     "averages: e.g. last_3 snap_pct is the player's share of all team offensive snaps across "
     "those games (snap_pct_approx when a team total was estimated). Red-zone looks = targets "
     "+ carries inside the opponent's 20 (goal-line carries, inside the 5, are a subset); null "
-    "means no play-by-play for that game. `games` shows only the last `last_n` recorded games: "
+    "means no play-by-play for that game. `games` shows only the last `last_n` recorded games, "
+    "or with `last_weeks` every game from `start_week` to `through_week`, so fewer games than "
+    "weeks after a bye or a missed game: "
     "earlier games are outside the requested window (window.season_games_recorded, "
     "games_outside_requested_window), not missing. shown_totals sums exactly the games shown "
     "(targets, carries, red-zone looks; shares as totals): quote it, never add up `games`. "
