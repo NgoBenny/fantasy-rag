@@ -11,16 +11,26 @@ $ErrorActionPreference = "Continue"
 $repo = Split-Path -Parent $PSScriptRoot
 $logDir = Join-Path $repo "data\logs"
 New-Item -ItemType Directory -Force $logDir | Out-Null
-$name = @{ daily = "ingest"; news = "news"; forward = "forward"; "forward-check" = "forward"; backup = "backup" }[$Job]
+# One log per job: Out-File holds its file for a whole pipeline, and catch-up runs start together.
+$name = if ($Job -eq "daily") { "ingest" } else { $Job }
 $log = Join-Path $logDir ("{0}_{1}.log" -f $name, (Get-Date -Format "yyyy-MM"))
 
 # Exit with the job's code; a failure also shows a toast (logs hold the details).
 function Finish([int]$code, [string]$message) {
     if ($code -ne 0) {
-        & (Join-Path $PSScriptRoot "notify.ps1") -Title "fantasy-rag: $Job failed" -Message $message |
-            Out-File -Append -Encoding utf8 $log
+        # Toast first, then log: a locked log must not cost the toast.
+        $out = & (Join-Path $PSScriptRoot "notify.ps1") -Title "fantasy-rag: $Job failed" -Message $message
+        $out | Out-File -Append -Encoding utf8 $log
     }
     exit $code
+}
+
+# One CLI step, logged. If the log can't be opened (another copy of this job holds it) PowerShell
+# never starts the command and keeps the last exit code; 99 keeps that from reading as success.
+function Step {
+    $global:LASTEXITCODE = 99
+    uv run fantasy-rag @args 2>&1 | Out-File -Append -Encoding utf8 $log
+    $LASTEXITCODE
 }
 
 "=== $(Get-Date -Format o)" | Out-File -Append -Encoding utf8 $log
@@ -40,8 +50,7 @@ docker compose up -d --wait db 2>&1 | Out-File -Append -Encoding utf8 $log
 Set-Location (Join-Path $repo "backend")
 $env:PYTHONIOENCODING = "utf-8"
 if ($Job -eq "news") {
-    uv run fantasy-rag ingest news 2>&1 | Out-File -Append -Encoding utf8 $log
-    $newsExit = $LASTEXITCODE
+    $newsExit = Step ingest news
     # Refresh the Phase 4 evidence after every run: stories per source (last 48 hours)
     # and how many rostered-player mentions carry the player's ID. Written to a temp file
     # first, so a failed report never replaces the last good one.
@@ -60,8 +69,7 @@ if ($Job -eq "news") {
     }
     Remove-Item -Force $err -ErrorAction SilentlyContinue
     # Sleeper adds/drops/trades since the last roster import (waiver availability).
-    uv run fantasy-rag league sync-transactions 2>&1 | Out-File -Append -Encoding utf8 $log
-    $txExit = $LASTEXITCODE
+    $txExit = Step league sync-transactions
     "exit=$newsExit report=$reportExit transactions=$txExit" | Out-File -Append -Encoding utf8 $log
     # Task Scheduler must see a failure from any step.
     if ($newsExit -eq 0) { $newsExit = $reportExit }
@@ -75,30 +83,24 @@ if ($Job -eq "forward-check") {
     Finish $code "$msg"
 }
 if ($Job -eq "backup") {
-    uv run fantasy-rag backup 2>&1 | Out-File -Append -Encoding utf8 $log
-    $code = $LASTEXITCODE
+    $code = Step backup
     if ($code -eq 0 -and (Get-Date).DayOfWeek -eq "Sunday") {
-        uv run fantasy-rag backup --verify-latest 2>&1 | Out-File -Append -Encoding utf8 $log
-        $code = $LASTEXITCODE
+        $code = Step backup --verify-latest
     }
     Finish $code "backup or restore drill failed (exit $code); see $log"
 }
 if ($Job -eq "forward") {
-    uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
-    $ingestExit = $LASTEXITCODE
+    $ingestExit = Step ingest structured
     # Predict even if the ingest failed: the run records the data it had and when (its
     # snapshot time), and is marked late if that is after Tuesday noon ET.
-    uv run fantasy-rag predict 2>&1 | Out-File -Append -Encoding utf8 $log
-    $predictExit = $LASTEXITCODE
+    $predictExit = Step predict
     "exit=$ingestExit predict=$predictExit" | Out-File -Append -Encoding utf8 $log
     $code = if ($predictExit -ne 0) { $predictExit } else { $ingestExit }
     Finish $code "forward run: ingest exit $ingestExit, predict exit $predictExit; see $log"
 }
-uv run fantasy-rag ingest structured 2>&1 | Out-File -Append -Encoding utf8 $log
-$ingestExit = $LASTEXITCODE
+$ingestExit = Step ingest structured
 # League rosters and matchups (needs SLEEPER_USERNAME in .env; fails without it).
-uv run fantasy-rag league import 2>&1 | Out-File -Append -Encoding utf8 $log
-$leagueExit = $LASTEXITCODE
+$leagueExit = Step league import
 "exit=$ingestExit league=$leagueExit" | Out-File -Append -Encoding utf8 $log
 # Task Scheduler must see a failure if either job failed, or stale data looks fresh.
 $code = if ($ingestExit -ne 0) { $ingestExit } else { $leagueExit }

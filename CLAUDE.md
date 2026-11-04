@@ -211,6 +211,7 @@ docker compose --profile demo up api-demo      # demo API: sample data, no .env,
 powershell -File scripts/setup_runner.ps1           # create/update the runner checkout (reviewed main); refuses while a task runs
 powershell -File scripts/setup_runner.ps1 -Register # same, then (re-)register every task to run from it
 powershell -File scripts/tests/test_pause_tasks.ps1  # update-window regression test (throwaway tasks; Windows only)
+powershell -File scripts/tests/test_ingest_daily.ps1  # jobs with a locked log: never a silent exit 0 (throwaway copy, fake uv/docker; Windows only)
 powershell -File scripts/register_daily_ingest.ps1   # registers tasks for the checkout it's run from; daily 6pm + Wed-Sat 2pm/9pm; logs in that checkout's data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
 powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news"); refreshes data/logs/news_report.json
