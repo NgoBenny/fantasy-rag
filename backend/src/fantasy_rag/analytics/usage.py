@@ -223,15 +223,17 @@ def window_meta(
     shown: list[dict[str, Any]],
     schedule: dict[str, set[int]],
     through_week: int,
+    start_week: int | None = None,
 ) -> dict[str, Any]:
     """What a shown window leaves out, stated rather than left to guess: the season's
     recorded games vs those shown (the rest are outside the requested window), and every
-    week inside the window without a recorded game. A week is a bye only when the
+    week inside the window without a recorded game. The window starts at `start_week`
+    (a calendar-week window), else at the first game shown. A week is a bye only when the
     player's one team this season has no scheduled game that week; a week his team played
     is "no recorded appearance"; with no single known team it is "unknown"."""
     teams = {g["team"] for g in games if g.get("team")}
     team = next(iter(teams)) if len(teams) == 1 else None
-    start = shown[0]["week"] if shown else 1
+    start = start_week or (shown[0]["week"] if shown else 1)
     played = {g["week"] for g in games}
     without = []
     for week in range(start, through_week + 1):

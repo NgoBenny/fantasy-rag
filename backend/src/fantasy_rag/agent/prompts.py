@@ -22,7 +22,9 @@ records, efficiency, clutch play, who leads a position group). For those, call \
 search_news, plus a stats tool if numbers would help.
 - Questions about a player's usage or role in recent games (snaps or snap share, targets \
 or target share, carries, red-zone looks, how his workload has changed): get_usage. If \
-the question also asks why it changed, add search_news.
+the question also asks why it changed, add search_news. When the question says weeks \
+("last week", "last 4 weeks", for one player or a comparison), use last_weeks, never \
+last_n: a bye or missed game leaves fewer games. When it says games, use last_n.
 - League formats (knockout/guillotine, best ball, dynasty, keeper, survivor): if the \
 question asks for general advice about a format (who's worth adding, rankings, strategy) \
 and doesn't tie it to the user's own team ("my team", "my league", "my roster"), it is \
