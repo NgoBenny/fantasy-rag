@@ -9,7 +9,13 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
 
 from fantasy_rag.agent.tools import run_tool
-from fantasy_rag.analytics.queries import AmbiguousPlayer, resolve_player, weekly_rows
+from fantasy_rag.analytics import queries
+from fantasy_rag.analytics.queries import (
+    AmbiguousPlayer,
+    league_roster,
+    resolve_player,
+    weekly_rows,
+)
 from fantasy_rag.db import get_readonly_engine
 
 pytestmark = pytest.mark.db
@@ -51,6 +57,26 @@ def test_no_team_hint_never_picks_a_player_with_no_team(db: str) -> None:
         with pytest.raises(AmbiguousPlayer) as err:
             resolve_player(conn, "Mike Williams")
         assert {c.id for c in err.value.candidates} == {"00-3", "00-4"}
+        tx.rollback()
+
+
+def test_the_eval_can_read_rosters_as_of_a_week(db: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    with create_engine(db).connect() as conn, conn.begin() as tx:
+        before = conn.execute(
+            text("SELECT league_id, roster_id, week, sync_run_id FROM fantasy_rosters LIMIT 1")
+        ).one()
+        later = before.week + 1
+        conn.execute(
+            text(
+                "INSERT INTO fantasy_rosters (league_id, roster_id, week, player_ids, sync_run_id)"
+                " VALUES (:l, :r, :w, '{}', :s)"
+            ),
+            {"l": before.league_id, "r": before.roster_id, "w": later, "s": before.sync_run_id},
+        )
+        args = (conn, before.league_id, before.roster_id)
+        assert league_roster(*args)["week"] == later  # chat always reads the latest
+        monkeypatch.setattr(queries, "ROSTER_WEEK", before.week)
+        assert league_roster(*args)["week"] == before.week
         tx.rollback()
 
 

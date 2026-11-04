@@ -13,6 +13,9 @@ four no-support news questions on the answer only (it must not confirm the rumou
 Scores are reported under the original rubric and under the revised one
 (`route_overrides` in golden_answers.yaml). Every row keeps the full answer, the rejected
 draft and each tool call with its result, so answers can be audited without rerunning.
+
+Rosters are read as of `roster_week` in golden_answers.yaml, the week the questions were
+written against. Stats, news and projections stay live, so `correct_if` needs that in mind.
 """
 
 import json
@@ -25,6 +28,7 @@ from sqlalchemy import Connection
 from fantasy_rag.agent.llm import ChatLLM, LLMUnavailable
 from fantasy_rag.agent.router import MyLeague, ToolCall, Turn, ask, my_leagues
 from fantasy_rag.agent.tools import TOOLS, run_tool
+from fantasy_rag.analytics import queries
 from fantasy_rag.config import REPO_ROOT
 
 EVAL = REPO_ROOT / "backend" / "tests" / "eval"
@@ -90,6 +94,17 @@ def _identity(result: dict[str, Any] | None) -> list[str]:
     )  # fmt: skip
 
 
+def _game_weeks(result: dict[str, Any] | None) -> dict[str, list[int]]:
+    """The weeks of the games a stats or usage result actually covers, per player ID."""
+    if not result:
+        return {}
+    return {
+        b["player"]["id"]: [g["week"] for g in b.get("by_week", b.get("games", []))]
+        for b in result.get("players") or [result]
+        if "player" in b
+    }
+
+
 def route_problems(
     q: dict[str, Any],
     turn: Turn,
@@ -104,8 +119,21 @@ def route_problems(
     if not q.get("category", "").startswith("ambiguous"):
         out += [f"{c.name} failed: {c.error}" for c in turn.calls if c.error]
     if golden_identity is not None and selected:
-        tool = q["golden_call"][0]
-        if not any(_identity(c.result) == golden_identity for c in turn.calls if c.name == tool):
+        tool, alt = q["golden_call"][0], q.get("golden_alt")
+        # golden_alt: another tool that answers it, over exactly the games the golden call covers
+        # (get_player_stats' last_n counts weeks and get_usage's counts games: a bye splits them)
+        alt_ok = (
+            alt is not None
+            and not _requirement_problems(alt, turn.calls)
+            and any(
+                _game_weeks(c.result) == q["golden_games"]
+                for c in turn.calls
+                if c.name == alt["tool"]
+            )
+        )
+        if not alt_ok and not any(
+            _identity(c.result) == golden_identity for c in turn.calls if c.name == tool
+        ):
             out.append(f"{tool} not called for the golden player/weeks/scoring")
     out += [f"unknown tool {c.name}" for c in turn.calls if c.name not in TOOLS]
     known = [c for c in turn.calls if c.name in TOOLS]
@@ -164,7 +192,8 @@ def grade(
         rubrics["revised"] = _alts(ov["tools"]) if "tools" in ov else q["tools"]
         for name, tools in rubrics.items():
             # an override may also replace the question's intent checks (revised only)
-            qr = {**q, "require": ov["require"]} if name == "revised" and "require" in ov else q
+            revised = {k: ov[k] for k in ("require", "golden_alt") if k in ov}
+            qr = {**q, **revised} if name == "revised" else q
             selected, wrong = route_problems(qr, turn, tools, golden_identity, mine)
             if name == "revised" and ov.get("also_accept") == a.answer_type and not turn.calls:
                 selected, wrong = True, []
@@ -202,25 +231,37 @@ def _rate(rows: list[dict[str, Any]], key: str) -> float | None:
     return round(sum(r[key] for r in rows) / len(rows), 3) if rows else None
 
 
+def _golden(conn: Connection, q: dict[str, Any]) -> list[str] | None:
+    """What the golden call resolves to (a direct call, no LLM); keeps its games on `q`."""
+    if "golden_call" not in q:
+        return None
+    result = run_tool(conn, *q["golden_call"])
+    q["golden_games"] = _game_weeks(result)
+    return _identity(result)
+
+
 def run_golden(
     conn: Connection, llm: ChatLLM, username: str, only: set[str] | None = None
 ) -> dict[str, Any]:
     leagues = my_leagues(conn, username)
     mine = {lg.league_id: lg.roster_id for lg in leagues}
     rows, stopped = [], None
-    for q in golden_questions():
-        if only and q["id"] not in only and q["set"] not in only:
-            continue
-        golden = None
-        if "golden_call" in q:
-            golden = _identity(run_tool(conn, *q["golden_call"]))  # direct call, no LLM
-        scoped, selected = _context(q, leagues)
-        try:
-            turn = ask(conn, llm, q["question"], scoped, selected)
-        except LLMUnavailable as e:  # e.g. a free model's daily limit: keep what was graded
-            stopped = f"{q['id']}: {e}"
-            break
-        rows.append(grade(q, turn, golden, mine))
+    saved = queries.ROSTER_WEEK
+    queries.ROSTER_WEEK = _load("golden_answers.yaml")["roster_week"]
+    try:
+        for q in golden_questions():
+            if only and q["id"] not in only and q["set"] not in only:
+                continue
+            golden = _golden(conn, q)
+            scoped, selected = _context(q, leagues)
+            try:
+                turn = ask(conn, llm, q["question"], scoped, selected)
+            except LLMUnavailable as e:  # e.g. a free model's daily limit: keep what was graded
+                stopped = f"{q['id']}: {e}"
+                break
+            rows.append(grade(q, turn, golden, mine))
+    finally:
+        queries.ROSTER_WEEK = saved
     summary = _summary(rows) | {"tokens": llm.usage, "cost_usd": round(llm.cost_usd(), 4),
                                 "models": sorted(llm.usage), "stopped": stopped}  # fmt: skip
     return {"summary": summary, "rows": rows}
@@ -231,7 +272,13 @@ def _summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     fresh = [r for r in rows if r["set"] == "fresh"]
     typed = [r for r in rows if r["type_ok"] is not None]
     lat = sorted(r["latency_ms"] for r in rows)
-    out: dict[str, Any] = {"questions": len(rows), "routed_questions": len(routed)}
+    week = _load("golden_answers.yaml")["roster_week"]
+    out: dict[str, Any] = {
+        "questions": len(rows),
+        "routed_questions": len(routed),
+        "conditions": f"rosters as of week {week}, as stored at run time; waivers, stats, news,"
+        " injuries and projections live at run time",
+    }
     for rubric in ("original", "revised"):
         out[rubric] = {
             "tool_selection_accuracy": _rate(routed, f"{rubric}_tools_ok"),
@@ -274,6 +321,6 @@ def rescore(conn: Connection, report: dict[str, Any], username: str) -> dict[str
                     old["first_draft_problems"], old["problems"], rejected,
                     old["hit_round_limit"], old["latency_ms"], old.get("usage", {}),
                     context=old.get("context", ""), first_draft=first_draft)  # fmt: skip
-        golden = _identity(run_tool(conn, *q["golden_call"])) if "golden_call" in q else None
+        golden = _golden(conn, q)
         rows.append(grade(q, turn, golden, mine))
     return {"summary": _summary(rows) | {"rescored_from": report["summary"]}, "rows": rows}
