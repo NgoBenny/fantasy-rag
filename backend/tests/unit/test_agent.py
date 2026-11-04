@@ -232,6 +232,32 @@ def test_route_checks_arguments_and_errors() -> None:
     assert bad == ["optimize_lineup used league 3, not 1", "optimize_lineup used roster 9"]
 
 
+def test_golden_alt_needs_the_same_player_and_games() -> None:
+    from fantasy_rag.agent.evaluate import _game_weeks, _identity, route_problems
+
+    golden = {"player": {"id": "00-1"}, "season": 2026, "weeks": [5, 7], "scoring": "ppr",
+              "by_week": [{"week": 5}, {"week": 7}]}  # fmt: skip
+    q = {"id": "s01", "golden_call": ("get_player_stats", {}), "context": {"selected": None},
+         "golden_alt": {"tool": "get_usage", "players": ["Amon-Ra St. Brown"]},
+         "golden_games": _game_weeks(golden)}  # fmt: skip
+    tools = [["get_player_stats", "get_usage"]]
+
+    def usage(name: str, player_id: str, *weeks: int) -> router.ToolCall:
+        games = [{"week": w} for w in weeks]
+        result = {"players": [{"player": {"id": player_id, "name": name}, "games": games}]}
+        return router.ToolCall("r1", "get_usage", {}, result)
+
+    def wrong(*calls: router.ToolCall) -> list[str]:
+        return route_problems(q, _fake_turn(*calls), tools, _identity(golden), {})[1]
+
+    missed = ["get_player_stats not called for the golden player/weeks/scoring"]
+    assert wrong(usage("Amon-Ra St. Brown", "00-1", 5, 7)) == []
+    # "last 3 weeks" with a week 6 bye: three games reach back to week 4, a different total.
+    assert wrong(usage("Amon-Ra St. Brown", "00-1", 4, 5, 7)) == missed
+    assert wrong(usage("Jameson Williams", "00-2", 5, 7)) == missed  # a different player
+    assert wrong(router.ToolCall("r1", "get_player_stats", {}, golden)) == []
+
+
 def test_an_unknown_tool_is_a_wrong_route_not_a_crash() -> None:
     from fantasy_rag.agent.evaluate import route_problems
 
@@ -313,6 +339,10 @@ def test_fresh_questions_stay_out_of_the_frozen_route_score() -> None:
     assert fresh["f07"]["tools"] == [] and fresh["f07"]["expect_type"] == "clarification"
     assert fresh["f08"]["replaces"] == "f05" and "f05" in fresh  # the original stays
     assert "compare_players" in fresh["f02"]["override"]["tools"][0]
+    by_id = {q["id"]: q for q in qs}
+    assert by_id["s01"]["tools"] == [["get_player_stats"]]  # the original rubric never changes
+    assert by_id["a07"]["tools"] == [["optimize_lineup"], ["rank_waivers"]]
+    assert by_id["s01"]["override"]["golden_alt"]["tool"] == "get_usage"
 
 
 def test_a_failed_tool_call_is_not_evidence(monkeypatch: pytest.MonkeyPatch) -> None:

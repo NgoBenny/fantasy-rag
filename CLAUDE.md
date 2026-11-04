@@ -29,6 +29,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 - Phase 0 is on `main`. Every later phase: branch `phase-N`, open a PR, let CI gate the merge.
 - If a data source behaves differently from PLAN.md: stop, show what was observed, propose an alternative. Schema-row corrections go into PLAN.md and are listed in the report.
 - Never report a test as passing unless it was run.
+- Do not design for rare or future cases nobody asked about.
 - The repo is public: never commit league IDs, usernames, owner names or other personal data (including in `docs/data_sources.md`).
 
 ## Repo layout

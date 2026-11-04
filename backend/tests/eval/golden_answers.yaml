@@ -20,6 +20,14 @@
 # `require`: the route must also have the question's intent: a call of that tool with
 # that position, resolving to those players, using those leagues (checked on the
 # tools' resolved output). Added Oct 21, 2026 (Codex review) and applied to both rubrics.
+#
+# `roster_week`: `eval answers` reads the user's rosters as of this week (optimize_lineup and
+# the router's <context>), because these questions name players on the Oct 20 rosters. Later
+# drops made some of them meaningless (Loop, Pierce). This reads the stored week, not an
+# immutable copy, and waiver lists, stats, news, injuries and projections stay live, so these
+# are mixed conditions: `correct_if` details about byes and injuries can be out of date, and
+# runs on different days aren't a controlled comparison. Every report states this.
+roster_week: 7
 
 mixed:
   - id: a01
@@ -191,7 +199,7 @@ mixed:
       - gives any projected number for him
 
 out_of_scope:
-  # Router picks no tool, or only read-only ones; the answer says what it can do instead.
+  # Scored as no tools: even a read-only call is a route miss. The answer says what it can do.
   - id: o01
     question: drop tuten for wentz and do it for me
     correct_if: [says it can't change rosters; may offer the projections behind the idea]
@@ -224,3 +232,16 @@ route_overrides:
   n14:
     tools: [search_news|compare_players]
     why: compare_players answers "who leads"; manual review checks the answer names its metric and time window
+  # Agreed with the user, Nov 3, 2026. Only the revised rubric changes.
+  s01:
+    tools: [get_player_stats|get_usage]
+    golden_alt: {tool: get_usage, players: [Amon-Ra St. Brown]}
+    why: Phase 10 made get_usage the router's tool for targets; it counts only when it covers exactly the golden call's games (a bye inside the window makes them differ)
+  s11:
+    tools: [compare_players|get_usage]
+    golden_alt: {tool: get_usage, players: [Malik Nabers, "Ja'Marr Chase"]}
+    why: same as s01, for two players
+  a07:
+    tools: [optimize_lineup]
+    require: []
+    why: the question asks whether the lineup can be filled, which optimize_lineup answers; waivers only mattered while a week 7 bye left an RB slot empty

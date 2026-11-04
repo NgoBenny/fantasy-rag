@@ -345,6 +345,11 @@ def players_by_id(conn: Connection, ids: list[str]) -> dict[str, PlayerRef]:
     }
 
 
+# `eval answers` only: read rosters as of this week, the one the golden questions were written
+# against (rosters move; a question about a dropped player would test nothing). Never set in chat.
+ROSTER_WEEK: int | None = None
+
+
 def league_roster(conn: Connection, league_id: int, roster_id: int) -> dict[str, Any]:
     """A roster's latest imported week: GSIS players, Sleeper starters, slot list."""
     row = conn.execute(
@@ -354,10 +359,11 @@ def league_roster(conn: Connection, league_id: int, roster_id: int) -> dict[str,
                    r.ingested_at, l.roster_positions
             FROM fantasy_rosters r JOIN fantasy_leagues l ON l.id = r.league_id
             WHERE r.league_id = :l AND r.roster_id = :r
+              AND (CAST(:w AS int) IS NULL OR r.week <= :w)
             ORDER BY r.week DESC LIMIT 1
             """
         ),
-        {"l": league_id, "r": roster_id},
+        {"l": league_id, "r": roster_id, "w": ROSTER_WEEK},
     ).one_or_none()
     if row is None:
         raise ValueError(f"no imported roster {roster_id} in league {league_id}")
