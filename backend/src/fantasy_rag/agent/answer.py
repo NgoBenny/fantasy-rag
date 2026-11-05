@@ -25,7 +25,8 @@ AnswerType = Literal[
 EVIDENCE_FREE_TYPES = {"clarification", "out_of_scope", "no_data"}
 # The one way to state a search's window. The window is a request, not evidence, so a bare
 # "14" or "14 days" elsewhere (an injury's length, say) must still pass the number check.
-SEARCH_SCOPE = "News search covered the last {days} days."
+SEARCH_SCOPE = "News search looked back {days} days."
+_SCOPE_SHAPE = re.compile(re.escape(SEARCH_SCOPE).replace(r"\{days\}", r"\S+"))
 
 
 class Claim(BaseModel):
@@ -84,7 +85,8 @@ def problems(
     limitations and the metadata must appear in some result the answer cites (metadata
     of an evidence-free type: any result this turn). Numbers the user typed in the
     question are never evidence. `searched_days` lists the windows of searches that ran; a
-    limitation that is exactly SEARCH_SCOPE for one of them skips the number check.
+    limitation that is exactly SEARCH_SCOPE for the narrowest skips the number check (it
+    is true of every search that way), and that sentence with any other window is rejected.
     """
     out: list[str] = []
     trusted = _known(context)
@@ -115,8 +117,11 @@ def problems(
         out.append("no_data must describe missing evidence, not give a categorical yes/no")
     shown = sorted(cited & sources.keys())
     check("answer", answer.answer, shown)
-    scopes = {SEARCH_SCOPE.format(days=d) for d in searched_days}
-    check("limitations", " ".join(x for x in answer.limitations if x.strip() not in scopes), shown)
+    scope = SEARCH_SCOPE.format(days=min(searched_days)) if searched_days else None
+    plain = [x for x in answer.limitations if x.strip() != scope]
+    if wrong := [x.strip() for x in plain if _SCOPE_SHAPE.fullmatch(x.strip())]:
+        out.append(f"search window: use the smallest days of the searches run, not {wrong}")
+    check("limitations", " ".join(x for x in plain if x.strip() not in wrong), shown)
     meta = (answer.season, answer.week, answer.data_as_of, answer.scoring_format)
     # An evidence-free answer may cite nothing, but its as-of time comes from this turn's results.
     pool = list(sources) if evidence_free else shown

@@ -384,7 +384,11 @@ def failed_ids(calls: list[ToolCall]) -> set[str]:
 
 def searched_days(calls: list[ToolCall]) -> set[int]:
     """The windows of searches that ran; a failed search has no result, so it never counts."""
-    return {c.result["days"] for c in calls if c.name == "search_news" and c.result}
+    return {
+        c.result["days"]
+        for c in calls
+        if c.name == "search_news" and c.result and "days" in c.result  # older saved reports
+    }
 
 
 def _repair_input(content: str, answer: Answer, found: list[str]) -> str:

@@ -170,3 +170,14 @@ def test_cli_audits_a_saved_report_without_rerunning_answers(
     with pytest.raises(SystemExit) as exc:
         cli.main(["eval", "grounding"])
     assert exc.value.code == 2
+
+
+def test_audit_accepts_the_search_scope_sentence_and_shows_the_window() -> None:
+    saved = _report()
+    row = saved["rows"][0]
+    row["answer"]["limitations"] = ["News search looked back 14 days."]
+    row["calls"][0].update(tool="search_news", result={"days": 14, "results": []})
+    reviewer = Reviewer()
+    audited = audit_saved(saved, reviewer, only={row["id"]})["rows"][0]
+    assert audited["validation_problems"] == [] and audited["unverifiable"] == []
+    assert reviewer.seen[0]["search_windows"] == [14]

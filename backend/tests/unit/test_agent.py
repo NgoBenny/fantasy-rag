@@ -470,9 +470,8 @@ def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
     calls = [_searched(14)]
     srcs, windows = router.sources(calls), router.searched_days(calls)
     assert SEARCH_SCOPE.format(days="N") in WRITER_SYSTEM
-    said = "News search covered the last 14 days."
+    said = "News search looked back 14 days."
     assert problems(_limited(said), srcs, "", (), windows) == []
-    assert problems(_limited(said), srcs, "", (), {30}) == ["limitations: 14 not in r1"]
     for unsafe in (
         "Henry will miss 14 days.",
         "Henry has 14 touchdowns.",
@@ -490,10 +489,34 @@ def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
     assert problems(touchdowns, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
 
 
+def test_the_scope_sentence_with_any_other_window_fails_even_if_the_number_is_evidence() -> None:
+    # Review cases: 30 is in the cited evidence, but it is not the narrowest search that ran.
+    srcs = {"r1": "Out 30 days."}
+    said = "News search looked back 30 days."
+    wrong = [f"search window: use the smallest days of the searches run, not {[said]}"]
+    assert problems(_limited(said), srcs, "", (), {14}) == wrong
+    assert problems(_limited(said), srcs, "") == wrong  # no search ran
+    assert problems(_limited(said), srcs, "", (), {30, 7}) == wrong
+    assert problems(_limited("News search looked back 7 days."), srcs, "", (), {30, 7}) == []
+
+
 def test_a_failed_search_has_no_window() -> None:
     failed = router.ToolCall("r1", "search_news", {"days": 14}, error="search failed")
     assert router.searched_days([failed]) == set()
-    a = _limited("News search covered the last 14 days.")
-    assert problems(a, router.sources([failed]), "", {"r1"}, router.searched_days([failed])) == [
-        "limitations: 14 not in any cited result"
+    said = "News search looked back 14 days."
+    assert problems(_limited(said), router.sources([failed]), "", {"r1"}, set()) == [
+        f"search window: use the smallest days of the searches run, not {[said]}"
     ]
+
+
+def test_a_saved_search_without_days_has_no_window() -> None:
+    old = router.ToolCall("r1", "search_news", {}, {"since": "x", "results": []})
+    assert router.searched_days([old]) == set()
+
+
+def test_ask_passes_the_window_to_the_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(router, "context_block", lambda *a: "<context>week 7</context>")
+    monkeypatch.setattr(router, "route", lambda *a: ([_searched(14)], False))
+    draft = _limited("News search looked back 14 days.")
+    turn = router.ask(None, WriterLLM([draft]), "Any news?")  # type: ignore[arg-type]
+    assert turn.first_problems == [] and turn.answer is draft
