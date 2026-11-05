@@ -1,7 +1,7 @@
 # Runs one scheduled job and appends the result to data/logs.
 #   -Job daily (default): structured ingest (snapshots) + league import
 #   -Job news: news feeds -> documents, chunks, embeddings; Sleeper transactions
-#   -Job forward: Tuesday 16:00 ET: fresh stats, then the Phase 8 forward run (predict)
+#   -Job forward: Tuesday 16:00 and 18:00 ET: fresh stats, then the Phase 8 forward run (predict)
 #   -Job forward-check: Tuesday 20:30 ET: toast if this week's on-time forward run is missing
 #   -Job backup: verified dump outside the repo; on Sundays also the restore drill
 # Any failing job shows a Windows toast (scripts/notify.ps1); details stay in data/logs.

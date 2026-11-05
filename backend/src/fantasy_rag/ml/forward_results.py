@@ -51,9 +51,10 @@ def tuesdays(conn: Connection, now: datetime) -> list[dict[str, Any]]:
 
 
 def check(conn: Connection, now: datetime) -> tuple[bool, str]:
-    """Pre-deadline check: True once the upcoming week has an on-time run. Otherwise False
-    when the most recent passed deadline has no on-time run (so a check that runs days late
-    still reports the miss), or the upcoming week's deadline is less than WARN_BEFORE away."""
+    """Pre-deadline check: True once the upcoming week has an on-time run, even if an earlier
+    miss was never reported (the Model page still shows it). Otherwise False when the most
+    recent passed deadline has no on-time run (so a check that runs days late still reports
+    the miss), or the upcoming week's deadline is less than WARN_BEFORE away."""
     sched = _schedule(conn)
     upcoming, over = None, ""
     try:

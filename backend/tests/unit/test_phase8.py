@@ -219,6 +219,13 @@ def test_the_forward_run_labels_its_snapshot_and_logs_te_ridge_beside_the_baseli
     in_time = forecast(gs, sched, FORMATS, last_call - timedelta(minutes=1), {})
     assert (in_time.status, in_time.cutoff) == ("on_time", deadline)
     assert in_time.newest_game == f.newest_game
+    # A make-up game inside the later snapshot's extra hours stays out of the features.
+    kick = deadline - timedelta(hours=9)  # after cutoff - LAG, before any on-time snapshot
+    p0 = gs[0]
+    made_up = replace(p0, week=5, game_id="MAKEUP", kickoff=kick)
+    late_data = forecast([*gs, made_up], sched, FORMATS, last_call - timedelta(minutes=1), {})
+    assert late_data.newest_game == f.newest_game
+    assert all(r.latest_input != kick for r in late_data.rows)
     # Same Thursday-before-kickoff week, but after the deadline: late, never on time.
     assert forecast(gs, sched, FORMATS, last_call + timedelta(minutes=1), {}).status == "late"
     # Before the last game of the previous week could be in: early.

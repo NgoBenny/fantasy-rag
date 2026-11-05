@@ -22,6 +22,7 @@ from fantasy_rag.analytics.scoring import ScoringRules, score
 from fantasy_rag.ml import baseline, ranges
 from fantasy_rag.ml.benchmark import CALIBRATE, load, run_policy
 from fantasy_rag.ml.features import (
+    DEADLINE_AFTER_CUTOFF,
     LAG,
     POSITIONS,
     Game,
@@ -71,11 +72,6 @@ def target_week(sched: list[dict[str, Any]], snapshot: datetime) -> tuple[int, i
     if not upcoming:
         raise NoUpcomingWeek("no upcoming regular-season week")
     return min(upcoming)
-
-
-# Features still stop at the Tuesday noon cutoff; only the time a run may start moved
-# (docs/phase8_plan.md, amendment of Nov 4, 2026).
-DEADLINE_AFTER_CUTOFF = timedelta(hours=9)
 
 
 def deadlines(sched: list[dict[str, Any]]) -> dict[tuple[int, int], datetime]:

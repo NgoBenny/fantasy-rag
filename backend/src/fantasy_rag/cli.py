@@ -333,7 +333,8 @@ def _eval_grounding(report_path: str, only: str | None) -> None:
 
 def _predict() -> None:
     from fantasy_rag.db import get_engine
-    from fantasy_rag.ml.predict import DEADLINE_AFTER_CUTOFF, run
+    from fantasy_rag.ml.features import DEADLINE_AFTER_CUTOFF
+    from fantasy_rag.ml.predict import run
 
     r = run(get_engine())
     if "skipped" in r:

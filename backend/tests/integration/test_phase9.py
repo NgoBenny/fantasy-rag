@@ -334,3 +334,29 @@ def test_usage_is_failing_when_snaps_or_play_by_play_usage_fail(eng: Engine) -> 
     assert stamp["updated_at"] == min(stamp["stats_updated_at"], stamp["snaps_updated_at"],
                                       stamp["pbp_updated_at"])  # fmt: skip
     assert stamp["snaps_updated_at"] is not None
+
+
+def test_the_model_page_gets_the_run_deadline_not_the_feature_cutoff(eng: Engine) -> None:
+    from fastapi.testclient import TestClient
+
+    from fantasy_rag.api.main import app, get_conn
+
+    run = _run(eng, 10, "on_time")
+    noon = datetime(2026, 11, 10, 12, tzinfo=ET)
+    with eng.begin() as c:
+        c.execute(text("ALTER TABLE forward_runs DISABLE TRIGGER USER"))
+        c.execute(
+            text("UPDATE forward_runs SET cutoff_at = :n WHERE id = :i"), {"n": noon, "i": run}
+        )
+        c.execute(text("ALTER TABLE forward_runs ENABLE TRIGGER USER"))
+
+    def conn() -> Any:
+        with eng.connect() as c:
+            yield c
+
+    app.dependency_overrides[get_conn] = conn
+    try:
+        row = TestClient(app).get("/api/forward-runs").json()["runs"][0]
+    finally:
+        app.dependency_overrides.clear()
+    assert datetime.fromisoformat(row["deadline_at"]) == datetime(2026, 11, 10, 21, tzinfo=ET)

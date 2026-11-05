@@ -20,6 +20,9 @@ from fantasy_rag.analytics.scoring import ScoringRules, score
 from fantasy_rag.ml.baseline import HALF_LIFE, ewm
 
 ET = ZoneInfo("America/New_York")
+# Features still stop at the Tuesday noon cutoff; only the time a forward run may start
+# moved (docs/phase8_plan.md, amendment of Nov 4, 2026).
+DEADLINE_AFTER_CUTOFF = timedelta(hours=9)
 LAG = timedelta(hours=12)  # a game's stats count only if it kicked off this long before
 POSITIONS = ("QB", "RB", "WR", "TE")
 # Trained per position; every other component is projected by the player's weighted average.

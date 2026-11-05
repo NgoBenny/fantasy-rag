@@ -216,7 +216,7 @@ powershell -File scripts/tests/test_ingest_daily.ps1  # jobs with a locked log: 
 powershell -File scripts/register_daily_ingest.ps1   # registers tasks for the checkout it's run from; daily 6pm + Wed-Sat 2pm/9pm; logs in that checkout's data/logs/
 powershell -File scripts/ingest_daily.ps1            # one run by hand, same as the task
 powershell -File scripts/ingest_daily.ps1 -Job news  # one news run (hourly task "fantasy-rag news"); refreshes data/logs/news_report.json
-powershell -File scripts/ingest_daily.ps1 -Job forward  # ingest + forward run (task "fantasy-rag forward", Tuesdays 16:00 ET)
+powershell -File scripts/ingest_daily.ps1 -Job forward  # ingest + forward run (task "fantasy-rag forward", Tuesdays 16:00 and 18:00 ET)
 powershell -File scripts/ingest_daily.ps1 -Job forward-check  # toast if the on-time run is missing (task, Tuesdays 20:30 ET)
 powershell -File scripts/ingest_daily.ps1 -Job backup  # daily backup; Sundays also the restore drill (task "fantasy-rag backup", 7 PM)
 RECORD_GIF=1 npx playwright test -c playwright.demo.config.ts gif.demo   # (frontend/) frames, then: uv run python ../scripts/make_gif.py

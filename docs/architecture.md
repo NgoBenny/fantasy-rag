@@ -74,7 +74,7 @@ scores. Locks depend on the imported roster and schedule, so source freshness st
 
 ## Forward log (Phase 8)
 
-Every Tuesday at 16:00 ET, `predict` predicts the coming week with both the baseline and TE Ridge.
+Every Tuesday at 16:00 ET, with a second try at 18:00 ET, `predict` predicts the coming week with both the baseline and TE Ridge.
 - It reads one database snapshot and saves the inputs, model hash, scoring rules and predictions in insert-only tables (`forward_runs`, `forward_inputs`, `projections`, `model_artifacts`).
 - It is labelled `on_time` only if its snapshot precedes the Tuesday 21:00 ET deadline. Features still stop at the Tuesday 12:00 ET cutoff.
 - Once a week is final (4 days after its last game), its first on-time run is scored once into `calibration_errors`, keyed by a fingerprint of the scoring rules.

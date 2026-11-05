@@ -40,9 +40,11 @@ $today = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(16), "Unspecifi
 $local = [System.TimeZoneInfo]::ConvertTime($today, $eastern, [System.TimeZoneInfo]::Local)
 $forwardAction = JobAction "forward"
 $tuesday = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $local.ToString("HH:mm")
+# A second try at 18:00 ET if the first failed; after a success it writes nothing new.
+$retry = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $local.AddHours(2).ToString("HH:mm")
 $forwardSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -WakeToRun `
     -ExecutionTimeLimit (New-TimeSpan -Hours 1)
-Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -Trigger $tuesday `
+Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -Trigger @($tuesday, $retry) `
     -Settings $forwardSettings -Description "fantasy-rag: Phase 8 Tuesday forward predictions" -Force
 
 # Pre-deadline check: Tuesdays 20:30 ET (30 minutes before the forward run's deadline).
