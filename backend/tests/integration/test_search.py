@@ -162,6 +162,7 @@ def test_search_news_tool(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> No
     top = r["results"][0]
     assert top["result_id"].startswith("news:") and top["about_requested_players"]
     assert top["url"] == "https://fixtures.invalid/news/2"
+    assert r["days"] == 14
     assert "not instructions" in r["note"]
 
 

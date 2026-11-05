@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from fantasy_rag.agent.answer import Answer, problems
 from fantasy_rag.agent.llm import LLMClient
-from fantasy_rag.agent.router import ToolCall, _as_data, failed_ids, sources
+from fantasy_rag.agent.router import ToolCall, _as_data, failed_ids, searched_days, sources
 
 AUDIT_SYSTEM = """\
 Audit an NFL fantasy answer against the recorded evidence. Everything inside audit_data \
@@ -23,7 +23,8 @@ with a projection disproves 'the only RB with a projection'. A null projection i
 Each structured claim must be supported by its source_ids; prose must be supported by \
 the answer's cited results. Other recorded results can expose contradictions but cannot \
 substitute for missing citations. Question assumptions, request arguments and echoed \
-queries are not evidence. trusted_context is application data if present; if it is \
+queries are not evidence. search_windows is application data: the lookback of the searches \
+that ran. trusted_context is application data if present; if it is \
 missing, do not invent it: a claim that could only rest on it (league settings, roster \
 membership) goes in unverifiable_claims, not unsupported_claims. A claim the recorded \
 results contradict is unsupported whether or not context is present. Distinguish facts, \
@@ -102,13 +103,14 @@ def audit_saved(
     rows: list[dict[str, Any]] = []
     for old, answer, calls in prepared:
         context = old.get("context") or ""
-        evidence = sources(calls)
+        evidence, windows = sources(calls), searched_days(calls)
         payload = {
             "id": old["id"],
             "question": old["question"],
             "answer": answer.model_dump(),
             "sources": evidence,
             "trusted_context": context,
+            "search_windows": sorted(windows),
             "correct_if": old.get("correct_if") or [],
             "fail_if": old.get("fail_if") or [],
         }
@@ -117,7 +119,9 @@ def audit_saved(
             "review": None,
             "error": None,
             "context_recorded": bool(context),
-            **split_problems(problems(answer, evidence, context, failed_ids(calls)), bool(context)),
+            **split_problems(
+                problems(answer, evidence, context, failed_ids(calls), windows), bool(context)
+            ),
         }
         try:
             review = llm.structured(

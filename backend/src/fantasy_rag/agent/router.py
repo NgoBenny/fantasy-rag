@@ -355,7 +355,8 @@ def writer_input(question: str, context: str, calls: list[ToolCall]) -> str:
     )
 
 
-ECHOED_INPUTS = {"search_news": ("query", "since")}  # output fields that repeat the request
+# Output fields that repeat the request.
+ECHOED_INPUTS = {"search_news": ("query", "since", "days")}
 
 
 def sources(calls: list[ToolCall]) -> dict[str, str]:
@@ -379,6 +380,15 @@ def sources(calls: list[ToolCall]) -> dict[str, str]:
 def failed_ids(calls: list[ToolCall]) -> set[str]:
     """Calls that errored: citable only by a clarification, never as evidence."""
     return {c.result_id for c in calls if c.result is None}
+
+
+def searched_days(calls: list[ToolCall]) -> set[int]:
+    """The windows of searches that ran; a failed search has no result, so it never counts."""
+    return {
+        c.result["days"]
+        for c in calls
+        if c.name == "search_news" and c.result and "days" in c.result  # older saved reports
+    }
 
 
 def _repair_input(content: str, answer: Answer, found: list[str]) -> str:
@@ -429,13 +439,13 @@ def ask(
     context = context_block(conn, leagues or [], selected)
     calls, capped = route(conn, llm, question, context, on_progress, cancelled, calls)
     content = writer_input(question, context, calls)
-    srcs, failed = sources(calls), failed_ids(calls)
+    srcs, failed, windows = sources(calls), failed_ids(calls), searched_days(calls)
     if cancelled():
         raise Cancelled
     on_progress(Progress("writing", "Writing the answer"))
     answer = llm.structured(WRITER_SYSTEM, content, Answer)
     on_progress(Progress("checking", "Checking every number and source"))
-    first = problems(answer, srcs, context, failed)
+    first = problems(answer, srcs, context, failed, windows)
     first_draft = answer.model_copy(deep=True) if first else None
     found = first
     if first:
@@ -444,7 +454,7 @@ def ask(
         on_progress(Progress("repairing", "Fixing a failed check"))
         answer = llm.structured(WRITER_SYSTEM, _repair_input(content, answer, first), Answer)
         on_progress(Progress("checking", "Checking every number and source"))
-        found = problems(answer, srcs, context, failed)
+        found = problems(answer, srcs, context, failed, windows)
     rejected = None
     if found:
         rejected, answer = answer, _withheld()

@@ -458,6 +458,7 @@ def search_news(conn: Connection, a: SearchNews) -> dict[str, Any]:
         "query": a.query,
         "players": [r.model_dump() for r in refs],
         "since": since,
+        "days": a.days,
         "last_news_sync": q.last_sync(conn, "news"),
         "results": [
             {
