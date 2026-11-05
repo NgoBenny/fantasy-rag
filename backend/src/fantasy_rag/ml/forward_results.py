@@ -13,8 +13,13 @@ from typing import Any
 
 from sqlalchemy import Connection, text
 
-from fantasy_rag.ml.features import cutoffs
-from fantasy_rag.ml.predict import NoUpcomingWeek, scoring_rules, target_week
+from fantasy_rag.ml.predict import (
+    NoUpcomingWeek,
+    _has_on_time,
+    deadlines,
+    scoring_rules,
+    target_week,
+)
 
 FIRST_FORWARD = (2026, 8)  # the first week with a valid Tuesday cutoff after Phase 8
 WARN_BEFORE = timedelta(minutes=30)
@@ -35,7 +40,7 @@ def tuesdays(conn: Connection, now: datetime) -> list[dict[str, Any]]:
     for r in conn.execute(text("SELECT season, week, status FROM forward_runs")):
         statuses[(r.season, r.week)].add(r.status)
     out = []
-    for (s, w), deadline in sorted(cutoffs(_schedule(conn)).items()):
+    for (s, w), deadline in sorted(deadlines(_schedule(conn)).items()):
         if (s, w) < FIRST_FORWARD or deadline > now:
             continue
         got = statuses.get((s, w), set())
@@ -46,27 +51,28 @@ def tuesdays(conn: Connection, now: datetime) -> list[dict[str, Any]]:
 
 
 def check(conn: Connection, now: datetime) -> tuple[bool, str]:
-    """Pre-deadline check: False when the most recent passed deadline has no on-time run
-    (so a check that runs days late still reports the miss), or the upcoming week has none
-    and its deadline is less than WARN_BEFORE away."""
+    """Pre-deadline check: True once the upcoming week has an on-time run. Otherwise False
+    when the most recent passed deadline has no on-time run (so a check that runs days late
+    still reports the miss), or the upcoming week's deadline is less than WARN_BEFORE away."""
+    sched = _schedule(conn)
+    upcoming, over = None, ""
+    try:
+        upcoming = target_week(sched, now)
+    except NoUpcomingWeek as e:  # season over and the next schedule isn't out yet
+        over = str(e)
+    if upcoming and upcoming >= FIRST_FORWARD and _has_on_time(conn, *upcoming):
+        return True, f"{upcoming[0]} week {upcoming[1]}: on-time forward run recorded"
     past = tuesdays(conn, now)
     if past and past[-1]["status"] != "on_time":
         p = past[-1]
         return False, (f"{p['season']} week {p['week']}: NO on-time forward run ({p['status']});"
                        f" the deadline {p['deadline']:%a %b %d %H:%M %Z} has passed")  # fmt: skip
-    sched = _schedule(conn)
-    try:
-        season, week = target_week(sched, now)
-    except NoUpcomingWeek as e:  # season over and the next schedule isn't out yet
-        return True, str(e)
-    if (season, week) < FIRST_FORWARD:
+    if upcoming is None:
+        return True, over
+    season, week = upcoming
+    if upcoming < FIRST_FORWARD:
         return True, f"{season} week {week}: before the first forward week"
-    deadline = cutoffs(sched)[(season, week)]
-    on_time = conn.execute(text(
-        "SELECT 1 FROM forward_runs WHERE season = :s AND week = :w AND status = 'on_time'"),
-        {"s": season, "w": week}).first()  # fmt: skip
-    if on_time:
-        return True, f"{season} week {week}: on-time forward run recorded"
+    deadline = deadlines(sched)[upcoming]
     if now < deadline - WARN_BEFORE:
         return True, f"{season} week {week}: not due yet (deadline {deadline:%a %H:%M %Z})"
     # A passed deadline was already reported above, so this one is still ahead.

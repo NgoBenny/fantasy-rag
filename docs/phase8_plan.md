@@ -240,3 +240,20 @@ The rules above stay frozen; these replace or tighten the named sections.
   2023 field goal (`fgm_20_29`, as an emergency kicker), which the old component-only
   scoring dropped and the baseline-plus-adjustment scoring keeps. All other metric changes
   are in the fourth decimal.
+
+## Amendment, Nov 4, 2026: forward-run deadline
+
+The on-time deadline moves from Tuesday 12:00 ET to **Tuesday 21:00 ET**. The forward task
+moves to 16:00 ET and its check to 20:30 ET. The owner's PC is usually off until 1-3 PM
+Pacific on Tuesdays, so the old deadline would rarely have produced an on-time run.
+
+- **Made before any on-time result existed.** The only runs on record are weeks 7 and 9,
+  all after 21:00 ET on their Tuesdays, so they stay `late` under either deadline. Stored
+  statuses are never rewritten, and no result informed this change.
+- **Still an honest prediction.** A run must precede the week's first game, and the
+  snapshot time remains the run's real information cutoff.
+- **Features are unchanged.** They still stop at the Tuesday 12:00 ET cutoff with the same
+  12-hour rule, and the frozen 2025 benchmark and calibration seed stand as recorded.
+- **Known difference.** A later snapshot can see a few more hours of stat corrections and
+  snap-count updates than the Tuesday-noon assumption (A1-A3), so forward weeks may use
+  slightly fresher values for the same games than the benchmark assumed.

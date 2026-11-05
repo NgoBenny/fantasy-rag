@@ -201,7 +201,7 @@ def test_snaps_schedule_and_ranges_after_a_cutoff_change_nothing_before_it() -> 
 
 
 def test_the_forward_run_labels_its_snapshot_and_logs_te_ridge_beside_the_baseline() -> None:
-    from fantasy_rag.ml.predict import forecast
+    from fantasy_rag.ml.predict import deadlines, forecast
 
     gs = [replace(g, position="TE") if g.player_id in ("p0", "p1", "p2", "p3") else g
           for g in games(weeks=5)]  # fmt: skip
@@ -214,8 +214,13 @@ def test_the_forward_run_labels_its_snapshot_and_logs_te_ridge_beside_the_baseli
     assert set(f.preds["ridge"]) == {"p0", "p1", "p2", "p3"}  # TE only
     assert f.newest_game is not None and f.newest_game <= deadline - LAG
     assert "ridge" in f.artifacts
+    # After the feature cutoff but before the deadline: on time, with the same features.
+    last_call = deadlines(sched)[(SEASON, 6)]
+    in_time = forecast(gs, sched, FORMATS, last_call - timedelta(minutes=1), {})
+    assert (in_time.status, in_time.cutoff) == ("on_time", deadline)
+    assert in_time.newest_game == f.newest_game
     # Same Thursday-before-kickoff week, but after the deadline: late, never on time.
-    assert forecast(gs, sched, FORMATS, deadline + timedelta(hours=20), {}).status == "late"
+    assert forecast(gs, sched, FORMATS, last_call + timedelta(minutes=1), {}).status == "late"
     # Before the last game of the previous week could be in: early.
     assert forecast(gs, sched, FORMATS, sunday(5) + timedelta(hours=1), {}).status == "early"
 

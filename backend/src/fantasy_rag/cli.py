@@ -333,7 +333,7 @@ def _eval_grounding(report_path: str, only: str | None) -> None:
 
 def _predict() -> None:
     from fantasy_rag.db import get_engine
-    from fantasy_rag.ml.predict import run
+    from fantasy_rag.ml.predict import DEADLINE_AFTER_CUTOFF, run
 
     r = run(get_engine())
     if "skipped" in r:
@@ -342,7 +342,7 @@ def _predict() -> None:
     print(
         f"forward run {r['run_id']}: {r['season']} week {r['week']} {r['status'].upper()}"
         f" (data as of {r['snapshot_at']:%Y-%m-%d %H:%M %Z},"
-        f" deadline {r['cutoff']:%Y-%m-%d %H:%M %Z},"
+        f" deadline {r['cutoff'] + DEADLINE_AFTER_CUTOFF:%Y-%m-%d %H:%M %Z},"
         f" newest game {r['newest_game']}); {r['players']} players"
     )
     print(f"models: {r['models']}")

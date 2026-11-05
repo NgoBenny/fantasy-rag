@@ -282,7 +282,7 @@ export default async function ModelPage({ searchParams }: PageProps<"/model">) {
         )}
         <p className="text-sm text-muted-foreground">
           Each Tuesday the baseline and TE Ridge are predicted from the same saved inputs and stored unchanged.
-          Only runs whose data snapshot was taken before the noon ET deadline count; these weeks are the unseen
+          Only runs whose data snapshot was taken before the Tuesday 9 PM ET deadline count; these weeks are the unseen
           test the 2025 benchmark can&apos;t be.
         </p>
       </section>

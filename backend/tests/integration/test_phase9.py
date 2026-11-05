@@ -154,8 +154,8 @@ def test_every_past_tuesday_has_exactly_one_status(eng: Engine) -> None:
 def test_the_pre_deadline_check(eng: Engine) -> None:
     thursday = datetime(2026, 10, 29, 20, 15, tzinfo=ET)
     _week(eng, 8, thursday)
-    deadline = fr.cutoffs([{"season": 2026, "week": 8, "game_type": "REG",
-                            "kickoff_at": thursday}])[(2026, 8)]  # fmt: skip
+    deadline = fr.deadlines([{"season": 2026, "week": 8, "game_type": "REG",
+                              "kickoff_at": thursday}])[(2026, 8)]  # fmt: skip
     with eng.connect() as c:
         assert fr.check(c, deadline - timedelta(hours=2))[0]  # not due yet
         ok, msg = fr.check(c, deadline - timedelta(minutes=20))
@@ -164,6 +164,23 @@ def test_the_pre_deadline_check(eng: Engine) -> None:
     _run(eng, 8, "on_time")
     with eng.connect() as c:
         assert fr.check(c, deadline + timedelta(hours=1))[0]
+
+
+def test_an_on_time_run_clears_the_previous_weeks_miss(eng: Engine) -> None:
+    week8 = datetime(2026, 10, 29, 20, 15, tzinfo=ET)
+    week9 = datetime(2026, 11, 5, 20, 15, tzinfo=ET)
+    _week(eng, 8, week8)
+    _week(eng, 9, week9)
+    _run(eng, 8, "late")
+    deadline = fr.deadlines([{"season": 2026, "week": 9, "game_type": "REG",
+                              "kickoff_at": week9}])[(2026, 9)]  # fmt: skip
+    check_at = deadline - timedelta(minutes=30)
+    with eng.connect() as c:
+        ok, msg = fr.check(c, check_at)
+        assert not ok and "week 8" in msg
+    _run(eng, 9, "on_time")
+    with eng.connect() as c:
+        assert fr.check(c, check_at) == (True, "2026 week 9: on-time forward run recorded")
 
 
 def test_a_check_that_runs_days_late_still_reports_the_missed_tuesday(eng: Engine) -> None:

@@ -20,7 +20,7 @@ STRUCTURED = 81001  # ingest structured, league import, predict, calibration-see
 NEWS = 81002  # ingest news
 TRANSACTIONS = 81003  # league sync-transactions
 BACKUP = 81004  # backup
-PREDICT_WAIT = 15 * 60  # seconds; the forward task starts 1.5 h before the deadline
+PREDICT_WAIT = 15 * 60  # seconds; the forward task starts 5 h before the deadline
 
 
 @contextmanager

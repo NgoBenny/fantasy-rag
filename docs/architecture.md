@@ -16,8 +16,8 @@ flowchart LR
   subgraph Jobs["Scheduled jobs (Windows Task Scheduler, advisory locks)"]
     ING[ingest structured + league import<br/>daily, Wed–Sat 3x]
     NEWS[ingest news + transactions<br/>hourly]
-    PRED[predict<br/>Tue 10:30 ET]
-    CHK[forward-check<br/>Tue 11:30 ET]
+    PRED[predict<br/>Tue 16:00 ET]
+    CHK[forward-check<br/>Tue 20:30 ET]
     BK[backup + restore drill<br/>daily / Sundays]
   end
   DB[(Postgres 16<br/>pgvector + full-text)]
@@ -74,9 +74,9 @@ scores. Locks depend on the imported roster and schedule, so source freshness st
 
 ## Forward log (Phase 8)
 
-Every Tuesday at 10:30 ET, `predict` predicts the coming week with both the baseline and TE Ridge.
+Every Tuesday at 16:00 ET, `predict` predicts the coming week with both the baseline and TE Ridge.
 - It reads one database snapshot and saves the inputs, model hash, scoring rules and predictions in insert-only tables (`forward_runs`, `forward_inputs`, `projections`, `model_artifacts`).
-- It is labelled `on_time` only if its snapshot precedes the Tuesday 12:00 ET deadline.
+- It is labelled `on_time` only if its snapshot precedes the Tuesday 21:00 ET deadline. Features still stop at the Tuesday 12:00 ET cutoff.
 - Once a week is final (4 days after its last game), its first on-time run is scored once into `calibration_errors`, keyed by a fingerprint of the scoring rules.
 - The Model page compares baseline and Ridge on matched player-weeks of those unseen weeks.
 - `forward-check` raises a Windows toast if Tuesday's run is missing 30 minutes before the deadline.
