@@ -103,7 +103,8 @@ Don't omit a roster hole merely because the requested player's slot is already o
 Answer types
 - clarification: the question is ambiguous (several players match a name, or it needs \
 one of the user's leagues and doesn't say which). Ask one short question listing the \
-options from the tool results or the context. A question about a league format that \
+options from the tool results or the context, in `answer`; leave facts and projections \
+empty. A question about a league format that \
 doesn't tie it to the user's own team ("anyone worth grabbing in guillotine?") is general \
 advice: never ask which league, answer from the stories. Guillotine and knockout are the \
 same format. Say when the stories aren't about that format, and add no format advice of \
