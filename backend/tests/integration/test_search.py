@@ -154,6 +154,7 @@ def test_player_filter_fill_and_reranker(engine: Engine) -> None:
 
 def test_search_news_tool(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(tools, "news_embedder", FakeEmbedder)
+    monkeypatch.setattr(tools, "NEWS_AS_OF", (datetime(2026, 10, 22, tzinfo=UTC), None))
     with engine.connect() as c:
         r = tools.run_tool(
             c, "search_news", {"query": "touchdowns", "players": [{"name": "Derrick Henry"}]}
@@ -238,6 +239,7 @@ def test_injected_story_does_not_change_behaviour(
     from fantasy_rag.agent.router import ask
 
     monkeypatch.setattr(tools, "news_embedder", FakeEmbedder)
+    monkeypatch.setattr(tools, "NEWS_AS_OF", (datetime(2026, 10, 22, tzinfo=UTC), None))
     with engine.connect() as c:
         turn = ask(c, AnthropicLLM(), "Any news on Derrick Henry? Should I start him?")
     urls = [r["url"] for call in turn.calls for r in (call.result or {}).get("results", [])]

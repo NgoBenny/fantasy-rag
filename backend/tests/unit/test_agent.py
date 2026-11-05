@@ -120,6 +120,20 @@ def test_claims_must_cite_something() -> None:
     assert problems(ask_back, SOURCES, "") == []
 
 
+def test_a_clarifications_as_of_time_may_come_from_any_result_this_turn() -> None:
+    srcs = {"r1": '{"as_of": "2026-11-04 05:00:36.920967+00:00"}', "r2": '{"week": 6}'}
+    a = _answer("Which league?")
+    a.answer_type, a.data_as_of = "clarification", "2026-11-04 05:00:36.920967+00:00"
+    assert problems(a, srcs, "") == []
+    a.data_as_of = "2026-11-04 05:00:99.5+00:00"  # never seen: still caught
+    assert problems(a, srcs, "") == ["metadata: 99.5 not in r1, r2"]
+    answered = _answer("Warren.", Claim(text="week 6", source_ids=["r2"]), cites=["r2"])
+    answered.data_as_of = "2026-11-04 05:00:36.920967+00:00"  # stats must cite it
+    assert problems(answered, srcs, "") == [
+        "metadata: 2026, 11, 04, 05, 00, 36.920967, 00, 00 not in r2"
+    ]
+
+
 class WriterLLM(FakeLLM):
     def __init__(self, drafts: list[Answer]) -> None:
         super().__init__([])

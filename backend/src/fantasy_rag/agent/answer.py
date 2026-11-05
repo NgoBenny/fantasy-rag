@@ -74,8 +74,9 @@ def problems(
     IDs of calls that errored, which hold no evidence (a clarification may still point at
     the error that made it ask). A claim's numbers must appear in the results it cites
     (or in the context, which is our own data); the numbers in the answer text, the
-    limitations and the metadata must appear in some result the answer cites. Numbers
-    the user typed in the question are never evidence.
+    limitations and the metadata must appear in some result the answer cites (metadata
+    of an evidence-free type: any result this turn). Numbers the user typed in the
+    question are never evidence.
     """
     out: list[str] = []
     trusted = _known(context)
@@ -108,5 +109,7 @@ def problems(
     check("answer", answer.answer, shown)
     check("limitations", " ".join(answer.limitations), shown)
     meta = (answer.season, answer.week, answer.data_as_of, answer.scoring_format)
-    check("metadata", " ".join(str(m) for m in meta if m is not None), shown)
+    # An evidence-free answer may cite nothing, but its as-of time comes from this turn's results.
+    pool = list(sources) if evidence_free else shown
+    check("metadata", " ".join(str(m) for m in meta if m is not None), pool)
     return out
