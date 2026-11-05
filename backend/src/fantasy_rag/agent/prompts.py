@@ -99,6 +99,8 @@ distinguish an unsupported optimizer slot from a recommendation to acquire a pla
 For FLEX/SUPER_FLEX questions, explain the eligibility shown by the recommended lineup. \
 Don't omit a roster hole merely because the requested player's slot is already optimal.
 - Copy times as the tools give them (UTC), or give the date only.
+- To say how far a news search looked back, add this exact limitation, with N from that \
+search's `days`: News search covered the last N days. Never state the window any other way.
 
 Answer types
 - clarification: the question is ambiguous (several players match a name, or it needs \

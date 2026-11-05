@@ -6,7 +6,8 @@ import pytest
 from anthropic.types import Message, MessageParam, ToolParam
 
 from fantasy_rag.agent import router
-from fantasy_rag.agent.answer import Answer, Claim, numbers, problems
+from fantasy_rag.agent.answer import SEARCH_SCOPE, Answer, Claim, numbers, problems
+from fantasy_rag.agent.prompts import WRITER_SYSTEM
 
 
 def _msg(*tool_uses: tuple[str, dict[str, Any]]) -> Message:
@@ -451,3 +452,48 @@ def test_usage_progress_names_players_and_a_computed_share_is_rejected() -> None
     counts = {"r1": '{"targets": 16, "team_targets": 79}'}
     computed = _answer("Worthy saw 20.3% of targets.", Claim(text="20.3%", source_ids=["r1"]))
     assert "answer: 20.3 not in r1" in problems(computed, counts, "")
+
+
+def _searched(days: int) -> router.ToolCall:
+    return router.ToolCall(
+        "r1", "search_news", {"days": days}, {"since": "x", "days": days, "results": [], "note": ""}
+    )
+
+
+def _limited(*limitations: str, answer: str = "I found no supporting story.") -> Answer:
+    a = _answer(answer, cites=["r1"])
+    a.answer_type, a.limitations = "no_data", list(limitations)
+    return a
+
+
+def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
+    calls = [_searched(14)]
+    srcs, windows = router.sources(calls), router.searched_days(calls)
+    assert SEARCH_SCOPE.format(days="N") in WRITER_SYSTEM
+    said = "News search covered the last 14 days."
+    assert problems(_limited(said), srcs, "", (), windows) == []
+    assert problems(_limited(said), srcs, "", (), {30}) == ["limitations: 14 not in r1"]
+    for unsafe in (
+        "Henry will miss 14 days.",
+        "Henry has 14 touchdowns.",
+        # Saved withheld answers: the same window in other words stays rejected.
+        "News search limited to the window shown in the tool arguments (14 days) per r2.",
+    ):
+        assert problems(_limited(unsafe), srcs, "", (), windows) == ["limitations: 14 not in r1"]
+    assert problems(_limited(said + " Out 14 days."), srcs, "", (), windows) == [
+        "limitations: 14, 14 not in r1"
+    ]
+    assert problems(_limited(answer=said), srcs, "", (), windows) == ["answer: 14 not in r1"]
+    fact = _answer("Nothing found.", Claim(text=said, source_ids=["r1"]), cites=["r1"])
+    assert problems(fact, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
+    touchdowns = _answer("x", Claim(text="Henry has 14 touchdowns", source_ids=["r1"]))
+    assert problems(touchdowns, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
+
+
+def test_a_failed_search_has_no_window() -> None:
+    failed = router.ToolCall("r1", "search_news", {"days": 14}, error="search failed")
+    assert router.searched_days([failed]) == set()
+    a = _limited("News search covered the last 14 days.")
+    assert problems(a, router.sources([failed]), "", {"r1"}, router.searched_days([failed])) == [
+        "limitations: 14 not in any cited result"
+    ]
