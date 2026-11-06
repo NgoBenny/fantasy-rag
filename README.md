@@ -125,6 +125,6 @@ This is a personal, non-commercial project.
 
 ## Limitations
 
-- **Local only:** collection needs this PC on with Docker running, especially at Tuesday 07:30 Pacific. A missed week is shown as missing, never filled in. Hosted deployment is planned, not done.
+- **Local only:** collection needs this PC on with Docker running, especially on Tuesday between 1 and 6 PM Pacific. A missed week is shown as missing, never filled in. Hosted deployment is planned, not done.
 - **No injury or betting-line inputs** in the projections yet. Our own injury snapshots start Oct 20, 2026.
 - **Backups stay on this disk** unless you point `BACKUP_DIR` at other storage.

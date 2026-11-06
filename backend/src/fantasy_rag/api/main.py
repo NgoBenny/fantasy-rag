@@ -25,6 +25,7 @@ from fantasy_rag.db import get_log_engine, get_readonly_engine
 from fantasy_rag.ingest.health import SOURCES
 from fantasy_rag.ingest.health import health as source_health
 from fantasy_rag.ml import serve
+from fantasy_rag.ml.features import DEADLINE_AFTER_CUTOFF
 
 app = FastAPI(title="fantasy-rag", version="0.1")
 DEMO = Settings().demo_mode
@@ -297,7 +298,8 @@ def forward_runs(conn: Conn) -> dict[str, Any]:
             " FROM forward_runs f ORDER BY id DESC LIMIT 20"
         )
     )
-    return {"active": serve.ACTIVE, "runs": [dict(r._mapping) for r in found]}
+    runs = [{**r._mapping, "deadline_at": r.cutoff_at + DEADLINE_AFTER_CUTOFF} for r in found]
+    return {"active": serve.ACTIVE, "runs": runs}
 
 
 @app.get("/api/forward-results")

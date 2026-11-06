@@ -1,8 +1,8 @@
 # Runs one scheduled job and appends the result to data/logs.
 #   -Job daily (default): structured ingest (snapshots) + league import
 #   -Job news: news feeds -> documents, chunks, embeddings; Sleeper transactions
-#   -Job forward: Tuesday 10:30 ET: fresh stats, then the Phase 8 forward run (predict)
-#   -Job forward-check: Tuesday 11:30 ET: toast if this week's on-time forward run is missing
+#   -Job forward: Tuesday 16:00 and 18:00 ET: fresh stats, then the Phase 8 forward run (predict)
+#   -Job forward-check: Tuesday 20:30 ET: toast if this week's on-time forward run is missing
 #   -Job backup: verified dump outside the repo; on Sundays also the restore drill
 # Any failing job shows a Windows toast (scripts/notify.ps1); details stay in data/logs.
 # Invoked by the scheduled tasks that scripts/register_daily_ingest.ps1 creates.
@@ -92,7 +92,7 @@ if ($Job -eq "backup") {
 if ($Job -eq "forward") {
     $ingestExit = Step ingest structured
     # Predict even if the ingest failed: the run records the data it had and when (its
-    # snapshot time), and is marked late if that is after Tuesday noon ET.
+    # snapshot time), and is marked late if that is after Tuesday 21:00 ET.
     $predictExit = Step predict
     "exit=$ingestExit predict=$predictExit" | Out-File -Append -Encoding utf8 $log
     $code = if ($predictExit -ne 0) { $predictExit } else { $ingestExit }

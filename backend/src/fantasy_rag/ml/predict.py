@@ -3,7 +3,7 @@
 Reads every input inside one REPEATABLE READ transaction whose first query records the
 database clock: that time is the snapshot, the run's real information cutoff. Status:
 `on_time` when the snapshot falls between the previous week's last kickoff + LAG and
-the Tuesday 12:00 ET deadline, `late` after the deadline, `early` before the previous
+the Tuesday 21:00 ET deadline, `late` after the deadline, `early` before the previous
 week's games could be in. Baseline (every position) and TE Ridge are predicted from the
 same saved inputs, with each policy's own range, and written insert-only.
 """
@@ -22,6 +22,7 @@ from fantasy_rag.analytics.scoring import ScoringRules, score
 from fantasy_rag.ml import baseline, ranges
 from fantasy_rag.ml.benchmark import CALIBRATE, load, run_policy
 from fantasy_rag.ml.features import (
+    DEADLINE_AFTER_CUTOFF,
     LAG,
     POSITIONS,
     Game,
@@ -73,11 +74,14 @@ def target_week(sched: list[dict[str, Any]], snapshot: datetime) -> tuple[int, i
     return min(upcoming)
 
 
+def deadlines(sched: list[dict[str, Any]]) -> dict[tuple[int, int], datetime]:
+    return {k: cut + DEADLINE_AFTER_CUTOFF for k, cut in cutoffs(sched).items()}
+
+
 def status_of(sched: list[dict[str, Any]], season: int, week: int, snapshot: datetime) -> str:
-    cutoff = cutoffs(sched)[(season, week)]
     prev = [g["kickoff_at"] for g in sched if g["game_type"] == "REG" and g["kickoff_at"]
             and (g["season"], g["week"]) < (season, week)]  # fmt: skip
-    if snapshot > cutoff:
+    if snapshot > deadlines(sched)[(season, week)]:
         return "late"
     if prev and snapshot < max(prev) + LAG:
         return "early"

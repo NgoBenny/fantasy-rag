@@ -32,21 +32,23 @@ $newsSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstan
 Register-ScheduledTask -TaskName "fantasy-rag news" -Action $newsAction -Trigger $hourly `
     -Settings $newsSettings -Description "fantasy-rag: hourly news ingest" -Force
 
-# Phase 8 forward run: Tuesdays 10:30 America/New_York, converted to this PC's zone, so the
-# snapshot lands before the noon ET deadline. A run the PC misses starts when it is back
-# on and is then recorded as late (or not at all): a missed Tuesday is reported missing.
+# Phase 8 forward run: Tuesdays 16:00 America/New_York, converted to this PC's zone, so the
+# snapshot lands before the 21:00 ET deadline. A run the PC misses starts when it is back
+# on, and is recorded as late after the deadline: a missed Tuesday is reported missing.
 $eastern = [System.TimeZoneInfo]::FindSystemTimeZoneById("Eastern Standard Time")
-$today = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(10).AddMinutes(30), "Unspecified")
+$today = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(16), "Unspecified")
 $local = [System.TimeZoneInfo]::ConvertTime($today, $eastern, [System.TimeZoneInfo]::Local)
 $forwardAction = JobAction "forward"
 $tuesday = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $local.ToString("HH:mm")
+# A second try at 18:00 ET if the first failed; after a success it writes nothing new.
+$retry = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Tuesday -At $local.AddHours(2).ToString("HH:mm")
 $forwardSettings = New-ScheduledTaskSettingsSet -StartWhenAvailable -WakeToRun `
     -ExecutionTimeLimit (New-TimeSpan -Hours 1)
-Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -Trigger $tuesday `
+Register-ScheduledTask -TaskName "fantasy-rag forward" -Action $forwardAction -Trigger @($tuesday, $retry) `
     -Settings $forwardSettings -Description "fantasy-rag: Phase 8 Tuesday forward predictions" -Force
 
-# Pre-deadline check: Tuesdays 11:30 ET (30 minutes before the forward run's deadline).
-$check = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(11).AddMinutes(30), "Unspecified")
+# Pre-deadline check: Tuesdays 20:30 ET (30 minutes before the forward run's deadline).
+$check = [System.DateTime]::SpecifyKind((Get-Date).Date.AddHours(20).AddMinutes(30), "Unspecified")
 $checkLocal = [System.TimeZoneInfo]::ConvertTime($check, $eastern, [System.TimeZoneInfo]::Local)
 $checkAction = JobAction "forward-check"
 Register-ScheduledTask -TaskName "fantasy-rag forward-check" -Action $checkAction `

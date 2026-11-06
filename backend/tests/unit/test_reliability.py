@@ -14,6 +14,7 @@ from fantasy_rag.ingest.retry import Retrying, retry, transient
 from fantasy_rag.jobs import backup
 from fantasy_rag.jobs.backup import complete_dumps, rotate
 from fantasy_rag.ml.features import ET, cutoffs
+from fantasy_rag.ml.predict import deadlines
 
 PT = ZoneInfo("America/Los_Angeles")
 
@@ -74,10 +75,12 @@ def test_cutoffs_stay_tuesday_noon_eastern_across_the_dst_change() -> None:
     for week in (8, 9):
         local = cut[(2026, week)].astimezone(ET)
         assert (local.strftime("%a"), local.hour, local.minute) == ("Tue", 12, 0)
-        # The 07:30 Pacific task and the 08:30 Pacific check both land before the deadline.
+        # The 21:00 ET deadline leaves room for a PC first turned on at 3 PM Pacific.
+        last_call = deadlines(sched)[(2026, week)]
+        assert last_call.astimezone(ET).strftime("%a %H:%M") == "Tue 21:00"
         tuesday = local.date()
-        run = datetime(tuesday.year, tuesday.month, tuesday.day, 7, 30, tzinfo=PT)
-        assert run < cut[(2026, week)] and run + timedelta(hours=1) < cut[(2026, week)]
+        pc_on = datetime(tuesday.year, tuesday.month, tuesday.day, 15, 0, tzinfo=PT)
+        assert pc_on + timedelta(hours=2) < last_call
     assert cut[(2026, 9)] - cut[(2026, 8)] == timedelta(days=7, hours=1)  # the extra DST hour
 
 

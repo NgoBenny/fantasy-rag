@@ -91,8 +91,7 @@ function ForwardResultsSection({ fr, scoring }: { fr: ForwardResults; scoring: S
       </div>
       {fr.rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No finalized weeks yet. A week counts once its on-time Tuesday run exists and its last game is 4 days old
-          (the first is week 8, final November 6).
+          No finalized weeks yet. A week counts once its on-time Tuesday run exists and its last game is 4 days old.
         </p>
       ) : (
         <>
@@ -253,7 +252,7 @@ export default async function ModelPage({ searchParams }: PageProps<"/model">) {
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">Forward runs (2026)</h2>
         {forward.runs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No forward run yet; the first is Tuesday, October 27.</p>
+          <p className="text-sm text-muted-foreground">No forward run yet.</p>
         ) : (
           <Table aria-label="Forward runs">
             <TableHeader>
@@ -273,7 +272,7 @@ export default async function ModelPage({ searchParams }: PageProps<"/model">) {
                   </TableCell>
                   <TableCell>{r.status === "on_time" ? "on time" : `${r.status} (not counted)`}</TableCell>
                   <TableCell>{new Date(r.snapshot_at).toLocaleString()}</TableCell>
-                  <TableCell>{new Date(r.cutoff_at).toLocaleString()}</TableCell>
+                  <TableCell>{new Date(r.deadline_at).toLocaleString()}</TableCell>
                   <TableCell className="text-right tabular-nums">{r.players}</TableCell>
                 </TableRow>
               ))}
@@ -282,7 +281,7 @@ export default async function ModelPage({ searchParams }: PageProps<"/model">) {
         )}
         <p className="text-sm text-muted-foreground">
           Each Tuesday the baseline and TE Ridge are predicted from the same saved inputs and stored unchanged.
-          Only runs whose data snapshot was taken before the noon ET deadline count; these weeks are the unseen
+          Only runs whose data snapshot was taken before the Tuesday 9 PM ET deadline count; these weeks are the unseen
           test the 2025 benchmark can&apos;t be.
         </p>
       </section>

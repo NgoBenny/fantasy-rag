@@ -204,7 +204,7 @@ export interface ForwardRuns {
     season: number;
     week: number;
     status: "on_time" | "late" | "early";
-    cutoff_at: string;
+    deadline_at: string;
     snapshot_at: string;
     newest_game_kickoff: string | null;
     players: number;
