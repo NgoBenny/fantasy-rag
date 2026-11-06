@@ -16,7 +16,7 @@ from sqlalchemy import Connection
 from fantasy_rag.analytics import queries as q
 from fantasy_rag.analytics import usage as u
 from fantasy_rag.analytics.optimizer import ELIGIBLE, Candidate, optimize
-from fantasy_rag.analytics.scoring import score
+from fantasy_rag.analytics.scoring import ScoringRules, score
 from fantasy_rag.index.embedder import Embedder
 from fantasy_rag.ml import baseline, serve
 from fantasy_rag.retrieval.hybrid import Reranker
@@ -89,6 +89,30 @@ class ProjectPlayer(ScoringChoice):
 
 class CompareStartSit(ScoringChoice):
     players: list[PlayerName] = Field(min_length=2, max_length=4)
+
+
+class ChangeWindow(BaseModel):
+    """Which two projections a recomputed baseline change compares (both in one season)."""
+
+    season: int | None = Field(default=None, ge=2022, le=2030)
+    since_week: int | None = Field(
+        default=None, ge=1, le=18, description="the earlier projection (default: week - 1)"
+    )
+    week: int | None = Field(
+        default=None, ge=1, le=18, description="the later projection (default: current week)"
+    )
+
+    @model_validator(mode="after")
+    def _ordered(self) -> "ChangeWindow":
+        if self.since_week and self.week and self.since_week >= self.week:
+            raise ValueError("since_week must be before week")
+        if self.season and not self.week:
+            raise ValueError("give week together with season")
+        return self
+
+
+class ExplainProjection(ScoringChoice, ChangeWindow):
+    player: PlayerName
 
 
 class GetUsage(BaseModel):
@@ -289,7 +313,9 @@ def get_trending(conn: Connection, a: GetTrending) -> dict[str, Any]:
     }
 
 
-def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[str, Any]:
+def _projection(
+    conn: Connection, ref: q.PlayerRef, a: ScoringChoice, window: ChangeWindow | None = None
+) -> dict[str, Any]:
     season, week = q.projection_week(conn)
     rules, label = q.rules_for(conn, a.league_id, a.scoring)
     rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
@@ -322,7 +348,95 @@ def _projection(conn: Connection, ref: q.PlayerRef, a: ScoringChoice) -> dict[st
             "discounted; depth-chart changes are not in the baseline",
             "range_80 is nominal: about 80% of past outcomes fell inside such ranges",
         ],
+        **(
+            {
+                "change": _change(
+                    conn, ref, rows, rules, window, (season, week), got, avail, projected
+                )
+            }  # fmt: skip
+            if window is not None
+            else {}
+        ),
     }
+
+
+CHANGE_LABEL = "recomputed baseline change"
+CHANGE_CAVEATS = [
+    "Both projections are recomputed now with today's stats and scoring rules, so stat "
+    "corrections and rule changes since then are included: this is not a record of the "
+    "number shown at the time.",
+    "The baseline averages past fantasy points only; it does not use injuries, role, "
+    "matchup or news, so none of those explains the change.",
+]
+
+
+def _change(
+    conn: Connection,
+    ref: q.PlayerRef,
+    rows: list[dict[str, Any]],
+    rules: ScoringRules,
+    w: ChangeWindow,
+    current: tuple[int, int],
+    got: serve.Served | None,
+    avail: dict[str, Any] | None,
+    served_points: float | None,
+) -> dict[str, Any]:
+    """The recomputed baseline change for `w`, with fixed-template sentences whose numbers
+    all come from this result, kept apart from what is served now (availability can
+    override the baseline)."""
+    season = w.season or current[0]
+    week = w.week or current[1]
+    since = w.since_week or week - 1
+    if season != current[0]:
+        rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
+    served = {"week": current[1], "points": served_points, "availability": avail}
+    head = {"label": CHANGE_LABEL, "season": season, "served": served, "caveats": CHANGE_CAVEATS}
+    if got is not None and got.policy != "baseline":
+        return {**head, "available": False, "since_week": since, "week": week,
+                "reason": "the served projection is not the baseline",
+                "summary": "comparison unavailable", "explanation": []}  # fmt: skip
+    games = baseline.scored_history(rows, rules).get(ref.id, [])
+    res = baseline.explain(games, season, since, week)
+    if not res["available"]:
+        return {**head, **res, "summary": "comparison unavailable",
+                "explanation": [f"Comparison unavailable: {res['reason']}."]}  # fmt: skip
+    teams = {r["team"] for r in rows if r["season"] == season and r["team"]}
+    team = next(iter(teams)) if len(teams) == 1 else None
+    schedule = u.team_weeks(conn, season, week) if res["no_game_weeks"] else {}
+    no_game = [
+        {"week": n, "status": "unknown" if team is None
+         else "bye" if n not in schedule.get(team, set()) else "no recorded appearance"}
+        for n in res["no_game_weeks"]
+    ]  # fmt: skip
+    b, a, chg = res["before"]["points"], res["after"]["points"], res["baseline_change"]
+    lines = [
+        f"Recomputed baseline change, week {since} to week {week}: {chg:+.2f} ({b:.2f} to {a:.2f})."
+    ]
+    by_week: list[tuple[int, str]] = []
+    for s in res["steps"]:
+        x, pb = s["game_points"], s["projection_before"]
+        rel = "above" if x > pb else "below" if x < pb else "equal to"
+        by_week.append((s["week"], (
+            f"Week {s['week']}: {x:.2f} points, {rel} his projection before it ({pb:.2f}); "
+            f"that game is {s['weight_pct']:.1f}% of the new average and moved it "
+            f"{s['change']:+.2f}."
+        )))  # fmt: skip
+    by_week += [(g["week"], f"Week {g['week']}: no game ({g['status']}), no change.")
+                for g in no_game]  # fmt: skip
+    lines += [line for _, line in sorted(by_week)]
+    if avail and not avail["playable"] and served_points is not None:
+        why = avail.get("note") or f"{avail['status']} ({avail.get('source')})"
+        lines.append(
+            f"Separately, his served projection for week {current[1]} is "
+            f"{served_points:.1f}: {why}."
+        )
+    if res["steps"]:
+        top = max(res["steps"], key=lambda s: abs(s["change"]))
+        summary = (f"week {top['week']} game {top['game_points']:.1f} pts vs "
+                   f"{top['projection_before']:.1f} before")  # fmt: skip
+    else:
+        summary = "; ".join(f"week {g['week']}: no game ({g['status']})" for g in no_game)
+    return {**head, **res, "no_game_weeks": no_game, "summary": summary, "explanation": lines}
 
 
 def project_player(conn: Connection, a: ProjectPlayer) -> dict[str, Any]:
@@ -333,9 +447,23 @@ def compare_start_sit(conn: Connection, a: CompareStartSit) -> dict[str, Any]:
     return rank_start_sit(conn, [q.resolve_player(conn, **p.model_dump()) for p in a.players], a)
 
 
-def rank_start_sit(conn: Connection, refs: list[q.PlayerRef], a: ScoringChoice) -> dict[str, Any]:
-    """Rank already-resolved players by projection (the tool and the API share this)."""
-    projections = [_projection(conn, r, a) for r in refs]
+def explain_projection(conn: Connection, a: ExplainProjection) -> dict[str, Any]:
+    """Why a player's baseline projection moved between two weeks, as exact arithmetic."""
+    ref = q.resolve_player(conn, **a.player.model_dump())
+    p = _projection(conn, ref, a, a)
+    keep = ("player", "scoring", "model_version", "unscored_rules")
+    return {**{k: p[k] for k in keep}, **p["change"]}
+
+
+def rank_start_sit(
+    conn: Connection,
+    refs: list[q.PlayerRef],
+    a: ScoringChoice,
+    window: ChangeWindow | None = None,
+) -> dict[str, Any]:
+    """Rank already-resolved players by projection (the tool and the API share this). Each
+    carries its recomputed baseline change, shown beside it; the ranking ignores it."""
+    projections = [_projection(conn, r, a, window or ChangeWindow()) for r in refs]
     got, when = _usage(conn, refs)
     for p in projections:
         p["injury"] = q.injury_snapshots(conn, p["player"]["id"])
@@ -688,6 +816,13 @@ TOOLS: dict[str, tuple[type[BaseModel], Callable[[Connection, Any], dict[str, An
         RankWaivers,
         rank_waivers,
         "Best unrostered players in a league by projection.",
+    ),
+    "explain_projection": (
+        ExplainProjection,
+        explain_projection,
+        "Why a player's baseline projection changed between two weeks of one season (default:"
+        " last week to now): each game in between and how far it moved the average, recomputed"
+        " with today's data.",
     ),
     "get_usage": (
         GetUsage,

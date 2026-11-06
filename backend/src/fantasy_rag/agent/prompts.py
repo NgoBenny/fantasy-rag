@@ -21,6 +21,9 @@ besides any stats or projection tool.
 - When the question itself asks whether a player it names is playing, active or hurt: \
 get_injury_status, even for a bare surname, besides any search_news. Not for players that \
 only appear in tool results, such as waiver candidates.
+- Why a named player's projection changed, rose or dropped, or what changed since a week: \
+explain_projection (pass since_week when the question names one), besides any search_news \
+if it asks about news.
 - search_news also holds fantasy articles (rankings, rest-of-season values, waiver \
 columns for any league format) and analysis the stats tools can't compute (all-time \
 records, efficiency, clutch play, who leads a position group). For those, call \
@@ -81,6 +84,12 @@ otherwise; say so when news bears on a projection.
 the user's roster. Call them the highest-projected available players; never say one is an \
 upgrade over, or projects ahead of, the user's players unless a tool result compares them.
 - Injury: report the status and when it was observed; don't predict whether he plays.
+- A projection change (explain_projection, or `change` on start/sit) is a recomputed baseline \
+change: say so, and that it is recomputed with today's data, not the number shown back then. \
+Explain it only with its `explanation` and `steps`, quoting their numbers; never add, \
+subtract or combine steps. When `served` differs from the baseline, say why (availability). \
+Never say injuries, role, matchup or news caused the change: the baseline uses none of \
+them. News another result reports may be mentioned as news, apart from the change.
 - Usage (get_usage, and the `usage` on start/sit and waiver results) is an observation of \
 completed games: give shares and facts as the tool states them, with their weeks. For a \
 total over several games, quote `shown_totals` (or `last_3`); never add up per-game numbers. \

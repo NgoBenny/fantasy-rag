@@ -520,3 +520,17 @@ def test_ask_passes_the_window_to_the_check(monkeypatch: pytest.MonkeyPatch) -> 
     draft = _limited("News search looked back 14 days.")
     turn = router.ask(None, WriterLLM([draft]), "Any news?")  # type: ignore[arg-type]
     assert turn.first_problems == [] and turn.answer is draft
+
+
+def test_projection_change_progress_names_the_player_and_summed_steps_are_rejected() -> None:
+    steps = [{"week": 5, "change": 0.39}, {"week": 8, "change": 1.77}]
+    result = {"player": {"id": "00-1", "name": "Ja'Marr Chase"}, "baseline_change": 2.15,
+              "steps": steps}  # fmt: skip
+    call = router.ToolCall("r1", "explain_projection", {"player": {"name": "chase"}}, result)
+    assert router.tool_progress(call).message == "Looked up a projection change for Ja'Marr Chase"
+    srcs = router.sources([call])
+    quoted = _answer("Week 8 moved it +1.77.", Claim(text="+1.77 in week 8", source_ids=["r1"]))
+    assert problems(quoted, srcs, "") == []
+    # Two steps added up by the writer (0.39 + 1.77) is a number the tool never returned.
+    summed = _answer("Those games added 2.16.", Claim(text="2.16", source_ids=["r1"]))
+    assert "answer: 2.16 not in r1" in problems(summed, srcs, "")

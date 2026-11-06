@@ -12,7 +12,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import Connection, Engine, text
 
 from fantasy_rag.agent import tools
@@ -203,10 +203,18 @@ def start_sit(
     ids: Annotated[str, Query(description="comma-separated player IDs, 2-4")],
     league_id: int | None = None,
     scoring: Scoring = "ppr",
+    season: int | None = None,
+    since_week: int | None = None,
+    week: int | None = None,
 ) -> dict[str, Any]:
     """Current scheduled week's projections, with league scoring and bye/injury status (the
-    agent's compare_start_sit tool)."""
+    agent's compare_start_sit tool), and each player's recomputed baseline change between
+    `since_week` and `week` (default: last week to now)."""
     wanted = _ids(ids)
+    try:
+        window = tools.ChangeWindow(season=season, since_week=since_week, week=week)
+    except ValidationError as e:
+        raise HTTPException(422, str(e)) from e
     if DEMO:
         key = f"league:{league_id}" if league_id is not None else scoring
         saved = [demo.get("projection", key, i) for i in wanted]
@@ -215,7 +223,7 @@ def start_sit(
     if missing := [i for i in wanted if i not in refs]:
         raise HTTPException(422, f"unknown player IDs: {missing}")
     choice = tools.ScoringChoice(league_id=league_id, scoring=scoring)
-    return _guard(tools.rank_start_sit, conn, [refs[i] for i in wanted], choice)
+    return _guard(tools.rank_start_sit, conn, [refs[i] for i in wanted], choice, window)
 
 
 @app.get("/api/trending")
