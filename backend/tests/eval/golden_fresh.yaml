@@ -178,6 +178,68 @@ fresh:
     correct_if: [reports the targets from get_usage, and gives a reason only if a cited story states one]
     fail_if: [invents a reason, or presents the usage change itself as the cause]
 
+# Phase 11 (Nov 5, 2026): why a projection moved. Written before the first run; the
+# answers are also read by hand against their cited steps, because the number check can't
+# tell a step the writer added up from one the tool returned.
+  - id: p01
+    category: projection_change
+    question: why did bucky irving's projection go up?
+    context: {leagues: mine, selected: null}
+    tools: [explain_projection]
+    require: [{tool: explain_projection, players: [Bucky Irving]}]
+    correct_if: [calls it a recomputed baseline change and explains it with the tool's week steps]
+    fail_if:
+      - blames an injury, role or matchup for the change
+      - computes a sum or difference the tool didn't return
+
+  - id: p02
+    category: projection_change
+    question: what changed for ja'marr chase's projection since week 5?
+    context: {leagues: mine, selected: null}
+    tools: [explain_projection]
+    require: [{tool: explain_projection, players: [Ja'Marr Chase]}]
+    correct_if: [covers weeks 5 to now with each game's step and the bye week as no change]
+    fail_if:
+      - computes a sum or difference the tool didn't return
+      - presents it as the number shown back then rather than recomputed
+
+  - id: p03
+    category: projection_change
+    question: josh allen's projection moved, why?
+    context: {leagues: mine, selected: 1}
+    tools: [explain_projection]
+    require: [{tool: explain_projection, players: [Josh Allen]}]
+    correct_if: [uses league 1 scoring and the tool's steps]
+    fail_if: [blames an injury, role or matchup for the change]
+
+  - id: p04
+    category: projection_change
+    question: why is jaylen warren's projection different from last week?
+    context: {leagues: mine, selected: null}
+    tools: [explain_projection]
+    require: [{tool: explain_projection, players: [Jaylen Warren]}]
+    correct_if: [separates the baseline change from the served projection (he is on bye)]
+    fail_if: [shows a baseline change beside a 0 projection without saying why it is 0]
+
+  - id: p05
+    category: projection_change
+    question: did tyler loop's projection drop because he got hurt?
+    context: {leagues: mine, selected: null}
+    tools: [explain_projection]
+    require: [{tool: explain_projection, players: [Tyler Loop]}]
+    correct_if:
+      - says the baseline doesn't use injuries, and that his served projection is 0 because he is on IR
+    fail_if: [says the injury changed the baseline projection]
+
+  - id: p06
+    category: projection_change
+    question: why did gibbs' projection change and is there any news on him?
+    context: {leagues: mine, selected: null}
+    tools: [explain_projection, search_news]
+    require: [{tool: explain_projection, players: [Jahmyr Gibbs]}]
+    correct_if: [explains the change from the steps and reports news separately, not as its cause]
+    fail_if: [presents a news story as the cause of the change]
+
 # Router evaluation only, as in golden_answers.yaml: scores are reported under the
 # original and the revised rubric.
 route_overrides:

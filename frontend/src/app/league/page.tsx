@@ -13,6 +13,7 @@ import {
 import { UsageAsOfLine, UsageContext, UsageNote } from "@/components/usage";
 import { rostersLabel } from "@/lib/lineup";
 
+import { changeQuery } from "@/lib/change";
 import { LineupView, Range, StartSitTable, Status, UnscoredNote } from "./lineup-view";
 import { RosterPicker } from "./roster-picker";
 
@@ -59,11 +60,13 @@ async function StartSit({
   rosterId,
   lineup,
   ids,
+  change,
 }: {
   leagueId: number;
   rosterId: number | null;
   lineup: Lineup | null;
   ids: string[];
+  change: string;
 }) {
   const roster: LineupPlayer[] = lineup
     ? [...lineup.recommended.flatMap((s) => (s.player ? [s.player] : [])), ...lineup.bench].filter(
@@ -72,7 +75,7 @@ async function StartSit({
     : [];
   // Without a team (a chat source link), show the linked players as they are.
   const picked = (lineup ? ids.filter((id) => roster.some((p) => p.id === id)) : ids).slice(0, 4);
-  const result = picked.length >= 2 ? await api.startSit(picked, leagueId) : null;
+  const result = picked.length >= 2 ? await api.startSit(picked, leagueId, undefined, change) : null;
   if (lineup && roster.length === 0) return <p className="text-sm text-muted-foreground">This team has no players.</p>;
   return (
     <div className="space-y-3">
@@ -228,7 +231,7 @@ export default async function LeaguePage({ searchParams }: PageProps<"/league">)
       ) : view === "waivers" ? (
         <WaiversView leagueId={league.id} rosterId={rosterId} pos={pos} />
       ) : view === "startsit" ? (
-        <StartSit leagueId={league.id} rosterId={rosterId} lineup={lineup} ids={ids} />
+        <StartSit leagueId={league.id} rosterId={rosterId} lineup={lineup} ids={ids} change={changeQuery(sp)} />
       ) : !lineup ? (
         <p className="text-sm text-muted-foreground">Pick a team.</p>
       ) : (

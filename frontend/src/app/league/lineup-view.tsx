@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { UsageContext } from "@/components/usage";
 import type { Lineup, LineupPlayer, StartSit } from "@/lib/api";
+import { CHANGE_NOTE, changeHeader, formatChange } from "@/lib/change";
 import { movesSummary, rostersLabel } from "@/lib/lineup";
 
 /** Rules a projection leaves out; without this, incomplete projections look complete. */
@@ -34,6 +35,7 @@ export function StartSitTable({ result }: { result: StartSit }) {
             <TableHead className="text-right">Proj (wk {result.ranked[0]?.week})</TableHead>
             <TableHead className="text-right">80% range</TableHead>
             <TableHead className="text-right">Last game</TableHead>
+            <TableHead>{changeHeader(result.ranked.map((r) => r.change))}</TableHead>
             <TableHead>Usage context (last 3 games)</TableHead>
           </TableRow>
         </TableHeader>
@@ -49,6 +51,9 @@ export function StartSitTable({ result }: { result: StartSit }) {
                 <Range r={r.range_80} />
               </TableCell>
               <TableCell className="text-right tabular-nums">{r.last_game?.points ?? "–"}</TableCell>
+              <TableCell className="max-w-xs whitespace-normal" aria-label="Baseline change">
+                <ChangeCell change={r.change} />
+              </TableCell>
               <TableCell className="max-w-sm whitespace-normal">
                 <UsageContext usage={r.usage} />
               </TableCell>
@@ -56,7 +61,24 @@ export function StartSitTable({ result }: { result: StartSit }) {
           ))}
         </TableBody>
       </Table>
-      <p className="text-xs text-muted-foreground">Ranked by projection; usage is shown as context only.</p>
+      <p className="text-xs text-muted-foreground">
+        Ranked by projection; the change and usage are shown as context only.
+      </p>
+      <details className="text-xs text-muted-foreground">
+        <summary className="cursor-pointer">How changes are explained</summary>
+        <p className="mt-1">{CHANGE_NOTE}</p>
+      </details>
+    </>
+  );
+}
+
+function ChangeCell({ change }: { change?: Parameters<typeof formatChange>[0] }) {
+  const f = formatChange(change);
+  return (
+    <>
+      <span className="tabular-nums">{f.value}</span>
+      {f.served && <span className="ml-1 text-destructive">({f.served})</span>}
+      {f.note && <div className="text-xs text-muted-foreground">{f.note}</div>}
     </>
   );
 }

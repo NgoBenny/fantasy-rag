@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { UsageSection } from "@/components/usage";
 import { SHOWN_STATS, api, scoringOf } from "@/lib/api";
+import { changeQuery } from "@/lib/change";
 import { windowQuery } from "@/lib/usage";
 
 import { StartSitTable } from "../league/lineup-view";
@@ -26,7 +27,7 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
 
   const [{ players }, projections] = await Promise.all([
     api.compare(ids, scoring, window),
-    api.startSit(ids, null, scoring),
+    api.startSit(ids, null, scoring, changeQuery(sp)),
   ]);
   const rows: [string, (p: (typeof players)[number]) => string | number][] = [
     ["Games", (p) => p.games],
