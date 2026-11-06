@@ -68,3 +68,7 @@ def test_unsupported_comparisons_are_results_not_errors(since: int, week: int, r
 def test_a_first_projection_has_nothing_to_compare_with() -> None:
     got = explain([(S, 3, 11.0)], S, 2, 4)  # no game before week 2, no prior season
     assert not got["available"] and got["reason"] == "no games before week 2"
+
+
+def test_unsorted_history_gives_the_same_exact_steps() -> None:
+    assert explain(list(reversed(GAMES)), S, 2, 7) == explain(GAMES, S, 2, 7)

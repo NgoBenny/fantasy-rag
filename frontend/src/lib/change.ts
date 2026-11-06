@@ -4,14 +4,14 @@ import type { Availability } from "./api";
 export interface ProjectionChange {
   label: string;
   season: number;
-  since_week: number;
-  week: number;
+  since_week: number | null;
+  week: number | null;
   available: boolean;
   reason: string | null;
   baseline_change?: number;
   summary: string;
   explanation: string[];
-  served: { week: number; points: number | null; availability: Availability | null };
+  served: { season: number; week: number; points: number | null; availability: Availability | null };
 }
 
 export const CHANGE_NOTE =
@@ -40,11 +40,18 @@ export function changeQuery(sp: Record<string, string | string[] | undefined>): 
 
 /** Column header: the weeks compared, always labelled as recomputed. */
 export function changeHeader(changes: (ProjectionChange | undefined)[]): string {
-  const c = changes.find((x) => x?.available) ?? changes.find(Boolean);
-  if (!c) return "Baseline change (recomputed)";
-  return c.week === c.served.week
-    ? `Baseline vs wk ${c.since_week} (recomputed)`
-    : `Baseline wk ${c.since_week}→${c.week} (recomputed)`;
+  const c = changes.find((x) => x?.available) ?? changes.find((x) => x?.week != null);
+  if (!c || c.week == null) return "Baseline change (recomputed)";
+  if (!isNow(c)) {
+    const season = c.season === c.served.season ? "" : `${c.season} `;
+    return `Baseline ${season}wk ${c.since_week}→${c.week} (recomputed)`;
+  }
+  return `Baseline vs wk ${c.since_week} (recomputed)`;
+}
+
+/** Whether the change ends at the week (and season) the app serves now. */
+function isNow(c: ProjectionChange): boolean {
+  return c.season === c.served.season && c.week === c.served.week;
 }
 
 /** The cell: the change (computed in Python, only formatted here), its reason, and any availability override. */
@@ -53,7 +60,7 @@ export function formatChange(c?: ProjectionChange): { value: string; note: strin
   const a = c.served.availability;
   const served =
     a && !a.playable && c.served.points !== null
-      ? `served ${c.served.points.toFixed(1)}: ${a.status}${c.week !== c.served.week ? " (now)" : ""}`
+      ? `served ${c.served.points.toFixed(1)}: ${a.status}${isNow(c) ? "" : " (now)"}`
       : null;
   if (!c.available || c.baseline_change === undefined) {
     return { value: "comparison unavailable", note: c.reason ?? "", served };

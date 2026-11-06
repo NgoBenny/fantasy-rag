@@ -21,9 +21,9 @@ besides any stats or projection tool.
 - When the question itself asks whether a player it names is playing, active or hurt: \
 get_injury_status, even for a bare surname, besides any search_news. Not for players that \
 only appear in tool results, such as waiver candidates.
-- Why a named player's projection changed, rose or dropped, or what changed since a week: \
-explain_projection (pass since_week when the question names one), besides any search_news \
-if it asks about news.
+- Why a named player's projection changed, rose or dropped, or how his projection changed \
+since a week: explain_projection (pass since_week when the question names one), besides any \
+search_news if it asks about news. Not for usage or role questions (get_usage).
 - search_news also holds fantasy articles (rankings, rest-of-season values, waiver \
 columns for any league format) and analysis the stats tools can't compute (all-time \
 records, efficiency, clutch play, who leads a position group). For those, call \

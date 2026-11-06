@@ -129,10 +129,9 @@ data: ${JSON.stringify(data)}
 test("a projection-change citation opens the same player, scoring and pinned weeks", async ({ page }) => {
   const API = "http://localhost:8011";
   const [allen] = await (await page.request.get(`${API}/api/players?q=josh allen`)).json();
-  const [chase] = await (await page.request.get(`${API}/api/players?q=chase`)).json();
-  // The link format explain_projection's citation uses (backend: api/chat.py _href, tested there).
+  // Exactly what explain_projection's citation builds for one player (api/chat.py _href).
   const window = "season=2026&since=5&week=8";
-  const href = `/compare?ids=${allen.id},${chase.id}&scoring=half&${window}`;
+  const href = `/compare?ids=${allen.id}&scoring=half&${window}`;
   const answer = {
     answer: "See the cited change.", answer_type: "projection", season: 2026, week: 8, scoring_format: null,
     data_as_of: null, model_version: null, facts: [], projections: [{ text: "change", source_ids: ["r1"] }],
@@ -160,7 +159,7 @@ data: ${JSON.stringify(data)}
   // The same weeks the citation pinned, not the current default window.
   await expect(page.getByRole("columnheader", { name: "Baseline wk 5→8 (recomputed)" })).toBeVisible();
   const api = await (await page.request.get(
-    `${API}/api/start-sit?ids=${allen.id},${chase.id}&scoring=half&season=2026&since_week=5&week=8`,
+    `${API}/api/start-sit?ids=${allen.id}&scoring=half&season=2026&since_week=5&week=8`,
   )).json();
   const row = page.getByRole("table", { name: "Start/sit" }).getByRole("row").nth(1);
   await expect(row.getByLabel("Baseline change")).toContainText(api.ranked[0].change.summary);

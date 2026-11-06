@@ -75,7 +75,9 @@ async function StartSit({
     : [];
   // Without a team (a chat source link), show the linked players as they are.
   const picked = (lineup ? ids.filter((id) => roster.some((p) => p.id === id)) : ids).slice(0, 4);
-  const result = picked.length >= 2 ? await api.startSit(picked, leagueId, undefined, change) : null;
+  // A chat source link may carry one player (a cited projection change); picking needs 2.
+  const result =
+    picked.length >= (lineup ? 2 : 1) ? await api.startSit(picked, leagueId, undefined, change) : null;
   if (lineup && roster.length === 0) return <p className="text-sm text-muted-foreground">This team has no players.</p>;
   return (
     <div className="space-y-3">

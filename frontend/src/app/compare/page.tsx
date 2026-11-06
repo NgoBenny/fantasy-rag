@@ -14,6 +14,17 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
   const scoring = scoringOf(sp.scoring);
   const window = windowQuery(sp);
 
+  // One player: a cited projection change (chat) shows just its start/sit row.
+  if (ids.length === 1) {
+    const one = await api.startSit(ids, null, scoring, changeQuery(sp));
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">{one.ranked[0]?.player.name ?? "Projection"}</h1>
+        <StartSitTable result={one} />
+      </div>
+    );
+  }
+
   if (ids.length < 2) {
     return (
       <div className="space-y-2">

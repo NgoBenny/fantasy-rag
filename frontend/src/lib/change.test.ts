@@ -12,7 +12,7 @@ const base: ProjectionChange = {
   baseline_change: 1.62,
   summary: "week 8 game 21.0 pts vs 15.3 before",
   explanation: [],
-  served: { week: 9, points: 16.24, availability: null },
+  served: { season: 2026, week: 9, points: 16.24, availability: null },
 };
 
 describe("formatChange", () => {
@@ -27,9 +27,11 @@ describe("formatChange", () => {
     expect(got).toEqual({ value: "comparison unavailable", note: "no games before week 8", served: null });
   });
   it("never shows a positive change beside a zero without the availability override", () => {
-    const out = { ...base, served: { week: 9, points: 0, availability: { status: "Out", playable: false } } };
+    const out = { ...base, served: { season: 2026, week: 9, points: 0, availability: { status: "Out", playable: false } } };
     expect(formatChange(out)).toMatchObject({ value: "+1.62", served: "served 0.0: Out" });
     expect(formatChange({ ...out, week: 7, since_week: 6 }).served).toBe("served 0.0: Out (now)");
+    // Another season's week 9 is not "now" either.
+    expect(formatChange({ ...out, season: 2025 }).served).toBe("served 0.0: Out (now)");
   });
 });
 
@@ -37,6 +39,9 @@ describe("changeHeader and changeQuery", () => {
   it("names the weeks compared and says recomputed", () => {
     expect(changeHeader([base])).toBe("Baseline vs wk 8 (recomputed)");
     expect(changeHeader([{ ...base, since_week: 5, week: 7 }])).toBe("Baseline wk 5→7 (recomputed)");
+    expect(changeHeader([{ ...base, season: 2025 }])).toBe("Baseline 2025 wk 8→9 (recomputed)");
+    // No week yet (another season, week not given): no "→null".
+    expect(changeHeader([{ ...base, available: false, week: null }])).toBe("Baseline change (recomputed)");
   });
   it("passes only numeric window params on, under the API's names", () => {
     expect(changeQuery({ season: "2026", since: "5", week: "9", ids: "x" })).toBe("&season=2026&since_week=5&week=9");

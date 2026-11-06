@@ -56,8 +56,11 @@ def test_league_rules_and_unscored_warnings_carry_through(db: str) -> None:
 
 def test_a_week_without_a_game_is_labelled_from_the_schedule(db: str) -> None:
     _sql(db, "UPDATE player_week_stats SET team = 'NYJ' WHERE player_id = '00-3'")
+    # Week 2 played (NYJ off), week 3 still to come: the projection week is 3.
     _sql(db, "INSERT INTO schedules (game_id, season, week, game_type, home_team, away_team,"
-             " sync_run_id) VALUES ('g2', 2026, 2, 'REG', 'MIN', 'DAL', :r)")  # fmt: skip
+             " kickoff_at, sync_run_id) VALUES ('g2', 2026, 2, 'REG', 'MIN', 'DAL',"
+             " '2026-09-20 17:00+00', :r), ('g3', 2026, 3, 'REG', 'NYJ', 'DAL',"
+             " '2099-09-27 17:00+00', :r)")  # fmt: skip
     with get_readonly_engine(db).connect() as conn:
         r = run_tool(conn, "explain_projection",
                      {"player": {"name": "Mike Williams", "position": "WR"},
@@ -79,7 +82,7 @@ def test_an_out_player_shows_the_served_zero_beside_a_positive_change(db: str) -
     assert r["baseline_change"] > 0 and r["served"]["points"] == 0.0
     assert (
         r["explanation"][-1]
-        == "Separately, his served projection for week 3 is 0.0: Out (sleeper)."
+        == "Separately, his served projection for 2026 week 3 is 0.0: Out (sleeper)."
     )
     _every_number_is_in_the_result(r)
     changes = {p["player"]["name"]: p["change"] for p in ss["ranked"]}
@@ -96,8 +99,8 @@ def test_malformed_windows_are_rejected_and_unsupported_ones_are_results(db: str
                 run_tool(conn, "explain_projection", {"player": {"name": "Zero Guy"}, **bad})
         far = run_tool(conn, "explain_projection",
                        {"player": {"name": "Zero Guy"}, "since_week": 1, "week": 9})  # fmt: skip
-    assert not far["available"] and far["reason"] == "more than 6 weeks apart"
-    assert far["explanation"] == ["Comparison unavailable: more than 6 weeks apart."]
+    # Week 9 is still ahead here (week 3 is current); "more than 6 weeks" is unit-tested.
+    assert not far["available"] and far["reason"] == "week 9 has not been reached"
     with get_readonly_engine(db).connect() as conn:
         # A season alone means the current week; another season needs its week.
         same = run_tool(
@@ -125,3 +128,47 @@ def test_the_citation_pins_the_interval_it_explained(db: str) -> None:
     # Once the projection week moves on, the same saved result still links to weeks 2 to 3.
     later = {**r, "served": {**r["served"], "week": 4}}
     assert window in (_href(ToolCall("r1", "explain_projection", args, later)) or "")
+
+
+def test_unplayed_or_unloaded_weeks_are_unavailable_not_missed_games(db: str) -> None:
+    # Weeks 2 and 3 have kicked off long ago, week 4 is ahead; week 3 has no stats yet.
+    for w, kick in ((2, "2026-09-20 17:00+00"), (3, "2026-09-27 17:00+00"),
+                    (4, "2099-10-04 17:00+00")):  # fmt: skip
+        _sql(db, "INSERT INTO schedules (game_id, season, week, game_type, home_team, away_team,"
+                 " kickoff_at, sync_run_id) VALUES (:g, 2026, :w, 'REG', 'MIN', 'DAL', :k, :r)",
+             g=f"g{w}", w=w, k=kick)  # fmt: skip
+    with get_readonly_engine(db).connect() as conn:
+        now = run_tool(conn, "explain_projection", {"player": {"name": "Justin Jefferson"}})
+        ahead = run_tool(conn, "explain_projection",
+                         {"player": {"name": "Justin Jefferson"}, "week": 9})  # fmt: skip
+    assert (now["since_week"], now["week"]) == (3, 4)
+    assert not now["available"] and now["reason"] == "week 3 stats are not loaded yet"
+    assert not ahead["available"] and ahead["reason"] == "week 9 has not been reached"
+    assert ahead["explanation"] == ["Comparison unavailable: week 9 has not been reached."]
+
+
+def test_one_player_start_sit_for_a_cited_change(db: str) -> None:
+    from fastapi.testclient import TestClient
+
+    from fantasy_rag.api.main import app, get_conn
+
+    def conn() -> Any:
+        with get_readonly_engine(db).connect() as c:
+            yield c
+
+    app.dependency_overrides[get_conn] = conn
+    try:
+        client = TestClient(app)
+        one = client.get("/api/start-sit", params={"ids": "00-1", "since_week": 2, "week": 3})
+        bad = client.get("/api/start-sit", params={"ids": "00-1", "since_week": 3, "week": 3})
+    finally:
+        app.dependency_overrides.clear()
+    assert one.status_code == 200
+    assert one.json()["ranked"][0]["change"]["since_week"] == 2
+    assert bad.status_code == 422
+
+
+def test_a_result_without_a_week_links_to_the_player_only() -> None:
+    r = {"player": {"id": "00-1", "name": "Justin Jefferson"}, "season": 2025, "since_week": None,
+         "week": None, "available": False}  # fmt: skip
+    assert _href(ToolCall("r1", "explain_projection", {"season": 2025}, r)) == "/players/00-1"

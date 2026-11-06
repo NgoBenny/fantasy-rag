@@ -167,10 +167,10 @@ def player(
     return _guard(tools._player_block, conn, ref, w)
 
 
-def _ids(ids: str) -> list[str]:
+def _ids(ids: str, fewest: int = 2) -> list[str]:
     wanted = list(dict.fromkeys(i for i in ids.split(",") if i))
-    if not 2 <= len(wanted) <= 4:
-        raise HTTPException(422, "need 2-4 player IDs")
+    if not fewest <= len(wanted) <= 4:
+        raise HTTPException(422, f"need {fewest}-4 player IDs")
     return wanted
 
 
@@ -200,7 +200,7 @@ def compare(
 @app.get("/api/start-sit")
 def start_sit(
     conn: Conn,
-    ids: Annotated[str, Query(description="comma-separated player IDs, 2-4")],
+    ids: Annotated[str, Query(description="comma-separated player IDs, 1-4")],
     league_id: int | None = None,
     scoring: Scoring = "ppr",
     season: int | None = None,
@@ -210,7 +210,7 @@ def start_sit(
     """Current scheduled week's projections, with league scoring and bye/injury status (the
     agent's compare_start_sit tool), and each player's recomputed baseline change between
     `since_week` and `week` (default: last week to now)."""
-    wanted = _ids(ids)
+    wanted = _ids(ids, 1)  # one player: a cited projection change
     try:
         window = tools.ChangeWindow(season=season, since_week=since_week, week=week)
     except ValidationError as e:

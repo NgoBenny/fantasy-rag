@@ -391,26 +391,35 @@ def _change(
     all come from this result, kept apart from what is served now (availability can
     override the baseline)."""
     season = w.season or current[0]
-    served = {"week": current[1], "points": served_points, "availability": avail}
+    served = {"season": current[0], "week": current[1], "points": served_points,
+              "availability": avail}  # fmt: skip
     head = {"label": CHANGE_LABEL, "season": season, "served": served, "caveats": CHANGE_CAVEATS}
-    if season != current[0] and w.week is None:
-        why = f"give the week to compare in {season}"
-        return {**head, "available": False, "since_week": w.since_week, "week": None,
-                "reason": why, "summary": "comparison unavailable",
+
+    def unavailable(why: str, since: int | None, week: int | None) -> dict[str, Any]:
+        return {**head, "available": False, "reason": why, "since_week": since, "week": week,
+                "summary": "comparison unavailable",
                 "explanation": [f"Comparison unavailable: {why}."]}  # fmt: skip
+
+    if season != current[0] and w.week is None:
+        return unavailable(f"give the week to compare in {season}", w.since_week, None)
     week = w.week or current[1]
     since = w.since_week or week - 1
-    if season != current[0]:
+    if season == current[0]:
+        # Every week in the window must be played and loaded; otherwise "no game" would be a
+        # guess about a week still to come, or one whose stats haven't arrived yet.
+        done = u.completed_through(conn, season, datetime.now(UTC)) or q.latest_week(conn)[1]
+        if week > current[1]:
+            return unavailable(f"week {week} has not been reached", since, week)
+        if week - 1 > done:
+            return unavailable(f"week {week - 1} stats are not loaded yet", since, week)
+    else:
         rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
     if got is not None and got.policy != "baseline":
-        return {**head, "available": False, "since_week": since, "week": week,
-                "reason": "the served projection is not the baseline",
-                "summary": "comparison unavailable", "explanation": []}  # fmt: skip
+        return unavailable("the served projection is not the baseline", since, week)
     games = baseline.scored_history(rows, rules).get(ref.id, [])
     res = baseline.explain(games, season, since, week)
     if not res["available"]:
-        return {**head, **res, "summary": "comparison unavailable",
-                "explanation": [f"Comparison unavailable: {res['reason']}."]}  # fmt: skip
+        return unavailable(res["reason"], since, week)
     teams = {r["team"] for r in rows if r["season"] == season and r["team"]}
     team = next(iter(teams)) if len(teams) == 1 else None
     schedule = u.team_weeks(conn, season, week) if res["no_game_weeks"] else {}
@@ -439,7 +448,7 @@ def _change(
     if avail and not avail["playable"] and served_points is not None:
         why = avail.get("note") or f"{avail['status']} ({avail.get('source')})"
         lines.append(
-            f"Separately, his served projection for week {current[1]} is "
+            f"Separately, his served projection for {current[0]} week {current[1]} is "
             f"{served_points:.1f}: {why}."
         )
     if res["steps"]:

@@ -739,7 +739,7 @@
  "freshness": [
   {
    "age_hours": 0.0,
-   "last_ok": "2026-11-06T02:46:20.712010+00:00",
+   "last_ok": "2026-11-06T03:00:46.827625+00:00",
    "source": "sample data"
   }
  ],
@@ -1068,7 +1068,7 @@
    "recommended_total": 116.98,
    "roster_id": 1,
    "rosters_as_of": {
-    "synced_at": "2026-11-06T02:46:20.712010+00:00",
+    "synced_at": "2026-11-06T03:00:46.827625+00:00",
     "week": 9
    },
    "scoring": "Demo League rules (half PPR)",
@@ -14745,6 +14745,7 @@
      "served": {
       "availability": null,
       "points": 24.48,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -14896,6 +14897,7 @@
        "status": "Questionable"
       },
       "points": 9.81,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15047,6 +15049,7 @@
      "served": {
       "availability": null,
       "points": 10.25,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15226,6 +15229,7 @@
      "served": {
       "availability": null,
       "points": 14.67,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15398,6 +15402,7 @@
      "served": {
       "availability": null,
       "points": 16.48,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15574,7 +15579,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: up 0.93 (15.06 to 15.99).",
       "Week 8: 20.80 points, above his projection before it (15.06); that game is 16.2% of the new average and moved it up 0.93.",
-      "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
+      "Separately, his served projection for 2026 week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -15587,6 +15592,7 @@
        "status": "bye"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15747,6 +15753,7 @@
      "served": {
       "availability": null,
       "points": 15.08,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15877,6 +15884,7 @@
      "served": {
       "availability": null,
       "points": 19.51,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -15976,6 +15984,7 @@
      "served": {
       "availability": null,
       "points": 16.46,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -16101,6 +16110,7 @@
      "served": {
       "availability": null,
       "points": 19.35,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -16273,6 +16283,7 @@
      "served": {
       "availability": null,
       "points": 22.87,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -16417,6 +16428,7 @@
      "served": {
       "availability": null,
       "points": 15.32,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -16595,7 +16607,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
       "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
-      "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
+      "Separately, his served projection for 2026 week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -16609,6 +16621,7 @@
        "status": "IR"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -16736,6 +16749,7 @@
      "served": {
       "availability": null,
       "points": 24.48,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -16889,6 +16903,7 @@
        "status": "Questionable"
       },
       "points": 9.81,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17042,6 +17057,7 @@
      "served": {
       "availability": null,
       "points": 10.25,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17223,6 +17239,7 @@
      "served": {
       "availability": null,
       "points": 14.67,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17397,6 +17414,7 @@
      "served": {
       "availability": null,
       "points": 16.48,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17575,7 +17593,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: up 0.93 (15.06 to 15.99).",
       "Week 8: 20.80 points, above his projection before it (15.06); that game is 16.2% of the new average and moved it up 0.93.",
-      "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
+      "Separately, his served projection for 2026 week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -17588,6 +17606,7 @@
        "status": "bye"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17750,6 +17769,7 @@
      "served": {
       "availability": null,
       "points": 15.08,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17882,6 +17902,7 @@
      "served": {
       "availability": null,
       "points": 19.51,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -17983,6 +18004,7 @@
      "served": {
       "availability": null,
       "points": 16.46,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -18110,6 +18132,7 @@
      "served": {
       "availability": null,
       "points": 19.35,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -18284,6 +18307,7 @@
      "served": {
       "availability": null,
       "points": 22.87,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -18430,6 +18454,7 @@
      "served": {
       "availability": null,
       "points": 15.32,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -18610,7 +18635,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
       "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
-      "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
+      "Separately, his served projection for 2026 week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -18624,6 +18649,7 @@
        "status": "IR"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -18753,6 +18779,7 @@
      "served": {
       "availability": null,
       "points": 24.52,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -18904,6 +18931,7 @@
        "status": "Questionable"
       },
       "points": 12.12,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19055,6 +19083,7 @@
      "served": {
       "availability": null,
       "points": 12.58,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19234,6 +19263,7 @@
      "served": {
       "availability": null,
       "points": 18.07,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19406,6 +19436,7 @@
      "served": {
       "availability": null,
       "points": 19.97,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19582,7 +19613,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: up 0.76 (16.61 to 17.37).",
       "Week 8: 21.30 points, above his projection before it (16.61); that game is 16.2% of the new average and moved it up 0.76.",
-      "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
+      "Separately, his served projection for 2026 week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -19595,6 +19626,7 @@
        "status": "bye"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19755,6 +19787,7 @@
      "served": {
       "availability": null,
       "points": 19.12,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19885,6 +19918,7 @@
      "served": {
       "availability": null,
       "points": 19.51,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -19984,6 +20018,7 @@
      "served": {
       "availability": null,
       "points": 18.04,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -20109,6 +20144,7 @@
      "served": {
       "availability": null,
       "points": 23.86,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -20281,6 +20317,7 @@
      "served": {
       "availability": null,
       "points": 25.15,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -20425,6 +20462,7 @@
      "served": {
       "availability": null,
       "points": 16.24,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -20603,7 +20641,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
       "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
-      "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
+      "Separately, his served projection for 2026 week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -20617,6 +20655,7 @@
        "status": "IR"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -20744,6 +20783,7 @@
      "served": {
       "availability": null,
       "points": 24.44,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -20895,6 +20935,7 @@
        "status": "Questionable"
       },
       "points": 7.5,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21046,6 +21087,7 @@
      "served": {
       "availability": null,
       "points": 7.91,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21225,6 +21267,7 @@
      "served": {
       "availability": null,
       "points": 11.28,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21397,6 +21440,7 @@
      "served": {
       "availability": null,
       "points": 12.99,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21573,7 +21617,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: up 1.09 (13.52 to 14.61).",
       "Week 8: 20.30 points, above his projection before it (13.52); that game is 16.2% of the new average and moved it up 1.10.",
-      "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
+      "Separately, his served projection for 2026 week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -21586,6 +21630,7 @@
        "status": "bye"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21746,6 +21791,7 @@
      "served": {
       "availability": null,
       "points": 11.05,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21876,6 +21922,7 @@
      "served": {
       "availability": null,
       "points": 19.51,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -21975,6 +22022,7 @@
      "served": {
       "availability": null,
       "points": 14.87,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -22100,6 +22148,7 @@
      "served": {
       "availability": null,
       "points": 14.84,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -22272,6 +22321,7 @@
      "served": {
       "availability": null,
       "points": 20.59,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -22416,6 +22466,7 @@
      "served": {
       "availability": null,
       "points": 14.4,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -22594,7 +22645,7 @@
      "explanation": [
       "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
       "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
-      "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
+      "Separately, his served projection for 2026 week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -22608,6 +22659,7 @@
        "status": "IR"
       },
       "points": 0.0,
+      "season": 2026,
       "week": 9
      },
      "since_week": 8,
@@ -22700,7 +22752,7 @@
    }
   }
  },
- "recorded_at": "2026-11-06T02:46:20.712010+00:00",
+ "recorded_at": "2026-11-06T03:00:46.827625+00:00",
  "status": {
   "label": "Sample data from week 8, 2026, not live",
   "latest_week": 8,
@@ -22709,23 +22761,23 @@
   "sources": {
    "injuries": {
     "age_hours": 6.0,
-    "last_ok": "2026-11-05T20:46:20.712010+00:00"
+    "last_ok": "2026-11-05T21:00:46.827625+00:00"
    },
    "news": {
     "age_hours": 1.0,
-    "last_ok": "2026-11-06T01:46:20.712010+00:00"
+    "last_ok": "2026-11-06T02:00:46.827625+00:00"
    },
    "rosters": {
     "age_hours": 6.0,
-    "last_ok": "2026-11-05T20:46:20.712010+00:00"
+    "last_ok": "2026-11-05T21:00:46.827625+00:00"
    },
    "stats": {
     "age_hours": 6.0,
-    "last_ok": "2026-11-05T20:46:20.712010+00:00"
+    "last_ok": "2026-11-05T21:00:46.827625+00:00"
    },
    "transactions": {
     "age_hours": 1.0,
-    "last_ok": "2026-11-06T01:46:20.712010+00:00"
+    "last_ok": "2026-11-06T02:00:46.827625+00:00"
    }
   }
  },
@@ -23077,7 +23129,7 @@
    "model_version": "baseline-ewm-v1",
    "rostered_players_excluded": 10,
    "rosters_as_of": {
-    "synced_at": "2026-11-06T02:46:20.712010+00:00",
+    "synced_at": "2026-11-06T03:00:46.827625+00:00",
     "week": 9
    },
    "scoring": "Demo League rules (half PPR)",

@@ -81,6 +81,7 @@ def explain(
     def unavailable(reason: str) -> dict[str, Any]:
         return {"available": False, "reason": reason, "since_week": since_week, "week": week}
 
+    games = sorted(games)  # the steps are exact only in time order
     if since_week < 1:
         return unavailable("no earlier week this season to compare with")
     if since_week >= week:
