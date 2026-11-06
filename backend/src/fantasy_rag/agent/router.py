@@ -17,11 +17,12 @@ from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 from pydantic import BaseModel
 from sqlalchemy import Connection, text
 
-from fantasy_rag.agent.answer import Answer, problems
+from fantasy_rag.agent.answer import SEARCH_SCOPE, Answer, problems
 from fantasy_rag.agent.llm import INVALID_ARGS, Cancelled, LLMClient
 from fantasy_rag.agent.prompts import ROUTER_SYSTEM, WRITER_SYSTEM
 from fantasy_rag.agent.tools import TOOLS, run_tool
 from fantasy_rag.analytics.queries import (
+    SKILL,
     AmbiguousPlayer,
     latest_week,
     league_roster,
@@ -241,13 +242,15 @@ def swapped_player(
     args: dict[str, Any],
     covered: set[str] | None = None,
 ) -> str | None:
-    """A looked-up player the question never names, while it does name another player of
-    his position by surname ("is loop safe?" answered with the roster's other kicker).
+    """A looked-up player the question never names, while it does name another player by
+    surname: of his position ("is loop safe?" answered with the roster's other kicker), or
+    of any fantasy position when the lookup kept the question's first name ("tyler loop"
+    looked up as Tyler Lockett, a receiver).
     `covered`: surnames of players other calls already resolved successfully; a named
     player covered there (or in this same call) makes the roster player a fair comparison.
 
-    Only a same-position, exact-surname match counts, and surnames that are everyday
-    words are skipped, so ordinary questions don't trigger it.
+    Only an exact surname of a player with stats this season counts, and surnames that are
+    everyday words are skipped, so ordinary questions don't trigger it.
     """
     words = _question_words(question)
     named = _named_players(args)
@@ -259,20 +262,26 @@ def swapped_player(
     for p in named:
         if _surname(p["name"]) in words:
             continue  # the question names him (a shared first name doesn't count)
+        first = normalize_name(p["name"]).split()[:1]
+        # Kept the user's first name but not the surname ("tyler loop" looked up as Tyler
+        # Lockett): a swap across positions. Otherwise only his own position counts, so
+        # "start jefferson over my guy?" never matches a tight end surnamed Guy.
+        cross = bool(first) and first[0] in words
         try:
             ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
         except (AmbiguousPlayer, ValueError):
             continue
+        positions = list(SKILL) if cross else [ref.position]
         other = conn.execute(
             text(
                 "SELECT p.full_name, p.position, p.team FROM players p"
-                " WHERE p.position = :pos AND p.id <> :id"
+                " WHERE p.position = ANY(:pos) AND p.id <> :id"
                 " AND split_part(p.search_name, ' ', -1) = ANY(:words)"
                 " AND EXISTS (SELECT 1 FROM player_week_stats s"
                 "             WHERE s.player_id = p.id AND s.season = :season)"
                 " ORDER BY p.full_name LIMIT 1"
             ),
-            {"pos": ref.position, "id": ref.id, "words": sorted(surnames), "season": season},
+            {"pos": positions, "id": ref.id, "words": sorted(surnames), "season": season},
         ).first()
         if other is not None:
             return (
@@ -459,6 +468,11 @@ def ask(
     rejected = None
     if found:
         rejected, answer = answer, _withheld()
+    elif windows:
+        # The app states the window (the narrowest, so true of every search), never the model.
+        scope = SEARCH_SCOPE.format(days=min(windows))
+        if scope not in (x.strip() for x in answer.limitations):
+            answer.limitations.append(scope)
     if capped:
         answer.limitations.append(f"stopped after {MAX_ROUNDS} rounds of tool calls")
     return Turn(

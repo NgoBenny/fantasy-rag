@@ -121,7 +121,12 @@ def problems(
     plain = [x for x in answer.limitations if x.strip() != scope]
     if wrong := [x.strip() for x in plain if _SCOPE_SHAPE.fullmatch(x.strip())]:
         out.append(f"search window: use the smallest days of the searches run, not {wrong}")
-    check("limitations", " ".join(x for x in plain if x.strip() not in wrong), shown)
+    before = len(out)
+    rest = " ".join(x for x in plain if x.strip() not in wrong)
+    check("limitations", rest, shown)
+    windows = {float(d) for d in searched_days}
+    if len(out) > before and any(float(n) in windows for n in numbers(rest)):
+        out.append("limitations: don't state the search window; the app adds it")
     meta = (answer.season, answer.week, answer.data_as_of, answer.scoring_format)
     # An evidence-free answer may cite nothing, but its as-of time comes from this turn's results.
     pool = list(sources) if evidence_free else shown

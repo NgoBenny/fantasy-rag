@@ -179,6 +179,9 @@ def test_router_refuses_a_player_the_question_does_not_name(db: str) -> None:
             assert swapped_player(conn, q, swap), q  # possessives name him too
         assert swapped_player(conn, "is my receiver a safe start?", swap) is None
         assert swapped_player(conn, "is jefferson better than agent?", swap) is None
+        # Kept the first name, changed the surname: caught across positions (Loop -> Lockett).
+        cross = swapped_player(conn, "is free guy a safe start?", swap)
+        assert cross is not None and "Guy (TE" in cross
         # The named player already resolved by another call: a fair comparison.
         assert (
             swapped_player(conn, "start jefferson over my guy?", swap, {"justin", "jefferson"})
