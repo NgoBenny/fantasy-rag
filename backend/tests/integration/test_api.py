@@ -103,7 +103,8 @@ def test_start_sit_endpoint_matches_the_tool_with_bye_injury_and_league_scoring(
     # Same data; only the timestamp style differs ("Z" in responses, "+00:00" from Python).
     exp = json.loads(json.dumps(jsonable_encoder(tool)).replace("+00:00", "Z"))
     assert api == exp  # one ranking code path (same JSON as the tool)
-    assert client.get("/api/start-sit", params={"ids": "00-1"}).status_code == 422
+    assert client.get("/api/start-sit", params={"ids": "00-1"}).status_code == 200  # a cited change
+    assert client.get("/api/start-sit", params={"ids": ","}).status_code == 422
 
 
 def test_status_waivers_and_model_runs(client: TestClient) -> None:

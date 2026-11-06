@@ -81,6 +81,11 @@ test("league-free compare shows next week's projections in the chosen scoring", 
   const rows = page.getByRole("table", { name: "Start/sit" }).getByRole("row");
   await expect(rows.nth(1)).toContainText(api.ranked[0].player.name);
   await expect(rows.nth(1)).toContainText(String(api.ranked[0].projected_points));
+  // Phase 11: the recomputed baseline change, labelled as recomputed, with its reason.
+  const change = api.ranked[0].change;
+  await expect(page.getByRole("columnheader", { name: /recomputed/ })).toContainText(`wk ${change.since_week}`);
+  const cell = rows.nth(1).getByLabel("Baseline change");
+  await expect(cell).toContainText(change.summary);
 });
 
 test("a stream cut off before its answer shows an error with Retry", async ({ page }) => {
@@ -163,13 +168,15 @@ test("any 2-4 demo roster players can be compared, not just recorded pairs", asy
     await new Promise((r) => setTimeout(r, 800));
     await route.continue();
   });
-  for (const name of ["Brock Purdy", "Josh Allen", "Trey McBride"])
+  for (const name of ["Brock Purdy", "Jaylen Warren", "Trey McBride"])
     await page.getByLabel("Roster players").getByRole("link", { name }).click();
   await expect(page).toHaveURL(/ids=[^&]+(,|%2C)[^&]+(,|%2C)[^&]+/);
   const rows = page.getByRole("table", { name: "Start/sit" }).getByRole("row");
   await expect(rows).toHaveCount(4); // header + 3 players
-  await expect(rows.last()).toContainText("Josh Allen"); // on bye: 0, ranked last
+  await expect(rows.last()).toContainText("Jaylen Warren"); // on bye: 0, ranked last
   await expect(rows.last()).toContainText("bye");
+  // The served zero sits beside the baseline change, never an unexplained change next to 0.
+  await expect(rows.last().getByLabel("Baseline change")).toContainText("served 0.0: bye");
   await expect(page.getByText("Something went wrong")).toHaveCount(0);
 });
 
@@ -195,7 +202,7 @@ test("usage context: start/sit and waivers show it beside the projection, player
   const table = page.getByRole("table", { name: "Start/sit" });
   await expect(table.getByRole("columnheader", { name: "Usage context (last 3 games)" })).toBeVisible();
   await expect(table).toContainText(/snaps .*%/);
-  await expect(page.getByText("Ranked by projection; usage is shown as context only.")).toBeVisible();
+  await expect(page.getByText("Ranked by projection; the change and usage are shown as context only.")).toBeVisible();
 
   await page.goto("/league?league=900&view=waivers");
   const waivers = page.getByRole("table", { name: "Waivers" });

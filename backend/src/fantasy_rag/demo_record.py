@@ -37,7 +37,7 @@ from fantasy_rag.config import REPO_ROOT
 
 OUT = REPO_ROOT / "data" / "demo" / "demo.json"
 RECORDED = REPO_ROOT / "data" / "demo" / "recorded_chats.json"  # paid live recordings
-LABEL = "Sample data from week 7, 2026, not live"
+LABEL = "Sample data from week {week}, {season}, not live"
 DEMO_LEAGUE = 900
 DEMO_SCORING = "Demo League rules (half PPR)"
 # Half PPR plus a rule we can't compute yet (a short-reception bonus), so the demo shows
@@ -172,6 +172,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
     """`extra_chats`: live recordings (load_recorded()), placed after the saved answers."""
     refs = _refs(conn)
     season, week = q.latest_week(conn)
+    label = LABEL.format(week=week, season=season)
     _, target = q.projection_week(conn)
     presets = ("ppr", "half", "std")
     # Per player and preset, so the demo can serve any scoring toggle and rank any
@@ -210,10 +211,10 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
     waiver_refs = [refs["Justin Jefferson"], refs["Jahmyr Gibbs"], refs["CeeDee Lamb"]]
     waiver_proj = tools.rank_projections([proj[r.id] for r in waiver_refs])["ranked"]
     data = {
-        "label": LABEL,
+        "label": label,
         "recorded_at": now.isoformat(),
         "status": {
-            "label": LABEL,
+            "label": label,
             "season": season,
             "latest_week": week,
             "next_week": target,
@@ -254,7 +255,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                 "roster_id": 1,
                 "week": target,
                 "scoring": DEMO_SCORING,
-                "label": LABEL,
+                "label": label,
                 "rosters_as_of": {"week": target, "synced_at": now.isoformat()},
                 "recommended": [
                     {"slot": s, "player": slot_player(pid), "current": slot_player(pid)}
@@ -281,7 +282,7 @@ def build(conn: Connection, report: Path, extra_chats: list[dict[str, Any]]) -> 
                 "league_id": DEMO_LEAGUE,
                 "scoring": DEMO_SCORING,
                 "week": target,
-                "label": LABEL,
+                "label": label,
                 "rosters_as_of": {"week": target, "synced_at": now.isoformat()},
                 "availability_as_of": sample_as_of,
                 "rostered_players_excluded": len(DEMO_ROSTER),

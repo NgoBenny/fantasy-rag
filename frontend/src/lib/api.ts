@@ -1,4 +1,5 @@
 // Typed client for the fantasy-rag FastAPI backend (server-side fetches only).
+import type { ProjectionChange } from "./change";
 import type { RostersAsOf } from "./lineup";
 import type { Usage, UsageAsOf } from "./usage";
 
@@ -147,6 +148,7 @@ export interface Projection {
   range_80?: [number, number] | null;
   injury?: { source: string; status: string | null; body_part: string | null }[];
   usage?: Usage;
+  change?: ProjectionChange;
 }
 
 export const WAIVER_POSITIONS = ["QB", "RB", "WR", "TE", "K"] as const;
@@ -234,9 +236,9 @@ export interface ForwardResults {
 
 export const api = {
   status: () => call<Status>("/api/status"),
-  startSit: (ids: string[], leagueId: number | null, scoring: Scoring = "ppr") =>
+  startSit: (ids: string[], leagueId: number | null, scoring: Scoring = "ppr", change = "") =>
     call<StartSit>(
-      `/api/start-sit?ids=${ids.map(encodeURIComponent).join(",")}${leagueId ? `&league_id=${leagueId}` : `&scoring=${scoring}`}`,
+      `/api/start-sit?ids=${ids.map(encodeURIComponent).join(",")}${leagueId ? `&league_id=${leagueId}` : `&scoring=${scoring}`}${change}`,
     ),
   waivers: (leagueId: number, position?: WaiverPosition) =>
     call<Waivers>(`/api/leagues/${leagueId}/waivers${position ? `?position=${position}` : ""}`),

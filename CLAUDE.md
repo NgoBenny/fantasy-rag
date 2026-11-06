@@ -34,7 +34,7 @@ structured stats, league-aware projections and hybrid news search, citing every 
 
 ## Repo layout
 
-Exists now (Phases 0-10, local):
+Exists now (Phases 0-11, local):
 
 ```
 CLAUDE.md
@@ -91,12 +91,13 @@ backend/
   src/fantasy_rag/jobs/locks.py, backup.py    # fixed-ID advisory locks; verified backups + restore drill
   src/fantasy_rag/analytics/usage.py    # usage context: shares, red-zone looks, completed weeks, usage facts (batched)
   src/fantasy_rag/analytics/usage_check.py  # `usage-check`: pbp usage vs nflverse stats; snap denominators
+  src/fantasy_rag/ml/baseline.py explain()  # Phase 11: recomputed baseline change between two weeks, one exact step per game
 README.md, docs/architecture.md, docs/demo.gif  # overview, data flow, demo recording (DEMO_MODE)
 scripts/notify.ps1, scripts/make_gif.py     # Windows toast on job failure; demo GIF assembly
 scripts/run_hidden.vbs      # task launcher: runs a job with no console window, passes its exit code back
 scripts/setup_runner.ps1    # the separate checkout of reviewed main that scheduled tasks run from
 scripts/pause_tasks.ps1     # disable tasks for an update window, restore states (test: scripts/tests/test_pause_tasks.ps1)
-  src/fantasy_rag/agent/tools.py        # 11 typed tools (get_usage: Phase 10) + run_tool (Pydantic-validated, no SQL)
+  src/fantasy_rag/agent/tools.py        # 12 typed tools (get_usage: Phase 10, explain_projection: Phase 11) + run_tool (Pydantic-validated, no SQL)
   src/fantasy_rag/agent/router.py       # haiku picks tools (<= 4 rounds) -> sonnet writes the answer
   src/fantasy_rag/agent/llm.py, prompts.py  # LLMClient protocol + Anthropic/OpenRouter clients (make_llm); static prompts
   src/fantasy_rag/agent/answer.py       # answer contract; unsupported-number / citation checks
@@ -145,6 +146,7 @@ Deferred: hosted deployment (notes in docs/PLAN.md, Phase 9).
 - Everything binds to 127.0.0.1 (compose ports, `next dev/start --hostname 127.0.0.1`, uvicorn's default). Use `127.0.0.1`, not `localhost`, in `DATABASE_URL`: on this PC `localhost` tries IPv6 first and stalls. Engines use a 10 s connect timeout.
 - Jobs (Phase 9): every CLI job takes one advisory lock in `cli.main` (`jobs/locks.py`: STRUCTURED for ingest/league import/predict/calibration-seed, NEWS, TRANSACTIONS, BACKUP); nothing underneath locks. A second copy exits "already running", except `predict`, which waits up to 15 min (`locks.PREDICT_WAIT`) and then exits 1 so the toast fires. `predict` writes nothing if an on-time run for the week exists; after week 18 (no upcoming regular-season week) `predict` skips and `forward-check` passes. Source health comes from `sync_runs` (`failing` = last 2 attempts failed); `FANTASY_RAG_FAIL_SOURCE=<source>` injects an outage for drills only. Failed scheduled jobs show a Windows toast; logs are in `data/logs/`.
 - Usage (Phase 10, `analytics/usage.py`): observations of completed games, never the reason for a ranking or a projection, and never fed to the models. Shares are percentages (1 decimal) so the answer check sees them; last-3 shares are totals over team totals; changes are percentage points; red-zone looks = targets + carries inside the 20 (goal-line carries a subset); a game missing from `pbp_games` has unknown looks (None), never 0. Completed weeks come from `schedules` (every game kicked off ≥ 4 h ago, and stats exist), not `latest_week`. `get_usage` `last_n` counts games played; `last_weeks` counts calendar weeks, so a bye or missed game shows fewer games. Usage queries are batched per source, never per player. The play-by-play counting rules mirror nflverse's (kneels count as carries, scrambles too); `usage-check` must pass before red-zone numbers change.
+- Projection changes (Phase 11, `baseline.explain`, `explain_projection`, `change` on start/sit): always labelled a *recomputed baseline change* (both weeks recomputed with today's data, never the number shown back then). Every delta, step and summary is computed in Python; the writer only quotes them, because the number check can't catch arithmetic whose result happens to be in the evidence. Never attribute a change to injuries, role, matchup or news; availability overriding the served projection is stated beside the change. Malformed windows are rejected; unsupported ones return `available: false` with a reason. Citations pin `season`, `since` and `week`.
 - Scheduled tasks run from a separate checkout of reviewed `main` (`scripts/setup_runner.ps1`, default `%USERPROFILE%antasy-rag-runner`) with its own ignored `.env`, `.venv`, `data/cache` and `data/logs`; it shares the database container (compose `name: fantasy-rag`). Scheduled runs never pull: after a merge, run `setup_runner.ps1` between jobs; it disables the tasks for the whole update (refusing if one is running) and restores their states, so a trigger in that window is skipped. Register tasks only from the runner (`-Register`); registering from a dev tree points the tasks back at code being edited. Both checkouts share one database, so schema changes still need coordination.
 
 ## Commands

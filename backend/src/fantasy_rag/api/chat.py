@@ -110,6 +110,12 @@ def _href(call: ToolCall) -> str | None:
         window = f"season={res['season']}&{shown}#usage"
         return f"/compare?ids={ids}&{window}" if "," in ids else f"/players/{ids}?{window}"
     player = res.get("player")
+    if call.name == "explain_projection" and isinstance(player, dict) and res.get("week"):
+        # Pin the whole interval: the default window moves when the projection week does.
+        window = f"season={res['season']}&since={res['since_week']}&week={res['week']}"
+        if isinstance(league, int):
+            return f"/league?league={league}&view=startsit&ids={player['id']}&{window}"
+        return f"/compare?ids={player['id']}&scoring={scoring}&{window}"
     if isinstance(player, dict) and player.get("id"):
         return f"/players/{player['id']}"
     return None

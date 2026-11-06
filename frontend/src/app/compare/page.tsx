@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { UsageSection } from "@/components/usage";
 import { SHOWN_STATS, api, scoringOf } from "@/lib/api";
+import { changeQuery } from "@/lib/change";
 import { windowQuery } from "@/lib/usage";
 
 import { StartSitTable } from "../league/lineup-view";
@@ -12,6 +13,17 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
   const ids = (typeof sp.ids === "string" ? sp.ids.split(",") : []).filter(Boolean).slice(0, 4);
   const scoring = scoringOf(sp.scoring);
   const window = windowQuery(sp);
+
+  // One player: a cited projection change (chat) shows just its start/sit row.
+  if (ids.length === 1) {
+    const one = await api.startSit(ids, null, scoring, changeQuery(sp));
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">{one.ranked[0]?.player.name ?? "Projection"}</h1>
+        <StartSitTable result={one} />
+      </div>
+    );
+  }
 
   if (ids.length < 2) {
     return (
@@ -26,7 +38,7 @@ export default async function Compare({ searchParams }: PageProps<"/compare">) {
 
   const [{ players }, projections] = await Promise.all([
     api.compare(ids, scoring, window),
-    api.startSit(ids, null, scoring),
+    api.startSit(ids, null, scoring, changeQuery(sp)),
   ]);
   const rows: [string, (p: (typeof players)[number]) => string | number][] = [
     ["Games", (p) => p.games],

@@ -170,6 +170,7 @@ TOOL_LABELS = {
     "search_news": "recent news",
     "rank_waivers": "waiver options",
     "get_usage": "usage",
+    "explain_projection": "a projection change",
 }
 
 
