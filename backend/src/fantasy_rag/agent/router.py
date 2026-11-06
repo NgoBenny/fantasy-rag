@@ -235,6 +235,31 @@ def _question_words(question: str) -> set[str]:
     return set(_question_tokens(question))
 
 
+def _pairs(question: str) -> set[tuple[str, str]]:
+    """Adjacent words within one phrase: "bucky, dalton" (a list) is no "bucky dalton"."""
+    return {
+        pair
+        for part in re.split(r"[,;:/!?()\n]+", question)
+        for t in [_question_tokens(part)]
+        for pair in zip(t, t[1:], strict=False)
+    }
+
+
+def _without_names(tokens: list[str], names: set[str]) -> list[str]:
+    """`tokens` with every full-name span in `names` cut out ("chase brown" goes, a lone
+    "chase" stays, so "ja'marr chase" still names Ja'Marr Chase)."""
+    out = list(tokens)
+    for name in sorted(names, key=lambda n: -len(n.split())):
+        span = name.split()
+        i = 0
+        while span and i + len(span) <= len(out):
+            if out[i : i + len(span)] == span:
+                del out[i : i + len(span)]
+            else:
+                i += 1
+    return out
+
+
 def _surname(name: str) -> str:
     parts = normalize_name(name).split()  # suffixes (Jr., III) are already gone
     return parts[-1] if parts else ""
@@ -250,10 +275,11 @@ def swapped_player(
     surname: of his position ("is loop safe?" answered with the roster's other kicker), or
     of any fantasy position when the lookup kept the question's first name ("tyler loop"
     looked up as Tyler Lockett, a receiver).
-    `covered`: name words of players other calls already resolved successfully; a named
-    player covered there (or in this same call) makes the roster player a fair comparison.
-    Every word of those names is left out, so "james cook or kyren?" never reads "james"
-    as Jordan James.
+    `covered`: names (normalized) of players other calls already resolved successfully; a
+    named player covered there (or in this same call) makes the roster player a fair
+    comparison. Their full-name spans and surnames are left out of the question, so "james
+    cook or kyren?" never reads "james" as Jordan James, while a lone "chase" after Chase
+    Brown still names Ja'Marr Chase.
 
     Only an exact surname of a player with stats this season counts, and surnames that are
     everyday words are skipped, so ordinary questions don't trigger it.
@@ -261,8 +287,9 @@ def swapped_player(
     tokens = _question_tokens(question)
     words = set(tokens)
     named = _named_players(args)
-    in_call = {w for p in named for w in normalize_name(p["name"]).split()}
-    surnames = words - COMMON_WORDS - in_call - (covered or set())
+    names = {normalize_name(p["name"]) for p in named} | (covered or set())
+    rest = set(_without_names(tokens, names))
+    surnames = rest - COMMON_WORDS - {n.split()[-1] for n in names if n.split()}
     if not surnames or not named:
         return None
     season, _ = latest_week(conn)
@@ -274,7 +301,7 @@ def swapped_player(
         # Tyler Lockett): a swap across positions, checked for that surname only. Anything
         # else stays same-position, so "patrick mahomes or lamar?" never reads "patrick"
         # as Tim Patrick, and "my guy" never matches a tight end surnamed Guy.
-        pairs = {b for a, b in zip(tokens, tokens[1:], strict=False) if first and a == first[0]}
+        pairs = {b for a, b in _pairs(question) if first and a == first[0]}
         cross = sorted(pairs & surnames)
         try:
             ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
@@ -325,8 +352,7 @@ def route(
         done: dict[str, ToolResultBlockParam] = {}
 
         def covered() -> set[str]:  # only lookups that succeeded count
-            return {w for c in calls if c.result for n in _resolved_names(c.result)
-                    for w in normalize_name(n).split()}  # fmt: skip
+            return {normalize_name(n) for c in calls if c.result for n in _resolved_names(c.result)}
 
         # A call that looks like a swap waits until this round's other calls ran: one of
         # them may resolve the named player, which makes it a fair comparison.

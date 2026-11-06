@@ -182,10 +182,11 @@ def test_router_refuses_a_player_the_question_does_not_name(db: str) -> None:
         # Kept the first name, changed the surname: caught across positions (Loop -> Lockett).
         cross = swapped_player(conn, "is free guy a safe start?", swap)
         assert cross is not None and "Guy (TE" in cross
+        # A list ("free, guy") is no "first name surname" pair.
+        assert swapped_player(conn, "free, guy: who scores more?", swap) is None
         # The named player already resolved by another call: a fair comparison.
         assert (
-            swapped_player(conn, "start jefferson over my guy?", swap, {"justin", "jefferson"})
-            is None
+            swapped_player(conn, "start jefferson over my guy?", swap, {"justin jefferson"}) is None
         )
         assert (
             swapped_player(
@@ -281,13 +282,17 @@ def test_a_first_name_that_is_another_players_surname_is_not_a_swap(db: str) -> 
                        " stats, sync_run_id) VALUES (2026, 1, 'REG', '00-20', '{}', :r)"),
                   {"r": run})  # fmt: skip
     engine.dispose()
-    pair = {"players": [{"name": "Justin Jefferson"}, {"name": "Zero Guy"}]}
+    # Same position as the decoy (Tim Justin, WR), so main's same-position check would fire.
+    pair = {"players": [{"name": "Justin Jefferson"}, {"name": "Free Agent"}]}
+    alone = {"player": {"name": "Free Agent"}}
     with get_readonly_engine(db).connect() as conn:
         # Review case ("patrick mahomes or lamar?" read "patrick" as Tim Patrick).
-        assert swapped_player(conn, "justin jefferson or zero?", pair) is None
-        # Words of a name another call already resolved never count either.
-        alone = {"player": {"name": "Zero Guy"}}
+        assert swapped_player(conn, "justin jefferson or free?", pair) is None
+        # A name another call already resolved doesn't count either (covered, full names).
         assert (
-            swapped_player(conn, "justin jefferson or zero?", alone, {"justin", "jefferson"})
-            is None
+            swapped_player(conn, "justin jefferson or free?", alone, {"justin jefferson"}) is None
         )
+        # ...but a resolved name's first word alone still names someone else: "chase brown
+        # or ja'marr chase?" with a teammate looked up in place of Ja'Marr Chase.
+        msg = swapped_player(conn, "justin jefferson or tim justin?", alone, {"justin jefferson"})
+        assert msg is not None and "Tim Justin (WR, NYG)" in msg
