@@ -106,8 +106,6 @@ class ChangeWindow(BaseModel):
     def _ordered(self) -> "ChangeWindow":
         if self.since_week and self.week and self.since_week >= self.week:
             raise ValueError("since_week must be before week")
-        if self.season and not self.week:
-            raise ValueError("give week together with season")
         return self
 
 
@@ -361,6 +359,14 @@ def _projection(
 
 
 CHANGE_LABEL = "recomputed baseline change"
+
+
+def _moved(x: float) -> str:
+    """A change as a direction and a size ("down 0.07"), so an answer that says "fell 0.07"
+    quotes the evidence."""
+    return "not at all" if x == 0 else f"{'up' if x > 0 else 'down'} {abs(x):.2f}"
+
+
 CHANGE_CAVEATS = [
     "Both projections are recomputed now with today's stats and scoring rules, so stat "
     "corrections and rule changes since then are included: this is not a record of the "
@@ -385,12 +391,17 @@ def _change(
     all come from this result, kept apart from what is served now (availability can
     override the baseline)."""
     season = w.season or current[0]
+    served = {"week": current[1], "points": served_points, "availability": avail}
+    head = {"label": CHANGE_LABEL, "season": season, "served": served, "caveats": CHANGE_CAVEATS}
+    if season != current[0] and w.week is None:
+        why = f"give the week to compare in {season}"
+        return {**head, "available": False, "since_week": w.since_week, "week": None,
+                "reason": why, "summary": "comparison unavailable",
+                "explanation": [f"Comparison unavailable: {why}."]}  # fmt: skip
     week = w.week or current[1]
     since = w.since_week or week - 1
     if season != current[0]:
         rows = q.weekly_rows(conn, [ref.id], [season - 1, season])
-    served = {"week": current[1], "points": served_points, "availability": avail}
-    head = {"label": CHANGE_LABEL, "season": season, "served": served, "caveats": CHANGE_CAVEATS}
     if got is not None and got.policy != "baseline":
         return {**head, "available": False, "since_week": since, "week": week,
                 "reason": "the served projection is not the baseline",
@@ -410,7 +421,8 @@ def _change(
     ]  # fmt: skip
     b, a, chg = res["before"]["points"], res["after"]["points"], res["baseline_change"]
     lines = [
-        f"Recomputed baseline change, week {since} to week {week}: {chg:+.2f} ({b:.2f} to {a:.2f})."
+        f"Recomputed baseline change, week {since} to week {week}: {_moved(chg)} "
+        f"({b:.2f} to {a:.2f})."
     ]
     by_week: list[tuple[int, str]] = []
     for s in res["steps"]:
@@ -419,7 +431,7 @@ def _change(
         by_week.append((s["week"], (
             f"Week {s['week']}: {x:.2f} points, {rel} his projection before it ({pb:.2f}); "
             f"that game is {s['weight_pct']:.1f}% of the new average and moved it "
-            f"{s['change']:+.2f}."
+            f"{_moved(s['change'])}."
         )))  # fmt: skip
     by_week += [(g["week"], f"Week {g['week']}: no game ({g['status']}), no change.")
                 for g in no_game]  # fmt: skip

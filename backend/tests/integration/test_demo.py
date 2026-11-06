@@ -161,13 +161,13 @@ def test_demo_start_sit_ranks_any_demo_players_like_the_live_code(demo_api: str)
 
     data = json.loads(DEMO.read_text("utf-8"))
     by_name = {p["name"]: p["id"] for p in data["players"]}
-    trio = [by_name[n] for n in ("Brock Purdy", "Josh Allen", "Trey McBride")]
+    trio = [by_name[n] for n in ("Brock Purdy", "Jaylen Warren", "Trey McBride")]
     for params, key in [({"league_id": 900}, "league:900"), ({"scoring": "std"}, "std")]:
         got = httpx.get(f"{demo_api}/api/start-sit", params={"ids": ",".join(trio), **params})
         assert got.status_code == 200
         expected = rank_projections([data["projection"][key][i] for i in trio])
         assert got.json() == {**expected, "demo": True}
-    bye = got.json()["ranked"][-1]  # Josh Allen is on bye: 0, ranked below real projections
-    assert bye["player"]["name"] == "Josh Allen" and bye["projected_points"] == 0.0
+    bye = got.json()["ranked"][-1]  # Jaylen Warren is on bye: 0, ranked below real projections
+    assert bye["player"]["name"] == "Jaylen Warren" and bye["projected_points"] == 0.0
     unknown = httpx.get(f"{demo_api}/api/start-sit", params={"ids": f"{trio[0]},00-x"})
     assert unknown.status_code == 404

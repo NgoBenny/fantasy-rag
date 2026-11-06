@@ -739,7 +739,7 @@
  "freshness": [
   {
    "age_hours": 0.0,
-   "last_ok": "2026-11-06T01:31:52.076787+00:00",
+   "last_ok": "2026-11-06T02:46:20.712010+00:00",
    "source": "sample data"
   }
  ],
@@ -1068,7 +1068,7 @@
    "recommended_total": 116.98,
    "roster_id": 1,
    "rosters_as_of": {
-    "synced_at": "2026-11-06T01:31:52.076787+00:00",
+    "synced_at": "2026-11-06T02:46:20.712010+00:00",
     "week": 9
    },
    "scoring": "Demo League rules (half PPR)",
@@ -2647,12 +2647,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -2904,12 +2904,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -3115,12 +3115,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -3425,12 +3425,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -3767,12 +3767,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -4111,12 +4111,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -4462,12 +4462,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -4791,12 +4791,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "games": [
@@ -5082,12 +5082,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -5387,12 +5387,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -5697,12 +5697,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -6002,12 +6002,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -6346,12 +6346,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "games": [
@@ -6672,12 +6672,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -6929,12 +6929,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -7140,12 +7140,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -7450,12 +7450,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -7792,12 +7792,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -8136,12 +8136,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -8487,12 +8487,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -8816,12 +8816,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "games": [
@@ -9107,12 +9107,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -9412,12 +9412,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -9722,12 +9722,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -10027,12 +10027,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -10371,12 +10371,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "games": [
@@ -10697,12 +10697,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -10954,12 +10954,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -11165,12 +11165,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -11475,12 +11475,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -11817,12 +11817,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -12161,12 +12161,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -12512,12 +12512,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -12841,12 +12841,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "games": [
@@ -13132,12 +13132,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -13437,12 +13437,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -13747,12 +13747,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -14052,12 +14052,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -14396,12 +14396,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "games": [
@@ -14724,6 +14724,7 @@
      },
      "available": true,
      "baseline_change": 0.4,
+     "baseline_change_size": 0.4,
      "before": {
       "games_used": 22,
       "points": 24.08,
@@ -14734,8 +14735,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.40 (24.08 to 24.48).",
-      "Week 8: 26.56 points, above his projection before it (24.08); that game is 16.2% of the new average and moved it +0.40."
+      "Recomputed baseline change, week 8 to week 9: up 0.40 (24.08 to 24.48).",
+      "Week 8: 26.56 points, above his projection before it (24.08); that game is 16.2% of the new average and moved it up 0.40."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -14753,6 +14754,7 @@
        "game_points": 26.56,
        "projection_before": 24.08,
        "season": 2026,
+       "size": 0.4,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -14786,12 +14788,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -14863,6 +14865,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 18,
       "points": 9.81,
@@ -14873,7 +14876,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (9.81 to 9.81).",
+      "Recomputed baseline change, week 8 to week 9: not at all (9.81 to 9.81).",
       "Week 8: no game (no recorded appearance), no change."
      ],
      "label": "recomputed baseline change",
@@ -14945,12 +14948,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -15023,6 +15026,7 @@
      },
      "available": true,
      "baseline_change": 0.31,
+     "baseline_change_size": 0.31,
      "before": {
       "games_used": 22,
       "points": 9.94,
@@ -15033,8 +15037,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.31 (9.94 to 10.25).",
-      "Week 8: 11.80 points, above his projection before it (9.94); that game is 16.2% of the new average and moved it +0.30."
+      "Recomputed baseline change, week 8 to week 9: up 0.31 (9.94 to 10.25).",
+      "Week 8: 11.80 points, above his projection before it (9.94); that game is 16.2% of the new average and moved it up 0.30."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -15052,6 +15056,7 @@
        "game_points": 11.8,
        "projection_before": 9.94,
        "season": 2026,
+       "size": 0.3,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -15104,12 +15109,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -15200,6 +15205,7 @@
      },
      "available": true,
      "baseline_change": -1.05,
+     "baseline_change_size": 1.05,
      "before": {
       "games_used": 20,
       "points": 15.72,
@@ -15210,8 +15216,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.05 (15.72 to 14.67).",
-      "Week 8: 9.30 points, below his projection before it (15.72); that game is 16.3% of the new average and moved it -1.05."
+      "Recomputed baseline change, week 8 to week 9: down 1.05 (15.72 to 14.67).",
+      "Week 8: 9.30 points, below his projection before it (15.72); that game is 16.3% of the new average and moved it down 1.05."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -15229,6 +15235,7 @@
        "game_points": 9.3,
        "projection_before": 15.72,
        "season": 2026,
+       "size": 1.05,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -15272,12 +15279,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -15370,6 +15377,7 @@
      },
      "available": true,
      "baseline_change": 1.77,
+     "baseline_change_size": 1.77,
      "before": {
       "games_used": 22,
       "points": 14.71,
@@ -15380,8 +15388,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.77 (14.71 to 16.48).",
-      "Week 8: 25.60 points, above his projection before it (14.71); that game is 16.2% of the new average and moved it +1.77."
+      "Recomputed baseline change, week 8 to week 9: up 1.77 (14.71 to 16.48).",
+      "Week 8: 25.60 points, above his projection before it (14.71); that game is 16.2% of the new average and moved it up 1.77."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -15399,6 +15407,7 @@
        "game_points": 25.6,
        "projection_before": 14.71,
        "season": 2026,
+       "size": 1.77,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -15451,12 +15460,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -15552,6 +15561,7 @@
      },
      "available": true,
      "baseline_change": 0.93,
+     "baseline_change_size": 0.93,
      "before": {
       "games_used": 23,
       "points": 15.06,
@@ -15562,8 +15572,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.93 (15.06 to 15.99).",
-      "Week 8: 20.80 points, above his projection before it (15.06); that game is 16.2% of the new average and moved it +0.93.",
+      "Recomputed baseline change, week 8 to week 9: up 0.93 (15.06 to 15.99).",
+      "Week 8: 20.80 points, above his projection before it (15.06); that game is 16.2% of the new average and moved it up 0.93.",
       "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
@@ -15586,6 +15596,7 @@
        "game_points": 20.8,
        "projection_before": 15.06,
        "season": 2026,
+       "size": 0.93,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -15616,12 +15627,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -15715,6 +15726,7 @@
      },
      "available": true,
      "baseline_change": 0.31,
+     "baseline_change_size": 0.31,
      "before": {
       "games_used": 24,
       "points": 14.77,
@@ -15725,8 +15737,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.31 (14.77 to 15.08).",
-      "Week 8: 16.70 points, above his projection before it (14.77); that game is 16.1% of the new average and moved it +0.31."
+      "Recomputed baseline change, week 8 to week 9: up 0.31 (14.77 to 15.08).",
+      "Week 8: 16.70 points, above his projection before it (14.77); that game is 16.1% of the new average and moved it up 0.31."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -15744,6 +15756,7 @@
        "game_points": 16.7,
        "projection_before": 14.77,
        "season": 2026,
+       "size": 0.31,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -15777,12 +15790,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -15838,6 +15851,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 16,
       "points": 19.51,
@@ -15848,7 +15862,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (19.51 to 19.51).",
+      "Recomputed baseline change, week 8 to week 9: not at all (19.51 to 19.51).",
       "Week 8: no game (bye), no change."
      ],
      "label": "recomputed baseline change",
@@ -15896,12 +15910,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -15941,6 +15955,7 @@
      },
      "available": true,
      "baseline_change": -1.7,
+     "baseline_change_size": 1.7,
      "before": {
       "games_used": 24,
       "points": 18.16,
@@ -15951,8 +15966,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.70 (18.16 to 16.46).",
-      "Week 8: 7.60 points, below his projection before it (18.16); that game is 16.1% of the new average and moved it -1.70."
+      "Recomputed baseline change, week 8 to week 9: down 1.70 (18.16 to 16.46).",
+      "Week 8: 7.60 points, below his projection before it (18.16); that game is 16.1% of the new average and moved it down 1.70."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -15970,6 +15985,7 @@
        "game_points": 7.6,
        "projection_before": 18.16,
        "season": 2026,
+       "size": 1.7,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -16003,12 +16019,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -16064,6 +16080,7 @@
      },
      "available": true,
      "baseline_change": 0.03,
+     "baseline_change_size": 0.03,
      "before": {
       "games_used": 21,
       "points": 19.32,
@@ -16074,8 +16091,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.03 (19.32 to 19.35).",
-      "Week 8: 19.50 points, above his projection before it (19.32); that game is 16.3% of the new average and moved it +0.03."
+      "Recomputed baseline change, week 8 to week 9: up 0.03 (19.32 to 19.35).",
+      "Week 8: 19.50 points, above his projection before it (19.32); that game is 16.3% of the new average and moved it up 0.03."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -16093,6 +16110,7 @@
        "game_points": 19.5,
        "projection_before": 19.32,
        "season": 2026,
+       "size": 0.03,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -16145,12 +16163,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -16234,6 +16252,7 @@
      },
      "available": true,
      "baseline_change": 0.18,
+     "baseline_change_size": 0.18,
      "before": {
       "games_used": 23,
       "points": 22.69,
@@ -16244,8 +16263,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.18 (22.69 to 22.87).",
-      "Week 8: 23.80 points, above his projection before it (22.69); that game is 16.2% of the new average and moved it +0.18."
+      "Recomputed baseline change, week 8 to week 9: up 0.18 (22.69 to 22.87).",
+      "Week 8: 23.80 points, above his projection before it (22.69); that game is 16.2% of the new average and moved it up 0.18."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -16263,6 +16282,7 @@
        "game_points": 23.8,
        "projection_before": 22.69,
        "season": 2026,
+       "size": 0.18,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -16315,12 +16335,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -16376,6 +16396,7 @@
      },
      "available": true,
      "baseline_change": 1.13,
+     "baseline_change_size": 1.13,
      "before": {
       "games_used": 17,
       "points": 14.19,
@@ -16386,8 +16407,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.13 (14.19 to 15.32).",
-      "Week 8: 21.00 points, above his projection before it (14.19); that game is 16.6% of the new average and moved it +1.13."
+      "Recomputed baseline change, week 8 to week 9: up 1.13 (14.19 to 15.32).",
+      "Week 8: 21.00 points, above his projection before it (14.19); that game is 16.6% of the new average and moved it up 1.13."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -16405,6 +16426,7 @@
        "game_points": 21.0,
        "projection_before": 14.19,
        "season": 2026,
+       "size": 1.13,
        "week": 8,
        "weight_pct": 16.6
       }
@@ -16457,12 +16479,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -16560,6 +16582,7 @@
      },
      "available": true,
      "baseline_change": -0.82,
+     "baseline_change_size": 0.82,
      "before": {
       "games_used": 24,
       "points": 8.11,
@@ -16570,8 +16593,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -0.82 (8.11 to 7.29).",
-      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it -0.82.",
+      "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
+      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
       "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
@@ -16595,6 +16618,7 @@
        "game_points": 3.0,
        "projection_before": 8.11,
        "season": 2026,
+       "size": 0.82,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -16644,12 +16668,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -16691,6 +16715,7 @@
      },
      "available": true,
      "baseline_change": 0.4,
+     "baseline_change_size": 0.4,
      "before": {
       "games_used": 22,
       "points": 24.08,
@@ -16701,8 +16726,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.40 (24.08 to 24.48).",
-      "Week 8: 26.56 points, above his projection before it (24.08); that game is 16.2% of the new average and moved it +0.40."
+      "Recomputed baseline change, week 8 to week 9: up 0.40 (24.08 to 24.48).",
+      "Week 8: 26.56 points, above his projection before it (24.08); that game is 16.2% of the new average and moved it up 0.40."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -16720,6 +16745,7 @@
        "game_points": 26.56,
        "projection_before": 24.08,
        "season": 2026,
+       "size": 0.4,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -16755,12 +16781,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -16832,6 +16858,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 18,
       "points": 9.81,
@@ -16842,7 +16869,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (9.81 to 9.81).",
+      "Recomputed baseline change, week 8 to week 9: not at all (9.81 to 9.81).",
       "Week 8: no game (no recorded appearance), no change."
      ],
      "label": "recomputed baseline change",
@@ -16916,12 +16943,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -16994,6 +17021,7 @@
      },
      "available": true,
      "baseline_change": 0.31,
+     "baseline_change_size": 0.31,
      "before": {
       "games_used": 22,
       "points": 9.94,
@@ -17004,8 +17032,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.31 (9.94 to 10.25).",
-      "Week 8: 11.80 points, above his projection before it (9.94); that game is 16.2% of the new average and moved it +0.30."
+      "Recomputed baseline change, week 8 to week 9: up 0.31 (9.94 to 10.25).",
+      "Week 8: 11.80 points, above his projection before it (9.94); that game is 16.2% of the new average and moved it up 0.30."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -17023,6 +17051,7 @@
        "game_points": 11.8,
        "projection_before": 9.94,
        "season": 2026,
+       "size": 0.3,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -17077,12 +17106,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -17173,6 +17202,7 @@
      },
      "available": true,
      "baseline_change": -1.05,
+     "baseline_change_size": 1.05,
      "before": {
       "games_used": 20,
       "points": 15.72,
@@ -17183,8 +17213,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.05 (15.72 to 14.67).",
-      "Week 8: 9.30 points, below his projection before it (15.72); that game is 16.3% of the new average and moved it -1.05."
+      "Recomputed baseline change, week 8 to week 9: down 1.05 (15.72 to 14.67).",
+      "Week 8: 9.30 points, below his projection before it (15.72); that game is 16.3% of the new average and moved it down 1.05."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -17202,6 +17232,7 @@
        "game_points": 9.3,
        "projection_before": 15.72,
        "season": 2026,
+       "size": 1.05,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -17247,12 +17278,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -17345,6 +17376,7 @@
      },
      "available": true,
      "baseline_change": 1.77,
+     "baseline_change_size": 1.77,
      "before": {
       "games_used": 22,
       "points": 14.71,
@@ -17355,8 +17387,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.77 (14.71 to 16.48).",
-      "Week 8: 25.60 points, above his projection before it (14.71); that game is 16.2% of the new average and moved it +1.77."
+      "Recomputed baseline change, week 8 to week 9: up 1.77 (14.71 to 16.48).",
+      "Week 8: 25.60 points, above his projection before it (14.71); that game is 16.2% of the new average and moved it up 1.77."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -17374,6 +17406,7 @@
        "game_points": 25.6,
        "projection_before": 14.71,
        "season": 2026,
+       "size": 1.77,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -17428,12 +17461,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -17529,6 +17562,7 @@
      },
      "available": true,
      "baseline_change": 0.93,
+     "baseline_change_size": 0.93,
      "before": {
       "games_used": 23,
       "points": 15.06,
@@ -17539,8 +17573,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.93 (15.06 to 15.99).",
-      "Week 8: 20.80 points, above his projection before it (15.06); that game is 16.2% of the new average and moved it +0.93.",
+      "Recomputed baseline change, week 8 to week 9: up 0.93 (15.06 to 15.99).",
+      "Week 8: 20.80 points, above his projection before it (15.06); that game is 16.2% of the new average and moved it up 0.93.",
       "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
@@ -17563,6 +17597,7 @@
        "game_points": 20.8,
        "projection_before": 15.06,
        "season": 2026,
+       "size": 0.93,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -17595,12 +17630,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -17694,6 +17729,7 @@
      },
      "available": true,
      "baseline_change": 0.31,
+     "baseline_change_size": 0.31,
      "before": {
       "games_used": 24,
       "points": 14.77,
@@ -17704,8 +17740,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.31 (14.77 to 15.08).",
-      "Week 8: 16.70 points, above his projection before it (14.77); that game is 16.1% of the new average and moved it +0.31."
+      "Recomputed baseline change, week 8 to week 9: up 0.31 (14.77 to 15.08).",
+      "Week 8: 16.70 points, above his projection before it (14.77); that game is 16.1% of the new average and moved it up 0.31."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -17723,6 +17759,7 @@
        "game_points": 16.7,
        "projection_before": 14.77,
        "season": 2026,
+       "size": 0.31,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -17758,12 +17795,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -17819,6 +17856,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 16,
       "points": 19.51,
@@ -17829,7 +17867,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (19.51 to 19.51).",
+      "Recomputed baseline change, week 8 to week 9: not at all (19.51 to 19.51).",
       "Week 8: no game (bye), no change."
      ],
      "label": "recomputed baseline change",
@@ -17879,12 +17917,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -17924,6 +17962,7 @@
      },
      "available": true,
      "baseline_change": -1.7,
+     "baseline_change_size": 1.7,
      "before": {
       "games_used": 24,
       "points": 18.16,
@@ -17934,8 +17973,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.70 (18.16 to 16.46).",
-      "Week 8: 7.60 points, below his projection before it (18.16); that game is 16.1% of the new average and moved it -1.70."
+      "Recomputed baseline change, week 8 to week 9: down 1.70 (18.16 to 16.46).",
+      "Week 8: 7.60 points, below his projection before it (18.16); that game is 16.1% of the new average and moved it down 1.70."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -17953,6 +17992,7 @@
        "game_points": 7.6,
        "projection_before": 18.16,
        "season": 2026,
+       "size": 1.7,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -17988,12 +18028,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -18049,6 +18089,7 @@
      },
      "available": true,
      "baseline_change": 0.03,
+     "baseline_change_size": 0.03,
      "before": {
       "games_used": 21,
       "points": 19.32,
@@ -18059,8 +18100,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.03 (19.32 to 19.35).",
-      "Week 8: 19.50 points, above his projection before it (19.32); that game is 16.3% of the new average and moved it +0.03."
+      "Recomputed baseline change, week 8 to week 9: up 0.03 (19.32 to 19.35).",
+      "Week 8: 19.50 points, above his projection before it (19.32); that game is 16.3% of the new average and moved it up 0.03."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -18078,6 +18119,7 @@
        "game_points": 19.5,
        "projection_before": 19.32,
        "season": 2026,
+       "size": 0.03,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -18132,12 +18174,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -18221,6 +18263,7 @@
      },
      "available": true,
      "baseline_change": 0.18,
+     "baseline_change_size": 0.18,
      "before": {
       "games_used": 23,
       "points": 22.69,
@@ -18231,8 +18274,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.18 (22.69 to 22.87).",
-      "Week 8: 23.80 points, above his projection before it (22.69); that game is 16.2% of the new average and moved it +0.18."
+      "Recomputed baseline change, week 8 to week 9: up 0.18 (22.69 to 22.87).",
+      "Week 8: 23.80 points, above his projection before it (22.69); that game is 16.2% of the new average and moved it up 0.18."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -18250,6 +18293,7 @@
        "game_points": 23.8,
        "projection_before": 22.69,
        "season": 2026,
+       "size": 0.18,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -18304,12 +18348,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -18365,6 +18409,7 @@
      },
      "available": true,
      "baseline_change": 1.13,
+     "baseline_change_size": 1.13,
      "before": {
       "games_used": 17,
       "points": 14.19,
@@ -18375,8 +18420,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.13 (14.19 to 15.32).",
-      "Week 8: 21.00 points, above his projection before it (14.19); that game is 16.6% of the new average and moved it +1.13."
+      "Recomputed baseline change, week 8 to week 9: up 1.13 (14.19 to 15.32).",
+      "Week 8: 21.00 points, above his projection before it (14.19); that game is 16.6% of the new average and moved it up 1.13."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -18394,6 +18439,7 @@
        "game_points": 21.0,
        "projection_before": 14.19,
        "season": 2026,
+       "size": 1.13,
        "week": 8,
        "weight_pct": 16.6
       }
@@ -18448,12 +18494,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -18551,6 +18597,7 @@
      },
      "available": true,
      "baseline_change": -0.82,
+     "baseline_change_size": 0.82,
      "before": {
       "games_used": 24,
       "points": 8.11,
@@ -18561,8 +18608,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -0.82 (8.11 to 7.29).",
-      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it -0.82.",
+      "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
+      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
       "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
@@ -18586,6 +18633,7 @@
        "game_points": 3.0,
        "projection_before": 8.11,
        "season": 2026,
+       "size": 0.82,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -18637,12 +18685,12 @@
     ],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -18684,6 +18732,7 @@
      },
      "available": true,
      "baseline_change": 0.39,
+     "baseline_change_size": 0.39,
      "before": {
       "games_used": 22,
       "points": 24.13,
@@ -18694,8 +18743,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.39 (24.13 to 24.52).",
-      "Week 8: 26.56 points, above his projection before it (24.13); that game is 16.2% of the new average and moved it +0.39."
+      "Recomputed baseline change, week 8 to week 9: up 0.39 (24.13 to 24.52).",
+      "Week 8: 26.56 points, above his projection before it (24.13); that game is 16.2% of the new average and moved it up 0.39."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -18713,6 +18762,7 @@
        "game_points": 26.56,
        "projection_before": 24.13,
        "season": 2026,
+       "size": 0.39,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -18746,12 +18796,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -18823,6 +18873,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 18,
       "points": 12.12,
@@ -18833,7 +18884,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (12.12 to 12.12).",
+      "Recomputed baseline change, week 8 to week 9: not at all (12.12 to 12.12).",
       "Week 8: no game (no recorded appearance), no change."
      ],
      "label": "recomputed baseline change",
@@ -18905,12 +18956,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -18983,6 +19034,7 @@
      },
      "available": true,
      "baseline_change": 0.34,
+     "baseline_change_size": 0.34,
      "before": {
       "games_used": 22,
       "points": 12.24,
@@ -18993,8 +19045,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.34 (12.24 to 12.58).",
-      "Week 8: 14.30 points, above his projection before it (12.24); that game is 16.2% of the new average and moved it +0.33."
+      "Recomputed baseline change, week 8 to week 9: up 0.34 (12.24 to 12.58).",
+      "Week 8: 14.30 points, above his projection before it (12.24); that game is 16.2% of the new average and moved it up 0.33."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -19012,6 +19064,7 @@
        "game_points": 14.3,
        "projection_before": 12.24,
        "season": 2026,
+       "size": 0.33,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -19064,12 +19117,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -19160,6 +19213,7 @@
      },
      "available": true,
      "baseline_change": -1.03,
+     "baseline_change_size": 1.03,
      "before": {
       "games_used": 20,
       "points": 19.1,
@@ -19170,8 +19224,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.03 (19.10 to 18.07).",
-      "Week 8: 12.80 points, below his projection before it (19.10); that game is 16.3% of the new average and moved it -1.03."
+      "Recomputed baseline change, week 8 to week 9: down 1.03 (19.10 to 18.07).",
+      "Week 8: 12.80 points, below his projection before it (19.10); that game is 16.3% of the new average and moved it down 1.03."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -19189,6 +19243,7 @@
        "game_points": 12.8,
        "projection_before": 19.1,
        "season": 2026,
+       "size": 1.03,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -19232,12 +19287,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -19330,6 +19385,7 @@
      },
      "available": true,
      "baseline_change": 2.15,
+     "baseline_change_size": 2.15,
      "before": {
       "games_used": 22,
       "points": 17.82,
@@ -19340,8 +19396,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +2.15 (17.82 to 19.97).",
-      "Week 8: 31.10 points, above his projection before it (17.82); that game is 16.2% of the new average and moved it +2.15."
+      "Recomputed baseline change, week 8 to week 9: up 2.15 (17.82 to 19.97).",
+      "Week 8: 31.10 points, above his projection before it (17.82); that game is 16.2% of the new average and moved it up 2.15."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -19359,6 +19415,7 @@
        "game_points": 31.1,
        "projection_before": 17.82,
        "season": 2026,
+       "size": 2.15,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -19411,12 +19468,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -19512,6 +19569,7 @@
      },
      "available": true,
      "baseline_change": 0.76,
+     "baseline_change_size": 0.76,
      "before": {
       "games_used": 23,
       "points": 16.61,
@@ -19522,8 +19580,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.76 (16.61 to 17.37).",
-      "Week 8: 21.30 points, above his projection before it (16.61); that game is 16.2% of the new average and moved it +0.76.",
+      "Recomputed baseline change, week 8 to week 9: up 0.76 (16.61 to 17.37).",
+      "Week 8: 21.30 points, above his projection before it (16.61); that game is 16.2% of the new average and moved it up 0.76.",
       "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
@@ -19546,6 +19604,7 @@
        "game_points": 21.3,
        "projection_before": 16.61,
        "season": 2026,
+       "size": 0.76,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -19576,12 +19635,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -19675,6 +19734,7 @@
      },
      "available": true,
      "baseline_change": 0.21,
+     "baseline_change_size": 0.21,
      "before": {
       "games_used": 24,
       "points": 18.91,
@@ -19685,8 +19745,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.21 (18.91 to 19.12).",
-      "Week 8: 20.20 points, above his projection before it (18.91); that game is 16.1% of the new average and moved it +0.21."
+      "Recomputed baseline change, week 8 to week 9: up 0.21 (18.91 to 19.12).",
+      "Week 8: 20.20 points, above his projection before it (18.91); that game is 16.1% of the new average and moved it up 0.21."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -19704,6 +19764,7 @@
        "game_points": 20.2,
        "projection_before": 18.91,
        "season": 2026,
+       "size": 0.21,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -19737,12 +19798,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -19798,6 +19859,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 16,
       "points": 19.51,
@@ -19808,7 +19870,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (19.51 to 19.51).",
+      "Recomputed baseline change, week 8 to week 9: not at all (19.51 to 19.51).",
       "Week 8: no game (bye), no change."
      ],
      "label": "recomputed baseline change",
@@ -19856,12 +19918,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -19901,6 +19963,7 @@
      },
      "available": true,
      "baseline_change": -2.01,
+     "baseline_change_size": 2.01,
      "before": {
       "games_used": 24,
       "points": 20.05,
@@ -19911,8 +19974,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -2.01 (20.05 to 18.04).",
-      "Week 8: 7.60 points, below his projection before it (20.05); that game is 16.1% of the new average and moved it -2.01."
+      "Recomputed baseline change, week 8 to week 9: down 2.01 (20.05 to 18.04).",
+      "Week 8: 7.60 points, below his projection before it (20.05); that game is 16.1% of the new average and moved it down 2.01."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -19930,6 +19993,7 @@
        "game_points": 7.6,
        "projection_before": 20.05,
        "season": 2026,
+       "size": 2.01,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -19963,12 +20027,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -20024,6 +20088,7 @@
      },
      "available": true,
      "baseline_change": 0.22,
+     "baseline_change_size": 0.22,
      "before": {
       "games_used": 21,
       "points": 23.64,
@@ -20034,8 +20099,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.22 (23.64 to 23.86).",
-      "Week 8: 25.00 points, above his projection before it (23.64); that game is 16.3% of the new average and moved it +0.22."
+      "Recomputed baseline change, week 8 to week 9: up 0.22 (23.64 to 23.86).",
+      "Week 8: 25.00 points, above his projection before it (23.64); that game is 16.3% of the new average and moved it up 0.22."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -20053,6 +20118,7 @@
        "game_points": 25.0,
        "projection_before": 23.64,
        "season": 2026,
+       "size": 0.22,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -20105,12 +20171,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -20194,6 +20260,7 @@
      },
      "available": true,
      "baseline_change": -0.07,
+     "baseline_change_size": 0.07,
      "before": {
       "games_used": 23,
       "points": 25.22,
@@ -20204,8 +20271,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -0.07 (25.22 to 25.15).",
-      "Week 8: 24.80 points, below his projection before it (25.22); that game is 16.2% of the new average and moved it -0.07."
+      "Recomputed baseline change, week 8 to week 9: down 0.07 (25.22 to 25.15).",
+      "Week 8: 24.80 points, below his projection before it (25.22); that game is 16.2% of the new average and moved it down 0.07."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -20223,6 +20290,7 @@
        "game_points": 24.8,
        "projection_before": 25.22,
        "season": 2026,
+       "size": 0.07,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -20275,12 +20343,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -20336,6 +20404,7 @@
      },
      "available": true,
      "baseline_change": 0.95,
+     "baseline_change_size": 0.95,
      "before": {
       "games_used": 17,
       "points": 15.29,
@@ -20346,8 +20415,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.95 (15.29 to 16.24).",
-      "Week 8: 21.00 points, above his projection before it (15.29); that game is 16.6% of the new average and moved it +0.95."
+      "Recomputed baseline change, week 8 to week 9: up 0.95 (15.29 to 16.24).",
+      "Week 8: 21.00 points, above his projection before it (15.29); that game is 16.6% of the new average and moved it up 0.95."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -20365,6 +20434,7 @@
        "game_points": 21.0,
        "projection_before": 15.29,
        "season": 2026,
+       "size": 0.95,
        "week": 8,
        "weight_pct": 16.6
       }
@@ -20417,12 +20487,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -20520,6 +20590,7 @@
      },
      "available": true,
      "baseline_change": -0.82,
+     "baseline_change_size": 0.82,
      "before": {
       "games_used": 24,
       "points": 8.11,
@@ -20530,8 +20601,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -0.82 (8.11 to 7.29).",
-      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it -0.82.",
+      "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
+      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
       "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
@@ -20555,6 +20626,7 @@
        "game_points": 3.0,
        "projection_before": 8.11,
        "season": 2026,
+       "size": 0.82,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -20604,12 +20676,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -20651,6 +20723,7 @@
      },
      "available": true,
      "baseline_change": 0.41,
+     "baseline_change_size": 0.41,
      "before": {
       "games_used": 22,
       "points": 24.03,
@@ -20661,8 +20734,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.41 (24.03 to 24.44).",
-      "Week 8: 26.56 points, above his projection before it (24.03); that game is 16.2% of the new average and moved it +0.41."
+      "Recomputed baseline change, week 8 to week 9: up 0.41 (24.03 to 24.44).",
+      "Week 8: 26.56 points, above his projection before it (24.03); that game is 16.2% of the new average and moved it up 0.41."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -20680,6 +20753,7 @@
        "game_points": 26.56,
        "projection_before": 24.03,
        "season": 2026,
+       "size": 0.41,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -20713,12 +20787,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -20790,6 +20864,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 18,
       "points": 7.5,
@@ -20800,7 +20875,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (7.50 to 7.50).",
+      "Recomputed baseline change, week 8 to week 9: not at all (7.50 to 7.50).",
       "Week 8: no game (no recorded appearance), no change."
      ],
      "label": "recomputed baseline change",
@@ -20872,12 +20947,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -20950,6 +21025,7 @@
      },
      "available": true,
      "baseline_change": 0.27,
+     "baseline_change_size": 0.27,
      "before": {
       "games_used": 22,
       "points": 7.64,
@@ -20960,8 +21036,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.27 (7.64 to 7.91).",
-      "Week 8: 9.30 points, above his projection before it (7.64); that game is 16.2% of the new average and moved it +0.27."
+      "Recomputed baseline change, week 8 to week 9: up 0.27 (7.64 to 7.91).",
+      "Week 8: 9.30 points, above his projection before it (7.64); that game is 16.2% of the new average and moved it up 0.27."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -20979,6 +21055,7 @@
        "game_points": 9.3,
        "projection_before": 7.64,
        "season": 2026,
+       "size": 0.27,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -21031,12 +21108,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -21127,6 +21204,7 @@
      },
      "available": true,
      "baseline_change": -1.07,
+     "baseline_change_size": 1.07,
      "before": {
       "games_used": 20,
       "points": 12.35,
@@ -21137,8 +21215,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.07 (12.35 to 11.28).",
-      "Week 8: 5.80 points, below his projection before it (12.35); that game is 16.3% of the new average and moved it -1.07."
+      "Recomputed baseline change, week 8 to week 9: down 1.07 (12.35 to 11.28).",
+      "Week 8: 5.80 points, below his projection before it (12.35); that game is 16.3% of the new average and moved it down 1.07."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -21156,6 +21234,7 @@
        "game_points": 5.8,
        "projection_before": 12.35,
        "season": 2026,
+       "size": 1.07,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -21199,12 +21278,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -21297,6 +21376,7 @@
      },
      "available": true,
      "baseline_change": 1.38,
+     "baseline_change_size": 1.38,
      "before": {
       "games_used": 22,
       "points": 11.61,
@@ -21307,8 +21387,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.38 (11.61 to 12.99).",
-      "Week 8: 20.10 points, above his projection before it (11.61); that game is 16.2% of the new average and moved it +1.38."
+      "Recomputed baseline change, week 8 to week 9: up 1.38 (11.61 to 12.99).",
+      "Week 8: 20.10 points, above his projection before it (11.61); that game is 16.2% of the new average and moved it up 1.38."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -21326,6 +21406,7 @@
        "game_points": 20.1,
        "projection_before": 11.61,
        "season": 2026,
+       "size": 1.38,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -21378,12 +21459,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -21479,6 +21560,7 @@
      },
      "available": true,
      "baseline_change": 1.09,
+     "baseline_change_size": 1.09,
      "before": {
       "games_used": 23,
       "points": 13.52,
@@ -21489,8 +21571,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.09 (13.52 to 14.61).",
-      "Week 8: 20.30 points, above his projection before it (13.52); that game is 16.2% of the new average and moved it +1.10.",
+      "Recomputed baseline change, week 8 to week 9: up 1.09 (13.52 to 14.61).",
+      "Week 8: 20.30 points, above his projection before it (13.52); that game is 16.2% of the new average and moved it up 1.10.",
       "Separately, his served projection for week 9 is 0.0: PIT has no game in week 9."
      ],
      "label": "recomputed baseline change",
@@ -21513,6 +21595,7 @@
        "game_points": 20.3,
        "projection_before": 13.52,
        "season": 2026,
+       "size": 1.1,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -21543,12 +21626,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -21642,6 +21725,7 @@
      },
      "available": true,
      "baseline_change": 0.42,
+     "baseline_change_size": 0.42,
      "before": {
       "games_used": 24,
       "points": 10.63,
@@ -21652,8 +21736,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.42 (10.63 to 11.05).",
-      "Week 8: 13.20 points, above his projection before it (10.63); that game is 16.1% of the new average and moved it +0.41."
+      "Recomputed baseline change, week 8 to week 9: up 0.42 (10.63 to 11.05).",
+      "Week 8: 13.20 points, above his projection before it (10.63); that game is 16.1% of the new average and moved it up 0.41."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -21671,6 +21755,7 @@
        "game_points": 13.2,
        "projection_before": 10.63,
        "season": 2026,
+       "size": 0.41,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -21704,12 +21789,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -21765,6 +21850,7 @@
      },
      "available": true,
      "baseline_change": 0.0,
+     "baseline_change_size": 0.0,
      "before": {
       "games_used": 16,
       "points": 19.51,
@@ -21775,7 +21861,7 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.00 (19.51 to 19.51).",
+      "Recomputed baseline change, week 8 to week 9: not at all (19.51 to 19.51).",
       "Week 8: no game (bye), no change."
      ],
      "label": "recomputed baseline change",
@@ -21823,12 +21909,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -21868,6 +21954,7 @@
      },
      "available": true,
      "baseline_change": -1.39,
+     "baseline_change_size": 1.39,
      "before": {
       "games_used": 24,
       "points": 16.26,
@@ -21878,8 +21965,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -1.39 (16.26 to 14.87).",
-      "Week 8: 7.60 points, below his projection before it (16.26); that game is 16.1% of the new average and moved it -1.40."
+      "Recomputed baseline change, week 8 to week 9: down 1.39 (16.26 to 14.87).",
+      "Week 8: 7.60 points, below his projection before it (16.26); that game is 16.1% of the new average and moved it down 1.40."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -21897,6 +21984,7 @@
        "game_points": 7.6,
        "projection_before": 16.26,
        "season": 2026,
+       "size": 1.4,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -21930,12 +22018,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -21991,6 +22079,7 @@
      },
      "available": true,
      "baseline_change": -0.16,
+     "baseline_change_size": 0.16,
      "before": {
       "games_used": 21,
       "points": 15.0,
@@ -22001,8 +22090,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -0.16 (15.00 to 14.84).",
-      "Week 8: 14.00 points, below his projection before it (15.00); that game is 16.3% of the new average and moved it -0.16."
+      "Recomputed baseline change, week 8 to week 9: down 0.16 (15.00 to 14.84).",
+      "Week 8: 14.00 points, below his projection before it (15.00); that game is 16.3% of the new average and moved it down 0.16."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -22020,6 +22109,7 @@
        "game_points": 14.0,
        "projection_before": 15.0,
        "season": 2026,
+       "size": 0.16,
        "week": 8,
        "weight_pct": 16.3
       }
@@ -22072,12 +22162,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -22161,6 +22251,7 @@
      },
      "available": true,
      "baseline_change": 0.43,
+     "baseline_change_size": 0.43,
      "before": {
       "games_used": 23,
       "points": 20.16,
@@ -22171,8 +22262,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +0.43 (20.16 to 20.59).",
-      "Week 8: 22.80 points, above his projection before it (20.16); that game is 16.2% of the new average and moved it +0.43."
+      "Recomputed baseline change, week 8 to week 9: up 0.43 (20.16 to 20.59).",
+      "Week 8: 22.80 points, above his projection before it (20.16); that game is 16.2% of the new average and moved it up 0.43."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -22190,6 +22281,7 @@
        "game_points": 22.8,
        "projection_before": 20.16,
        "season": 2026,
+       "size": 0.43,
        "week": 8,
        "weight_pct": 16.2
       }
@@ -22242,12 +22334,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -22303,6 +22395,7 @@
      },
      "available": true,
      "baseline_change": 1.31,
+     "baseline_change_size": 1.31,
      "before": {
       "games_used": 17,
       "points": 13.09,
@@ -22313,8 +22406,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: +1.31 (13.09 to 14.40).",
-      "Week 8: 21.00 points, above his projection before it (13.09); that game is 16.6% of the new average and moved it +1.32."
+      "Recomputed baseline change, week 8 to week 9: up 1.31 (13.09 to 14.40).",
+      "Week 8: 21.00 points, above his projection before it (13.09); that game is 16.6% of the new average and moved it up 1.32."
      ],
      "label": "recomputed baseline change",
      "no_game_weeks": [],
@@ -22332,6 +22425,7 @@
        "game_points": 21.0,
        "projection_before": 13.09,
        "season": 2026,
+       "size": 1.32,
        "week": 8,
        "weight_pct": 16.6
       }
@@ -22384,12 +22478,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [
       {
@@ -22487,6 +22581,7 @@
      },
      "available": true,
      "baseline_change": -0.82,
+     "baseline_change_size": 0.82,
      "before": {
       "games_used": 24,
       "points": 8.11,
@@ -22497,8 +22592,8 @@
       "The baseline averages past fantasy points only; it does not use injuries, role, matchup or news, so none of those explains the change."
      ],
      "explanation": [
-      "Recomputed baseline change, week 8 to week 9: -0.82 (8.11 to 7.29).",
-      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it -0.82.",
+      "Recomputed baseline change, week 8 to week 9: down 0.82 (8.11 to 7.29).",
+      "Week 8: 3.00 points, below his projection before it (8.11); that game is 16.1% of the new average and moved it down 0.82.",
       "Separately, his served projection for week 9 is 0.0: IR (sleeper)."
      ],
      "label": "recomputed baseline change",
@@ -22522,6 +22617,7 @@
        "game_points": 3.0,
        "projection_before": 8.11,
        "season": 2026,
+       "size": 0.82,
        "week": 8,
        "weight_pct": 16.1
       }
@@ -22571,12 +22667,12 @@
     "unscored_rules": [],
     "usage": {
      "as_of": {
-      "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+      "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
       "season": 2026,
-      "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-      "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+      "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+      "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
       "through_week": 8,
-      "updated_at": "2026-11-05T22:01:20.765065+00:00"
+      "updated_at": "2026-11-06T02:00:35.503628+00:00"
      },
      "facts": [],
      "window": {
@@ -22604,7 +22700,7 @@
    }
   }
  },
- "recorded_at": "2026-11-06T01:31:52.076787+00:00",
+ "recorded_at": "2026-11-06T02:46:20.712010+00:00",
  "status": {
   "label": "Sample data from week 8, 2026, not live",
   "latest_week": 8,
@@ -22613,23 +22709,23 @@
   "sources": {
    "injuries": {
     "age_hours": 6.0,
-    "last_ok": "2026-11-05T19:31:52.076787+00:00"
+    "last_ok": "2026-11-05T20:46:20.712010+00:00"
    },
    "news": {
     "age_hours": 1.0,
-    "last_ok": "2026-11-06T00:31:52.076787+00:00"
+    "last_ok": "2026-11-06T01:46:20.712010+00:00"
    },
    "rosters": {
     "age_hours": 6.0,
-    "last_ok": "2026-11-05T19:31:52.076787+00:00"
+    "last_ok": "2026-11-05T20:46:20.712010+00:00"
    },
    "stats": {
     "age_hours": 6.0,
-    "last_ok": "2026-11-05T19:31:52.076787+00:00"
+    "last_ok": "2026-11-05T20:46:20.712010+00:00"
    },
    "transactions": {
     "age_hours": 1.0,
-    "last_ok": "2026-11-06T00:31:52.076787+00:00"
+    "last_ok": "2026-11-06T01:46:20.712010+00:00"
    }
   }
  },
@@ -22639,87 +22735,87 @@
    "kind": "add",
    "players": [
     {
-     "count": 608175,
+     "count": 630909,
      "full_name": "Chris Rodriguez Jr.",
      "player_id": "00-0038611",
      "position": "RB",
      "team": "JAX",
-     "window_start": "2026-11-05T18:00:00+00:00"
+     "window_start": "2026-11-06T00:00:00+00:00"
     },
     {
-     "count": 421281,
+     "count": 434754,
      "full_name": "Devin Singletary",
      "player_id": "00-0035250",
      "position": "RB",
      "team": "NYG",
-     "window_start": "2026-11-05T18:00:00+00:00"
+     "window_start": "2026-11-06T00:00:00+00:00"
     },
     {
-     "count": 357864,
-     "full_name": "Adonai Mitchell",
-     "player_id": "00-0039890",
-     "position": "WR",
-     "team": "NYJ",
-     "window_start": "2026-11-05T18:00:00+00:00"
-    },
-    {
-     "count": 261318,
+     "count": 412788,
      "full_name": "Carson Wentz",
      "player_id": "00-0032950",
      "position": "QB",
      "team": "MIN",
-     "window_start": "2026-11-05T18:00:00+00:00"
+     "window_start": "2026-11-06T00:00:00+00:00"
     },
     {
-     "count": 243944,
-     "full_name": "Joe Milton III",
-     "player_id": "00-0039398",
-     "position": "QB",
-     "team": "PHI",
-     "window_start": "2026-11-05T18:00:00+00:00"
-    },
-    {
-     "count": 241038,
-     "full_name": "Malik Willis",
-     "player_id": "00-0038128",
-     "position": "QB",
-     "team": "MIA",
-     "window_start": "2026-11-05T18:00:00+00:00"
-    },
-    {
-     "count": 227990,
+     "count": 334040,
      "full_name": "Cairo Santos",
      "player_id": "00-0031203",
      "position": "K",
      "team": "CHI",
-     "window_start": "2026-11-05T18:00:00+00:00"
+     "window_start": "2026-11-06T00:00:00+00:00"
     },
     {
-     "count": 168894,
+     "count": 332856,
+     "full_name": "Adonai Mitchell",
+     "player_id": "00-0039890",
+     "position": "WR",
+     "team": "NYJ",
+     "window_start": "2026-11-06T00:00:00+00:00"
+    },
+    {
+     "count": 284459,
+     "full_name": "Malik Willis",
+     "player_id": "00-0038128",
+     "position": "QB",
+     "team": "MIA",
+     "window_start": "2026-11-06T00:00:00+00:00"
+    },
+    {
+     "count": 210282,
+     "full_name": "Demarcus Robinson",
+     "player_id": "00-0032775",
+     "position": "WR",
+     "team": "SF",
+     "window_start": "2026-11-06T00:00:00+00:00"
+    },
+    {
+     "count": 187756,
+     "full_name": "Joe Milton III",
+     "player_id": "00-0039398",
+     "position": "QB",
+     "team": "PHI",
+     "window_start": "2026-11-06T00:00:00+00:00"
+    },
+    {
+     "count": 168957,
      "full_name": "Emmett Johnson",
      "player_id": "00-0041013",
      "position": "RB",
      "team": "KC",
-     "window_start": "2026-11-05T18:00:00+00:00"
+     "window_start": "2026-11-06T00:00:00+00:00"
     },
     {
-     "count": 143280,
-     "full_name": "Elijah Mitchell",
-     "player_id": "00-0036567",
-     "position": "RB",
-     "team": "PHI",
-     "window_start": "2026-11-05T18:00:00+00:00"
-    },
-    {
-     "count": 133776,
+     "count": 148336,
      "full_name": "Mike Gesicki",
      "player_id": "00-0034829",
      "position": "TE",
      "team": "CIN",
-     "window_start": "2026-11-05T18:00:00+00:00"
+     "window_start": "2026-11-06T00:00:00+00:00"
     }
    ],
-   "window_start": "2026-11-05T18:00:00+00:00"
+   "window_start": "2026-11-06T00:00:00+00:00"
   }
  },
  "waivers": {
@@ -22981,17 +23077,17 @@
    "model_version": "baseline-ewm-v1",
    "rostered_players_excluded": 10,
    "rosters_as_of": {
-    "synced_at": "2026-11-06T01:31:52.076787+00:00",
+    "synced_at": "2026-11-06T02:46:20.712010+00:00",
     "week": 9
    },
    "scoring": "Demo League rules (half PPR)",
    "usage_as_of": {
-    "pbp_updated_at": "2026-11-05T22:03:30.106842+00:00",
+    "pbp_updated_at": "2026-11-06T02:01:00.128586+00:00",
     "season": 2026,
-    "snaps_updated_at": "2026-11-05T22:01:25.352767+00:00",
-    "stats_updated_at": "2026-11-05T22:01:20.765065+00:00",
+    "snaps_updated_at": "2026-11-06T02:00:37.553272+00:00",
+    "stats_updated_at": "2026-11-06T02:00:35.503628+00:00",
     "through_week": 8,
-    "updated_at": "2026-11-05T22:01:20.765065+00:00"
+    "updated_at": "2026-11-06T02:00:35.503628+00:00"
    },
    "week": 9
   }

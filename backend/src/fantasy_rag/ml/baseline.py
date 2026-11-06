@@ -104,6 +104,7 @@ def explain(
             "season": s, "week": w, "game_points": round(x, 2),
             "projection_before": round(mean, 2), "weight_pct": round(100 / (decayed + 1), 1),
             "change": round(moved - mean, 2) + 0.0,  # never -0.0
+            "size": abs(round(moved - mean, 2)),  # "down 0.07" quotes this, not a sign flip
         })  # fmt: skip
         mean, total = moved, decayed + 1
     played = {w for _, w, _ in new}
@@ -115,6 +116,7 @@ def explain(
         "before": {"week": since_week, "points": before[0], "games_used": before[1]},
         "after": {"week": week, "points": after[0], "games_used": after[1]},
         "baseline_change": round(after[0] - before[0], 2) + 0.0,
+        "baseline_change_size": abs(round(after[0] - before[0], 2)),
         "steps": steps,
         "no_game_weeks": [w for w in range(since_week, week) if w not in played],
     }

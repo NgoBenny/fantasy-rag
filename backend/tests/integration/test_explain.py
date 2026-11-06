@@ -41,6 +41,7 @@ def test_one_new_game_is_explained_with_its_weight_and_labelled_recomputed(db: s
     assert r["baseline_change"] == step["change"] < 0
     assert r["explanation"][0].startswith("Recomputed baseline change, week 2 to week 3:")
     assert "below his projection before it" in r["explanation"][1]
+    assert r["explanation"][1].endswith(f"moved it down {abs(step['change']):.2f}.")
     assert any("not a record of the number shown" in c for c in r["caveats"])
     _every_number_is_in_the_result(r)
 
@@ -90,14 +91,23 @@ def test_an_out_player_shows_the_served_zero_beside_a_positive_change(db: str) -
 
 def test_malformed_windows_are_rejected_and_unsupported_ones_are_results(db: str) -> None:
     with get_readonly_engine(db).connect() as conn:
-        for bad in ({"since_week": 3, "week": 3}, {"week": 19}, {"season": 2021, "week": 3},
-                    {"season": 2026}):  # fmt: skip
+        for bad in ({"since_week": 3, "week": 3}, {"week": 19}, {"season": 2021, "week": 3}):
             with pytest.raises(ValidationError):
                 run_tool(conn, "explain_projection", {"player": {"name": "Zero Guy"}, **bad})
         far = run_tool(conn, "explain_projection",
                        {"player": {"name": "Zero Guy"}, "since_week": 1, "week": 9})  # fmt: skip
     assert not far["available"] and far["reason"] == "more than 6 weeks apart"
     assert far["explanation"] == ["Comparison unavailable: more than 6 weeks apart."]
+    with get_readonly_engine(db).connect() as conn:
+        # A season alone means the current week; another season needs its week.
+        same = run_tool(
+            conn, "explain_projection", {"player": {"name": "Zero Guy"}, "season": 2026}
+        )
+        other = run_tool(
+            conn, "explain_projection", {"player": {"name": "Zero Guy"}, "season": 2025}
+        )
+    assert same["week"] == 3
+    assert not other["available"] and other["reason"] == "give the week to compare in 2025"
 
 
 def test_the_citation_pins_the_interval_it_explained(db: str) -> None:

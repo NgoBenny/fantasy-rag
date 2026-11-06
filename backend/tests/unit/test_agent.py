@@ -530,6 +530,14 @@ def test_projection_change_progress_names_the_player_and_summed_steps_are_reject
     assert router.tool_progress(call).message == "Looked up a projection change for Ja'Marr Chase"
     srcs = router.sources([call])
     quoted = _answer("Week 8 moved it +1.77.", Claim(text="+1.77 in week 8", source_ids=["r1"]))
+    # A drop written as a size ("fell 0.07") must be quotable: the tool states sizes too.
+    drop = {"player": result["player"], "explanation": ["... moved it down 0.07."],
+            "steps": [{"week": 8, "change": -0.07}]}  # fmt: skip
+    fell = _answer("It fell 0.07.", Claim(text="down 0.07", source_ids=["r1"]))
+    assert (
+        problems(fell, router.sources([router.ToolCall("r1", "explain_projection", {}, drop)]), "")
+        == []
+    )
     assert problems(quoted, srcs, "") == []
     # Two steps added up by the writer (0.39 + 1.77) is a number the tool never returned.
     summed = _answer("Those games added 2.16.", Claim(text="2.16", source_ids=["r1"]))
