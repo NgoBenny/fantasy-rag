@@ -226,9 +226,13 @@ def _named_players(args: dict[str, Any]) -> list[dict[str, Any]]:
     return [p for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
 
 
+def _question_tokens(question: str) -> list[str]:
+    """Words in order, normalized like players.search_name, possessives dropped."""
+    return normalize_name(re.sub(r"['\u2019]s\b", "", question)).split()
+
+
 def _question_words(question: str) -> set[str]:
-    """Words normalized like players.search_name, possessives dropped ("Jefferson's")."""
-    return set(normalize_name(re.sub(r"['\u2019]s\b", "", question)).split())
+    return set(_question_tokens(question))
 
 
 def _surname(name: str) -> str:
@@ -246,15 +250,18 @@ def swapped_player(
     surname: of his position ("is loop safe?" answered with the roster's other kicker), or
     of any fantasy position when the lookup kept the question's first name ("tyler loop"
     looked up as Tyler Lockett, a receiver).
-    `covered`: surnames of players other calls already resolved successfully; a named
+    `covered`: name words of players other calls already resolved successfully; a named
     player covered there (or in this same call) makes the roster player a fair comparison.
+    Every word of those names is left out, so "james cook or kyren?" never reads "james"
+    as Jordan James.
 
     Only an exact surname of a player with stats this season counts, and surnames that are
     everyday words are skipped, so ordinary questions don't trigger it.
     """
-    words = _question_words(question)
+    tokens = _question_tokens(question)
+    words = set(tokens)
     named = _named_players(args)
-    in_call = {_surname(p["name"]) for p in named}  # all resolve, or the call fails
+    in_call = {w for p in named for w in normalize_name(p["name"]).split()}
     surnames = words - COMMON_WORDS - in_call - (covered or set())
     if not surnames or not named:
         return None
@@ -263,15 +270,17 @@ def swapped_player(
         if _surname(p["name"]) in words:
             continue  # the question names him (a shared first name doesn't count)
         first = normalize_name(p["name"]).split()[:1]
-        # Kept the user's first name but not the surname ("tyler loop" looked up as Tyler
-        # Lockett): a swap across positions. Otherwise only his own position counts, so
-        # "start jefferson over my guy?" never matches a tight end surnamed Guy.
-        cross = bool(first) and first[0] in words
+        # The question says "<his first name> <another surname>" ("tyler loop" looked up as
+        # Tyler Lockett): a swap across positions, checked for that surname only. Anything
+        # else stays same-position, so "patrick mahomes or lamar?" never reads "patrick"
+        # as Tim Patrick, and "my guy" never matches a tight end surnamed Guy.
+        pairs = {b for a, b in zip(tokens, tokens[1:], strict=False) if first and a == first[0]}
+        cross = sorted(pairs & surnames)
         try:
             ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
         except (AmbiguousPlayer, ValueError):
             continue
-        positions = list(SKILL) if cross else [ref.position]
+        positions, check = (list(SKILL), cross) if cross else ([ref.position], sorted(surnames))
         other = conn.execute(
             text(
                 "SELECT p.full_name, p.position, p.team FROM players p"
@@ -281,7 +290,7 @@ def swapped_player(
                 "             WHERE s.player_id = p.id AND s.season = :season)"
                 " ORDER BY p.full_name LIMIT 1"
             ),
-            {"pos": positions, "id": ref.id, "words": sorted(surnames), "season": season},
+            {"pos": positions, "id": ref.id, "words": check, "season": season},
         ).first()
         if other is not None:
             return (
@@ -316,7 +325,8 @@ def route(
         done: dict[str, ToolResultBlockParam] = {}
 
         def covered() -> set[str]:  # only lookups that succeeded count
-            return {_surname(n) for c in calls if c.result for n in _resolved_names(c.result)}
+            return {w for c in calls if c.result for n in _resolved_names(c.result)
+                    for w in normalize_name(n).split()}  # fmt: skip
 
         # A call that looks like a swap waits until this round's other calls ran: one of
         # them may resolve the named player, which makes it a fair comparison.

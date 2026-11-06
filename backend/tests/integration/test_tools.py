@@ -266,3 +266,28 @@ def test_a_shared_first_name_does_not_hide_a_swap(db: str) -> None:
         assert msg is not None and "Justin Jefferson" in msg  # "Justin" doesn't name Agent
         assert swapped_player(conn, "Is Justin Agent a safe start?", other) is None
         tx.rollback()
+
+
+def test_a_first_name_that_is_another_players_surname_is_not_a_swap(db: str) -> None:
+    from fantasy_rag.agent.router import swapped_player
+
+    engine = create_engine(db)
+    with engine.begin() as c:  # a receiver surnamed Justin, with stats this season
+        run = c.execute(text("SELECT max(id) FROM sync_runs")).scalar_one()
+        c.execute(text("INSERT INTO players (id, full_name, search_name, position, team,"
+                       " sync_run_id) VALUES ('00-20', 'Tim Justin', 'tim justin', 'WR',"
+                       " 'NYG', :r)"), {"r": run})  # fmt: skip
+        c.execute(text("INSERT INTO player_week_stats (season, week, season_type, player_id,"
+                       " stats, sync_run_id) VALUES (2026, 1, 'REG', '00-20', '{}', :r)"),
+                  {"r": run})  # fmt: skip
+    engine.dispose()
+    pair = {"players": [{"name": "Justin Jefferson"}, {"name": "Zero Guy"}]}
+    with get_readonly_engine(db).connect() as conn:
+        # Review case ("patrick mahomes or lamar?" read "patrick" as Tim Patrick).
+        assert swapped_player(conn, "justin jefferson or zero?", pair) is None
+        # Words of a name another call already resolved never count either.
+        alone = {"player": {"name": "Zero Guy"}}
+        assert (
+            swapped_player(conn, "justin jefferson or zero?", alone, {"justin", "jefferson"})
+            is None
+        )

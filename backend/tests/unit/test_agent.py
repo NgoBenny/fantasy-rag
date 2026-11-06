@@ -466,6 +466,9 @@ def _limited(*limitations: str, answer: str = "I found no supporting story.") ->
     return a
 
 
+HINT = "search window: don't state the search window anywhere; the app adds it"
+
+
 def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
     calls = [_searched(14)]
     srcs, windows = router.sources(calls), router.searched_days(calls)
@@ -482,20 +485,22 @@ def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
         assert problems(_limited(unsafe), srcs, "", (), windows)[0] == "limitations: 14 not in r1"
     assert problems(_limited(said + " Out 14 days."), srcs, "", (), windows) == [
         "limitations: 14, 14 not in r1",
-        "limitations: don't state the search window; the app adds it",
+        "search window: don't state the search window anywhere; the app adds it",
     ]
-    assert problems(_limited(answer=said), srcs, "", (), windows) == ["answer: 14 not in r1"]
+    assert problems(_limited(answer=said), srcs, "", (), windows) == ["answer: 14 not in r1", HINT]
     fact = _answer("Nothing found.", Claim(text=said, source_ids=["r1"]), cites=["r1"])
-    assert problems(fact, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
+    assert problems(fact, srcs, "", (), windows) == ["fact 1: 14 not in r1", HINT]
     touchdowns = _answer("x", Claim(text="Henry has 14 touchdowns", source_ids=["r1"]))
-    assert problems(touchdowns, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
+    assert problems(touchdowns, srcs, "", (), windows) == ["fact 1: 14 not in r1", HINT]
 
 
 def test_the_scope_sentence_with_any_other_window_fails_even_if_the_number_is_evidence() -> None:
     # Review cases: 30 is in the cited evidence, but it is not the narrowest search that ran.
     srcs = {"r1": "Out 30 days."}
     said = "News search looked back 30 days."
-    wrong = [f"search window: use the smallest days of the searches run, not {[said]}"]
+    wrong = [
+        f"search window: don't state the search window anywhere; the app adds it, not {[said]}"
+    ]
     assert problems(_limited(said), srcs, "", (), {14}) == wrong
     assert problems(_limited(said), srcs, "") == wrong  # no search ran
     assert problems(_limited(said), srcs, "", (), {30, 7}) == wrong
@@ -507,7 +512,7 @@ def test_a_failed_search_has_no_window() -> None:
     assert router.searched_days([failed]) == set()
     said = "News search looked back 14 days."
     assert problems(_limited(said), router.sources([failed]), "", {"r1"}, set()) == [
-        f"search window: use the smallest days of the searches run, not {[said]}"
+        f"search window: don't state the search window anywhere; the app adds it, not {[said]}"
     ]
 
 
@@ -558,6 +563,9 @@ def test_the_app_states_the_search_window_and_a_restated_one_is_sent_back(
     restated = _limited("Search limited to the last 30 days.")
     llm = WriterLLM([restated, _limited("No story says so.")])
     turn = router.ask(None, llm, "Any news?")  # type: ignore[arg-type]
-    assert "limitations: don't state the search window; the app adds it" in turn.first_problems
+    assert (
+        "search window: don't state the search window anywhere; the app adds it"
+        in turn.first_problems
+    )
     assert "the app adds it" in llm.prompts[1] and turn.problems == []
     assert turn.answer.limitations == ["No story says so.", "News search looked back 30 days."]
