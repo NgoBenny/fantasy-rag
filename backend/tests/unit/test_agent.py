@@ -6,7 +6,7 @@ import pytest
 from anthropic.types import Message, MessageParam, ToolParam
 
 from fantasy_rag.agent import router
-from fantasy_rag.agent.answer import SEARCH_SCOPE, Answer, Claim, numbers, problems
+from fantasy_rag.agent.answer import Answer, Claim, numbers, problems
 from fantasy_rag.agent.prompts import WRITER_SYSTEM
 
 
@@ -466,10 +466,13 @@ def _limited(*limitations: str, answer: str = "I found no supporting story.") ->
     return a
 
 
+HINT = "search window: if a rejected number is the search window, don't state it: the app adds it"
+
+
 def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
     calls = [_searched(14)]
     srcs, windows = router.sources(calls), router.searched_days(calls)
-    assert SEARCH_SCOPE.format(days="N") in WRITER_SYSTEM
+    assert "the app adds" in WRITER_SYSTEM  # the writer never states the window
     said = "News search looked back 14 days."
     assert problems(_limited(said), srcs, "", (), windows) == []
     for unsafe in (
@@ -478,22 +481,24 @@ def test_only_the_exact_search_scope_statement_skips_the_number_check() -> None:
         # Saved withheld answers: the same window in other words stays rejected.
         "News search limited to the window shown in the tool arguments (14 days) per r2.",
     ):
-        assert problems(_limited(unsafe), srcs, "", (), windows) == ["limitations: 14 not in r1"]
+        # Still rejected (the window's own number is no evidence), with a hint to drop it.
+        assert problems(_limited(unsafe), srcs, "", (), windows)[0] == "limitations: 14 not in r1"
     assert problems(_limited(said + " Out 14 days."), srcs, "", (), windows) == [
-        "limitations: 14, 14 not in r1"
+        "limitations: 14, 14 not in r1",
+        "search window: if a rejected number is the search window, don't state it: the app adds it",
     ]
-    assert problems(_limited(answer=said), srcs, "", (), windows) == ["answer: 14 not in r1"]
+    assert problems(_limited(answer=said), srcs, "", (), windows) == ["answer: 14 not in r1", HINT]
     fact = _answer("Nothing found.", Claim(text=said, source_ids=["r1"]), cites=["r1"])
-    assert problems(fact, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
+    assert problems(fact, srcs, "", (), windows) == ["fact 1: 14 not in r1", HINT]
     touchdowns = _answer("x", Claim(text="Henry has 14 touchdowns", source_ids=["r1"]))
-    assert problems(touchdowns, srcs, "", (), windows) == ["fact 1: 14 not in r1"]
+    assert problems(touchdowns, srcs, "", (), windows) == ["fact 1: 14 not in r1", HINT]
 
 
 def test_the_scope_sentence_with_any_other_window_fails_even_if_the_number_is_evidence() -> None:
     # Review cases: 30 is in the cited evidence, but it is not the narrowest search that ran.
     srcs = {"r1": "Out 30 days."}
     said = "News search looked back 30 days."
-    wrong = [f"search window: use the smallest days of the searches run, not {[said]}"]
+    wrong = [f"search window: don't state it, the app adds it; not {[said]}"]
     assert problems(_limited(said), srcs, "", (), {14}) == wrong
     assert problems(_limited(said), srcs, "") == wrong  # no search ran
     assert problems(_limited(said), srcs, "", (), {30, 7}) == wrong
@@ -505,7 +510,7 @@ def test_a_failed_search_has_no_window() -> None:
     assert router.searched_days([failed]) == set()
     said = "News search looked back 14 days."
     assert problems(_limited(said), router.sources([failed]), "", {"r1"}, set()) == [
-        f"search window: use the smallest days of the searches run, not {[said]}"
+        f"search window: don't state it, the app adds it; not {[said]}"
     ]
 
 
@@ -542,3 +547,23 @@ def test_projection_change_progress_names_the_player_and_summed_steps_are_reject
     # Two steps added up by the writer (0.39 + 1.77) is a number the tool never returned.
     summed = _answer("Those games added 2.16.", Claim(text="2.16", source_ids=["r1"]))
     assert "answer: 2.16 not in r1" in problems(summed, srcs, "")
+
+
+def test_the_app_states_the_search_window_and_a_restated_one_is_sent_back(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(router, "context_block", lambda *a: "<context>week 7</context>")
+    monkeypatch.setattr(router, "route", lambda *a: ([_searched(30)], False))
+    plain = _limited("No story says so.")
+    turn = router.ask(None, WriterLLM([plain]), "Any news?")  # type: ignore[arg-type]
+    assert turn.answer.limitations[-1] == "News search looked back 30 days."
+    # A draft that words the window itself is told to drop it, then repaired.
+    restated = _limited("Search limited to the last 30 days.")
+    llm = WriterLLM([restated, _limited("No story says so.")])
+    turn = router.ask(None, llm, "Any news?")  # type: ignore[arg-type]
+    assert (
+        "search window: if a rejected number is the search window, don't state it: the app adds it"
+        in turn.first_problems
+    )
+    assert "the app adds it" in llm.prompts[1] and turn.problems == []
+    assert turn.answer.limitations == ["No story says so.", "News search looked back 30 days."]

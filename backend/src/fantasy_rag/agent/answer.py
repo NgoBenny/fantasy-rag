@@ -26,6 +26,7 @@ EVIDENCE_FREE_TYPES = {"clarification", "out_of_scope", "no_data"}
 # The one way to state a search's window. The window is a request, not evidence, so a bare
 # "14" or "14 days" elsewhere (an injury's length, say) must still pass the number check.
 SEARCH_SCOPE = "News search looked back {days} days."
+WINDOW_HINT = "if a rejected number is the search window, don't state it: the app adds it"
 _SCOPE_SHAPE = re.compile(re.escape(SEARCH_SCOPE).replace(r"\{days\}", r"\S+"))
 
 
@@ -92,10 +93,13 @@ def problems(
     trusted = _known(context)
     evidence_free = answer.answer_type in EVIDENCE_FREE_TYPES
 
-    def check(label: str, text: str, ids: list[str]) -> None:
+    rejected: list[str] = []  # every number that failed, for the search-window hint
+
+    def check(label: str, text: str, ids: list[str], hint: bool = True) -> None:
         pool = trusted.union(*(_known(sources[i]) for i in ids if i in sources))
         bad = [n for n in numbers(text) if float(n) not in pool]
         if bad:
+            rejected.extend(bad if hint else [])
             out.append(f"{label}: {', '.join(bad)} not in {', '.join(ids) or 'any cited result'}")
 
     claims = [("fact", answer.facts), ("projection", answer.projections)]
@@ -120,10 +124,15 @@ def problems(
     scope = SEARCH_SCOPE.format(days=min(searched_days)) if searched_days else None
     plain = [x for x in answer.limitations if x.strip() != scope]
     if wrong := [x.strip() for x in plain if _SCOPE_SHAPE.fullmatch(x.strip())]:
-        out.append(f"search window: use the smallest days of the searches run, not {wrong}")
+        out.append(f"search window: don't state it, the app adds it; not {wrong}")
     check("limitations", " ".join(x for x in plain if x.strip() not in wrong), shown)
     meta = (answer.season, answer.week, answer.data_as_of, answer.scoring_format)
     # An evidence-free answer may cite nothing, but its as-of time comes from this turn's results.
     pool = list(sources) if evidence_free else shown
-    check("metadata", " ".join(str(m) for m in meta if m is not None), pool)
+    # Metadata never states a window (a week 14 is just a week): no hint from it.
+    check("metadata", " ".join(str(m) for m in meta if m is not None), pool, hint=False)
+    # A failed number that equals a search window was most likely the window restated.
+    windows = {float(d) for d in searched_days}
+    if any(float(n) in windows for n in rejected):
+        out.append(f"search window: {WINDOW_HINT}")
     return out

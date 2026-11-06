@@ -17,11 +17,12 @@ from anthropic.types import MessageParam, ToolParam, ToolResultBlockParam
 from pydantic import BaseModel
 from sqlalchemy import Connection, text
 
-from fantasy_rag.agent.answer import Answer, problems
+from fantasy_rag.agent.answer import SEARCH_SCOPE, Answer, problems
 from fantasy_rag.agent.llm import INVALID_ARGS, Cancelled, LLMClient
 from fantasy_rag.agent.prompts import ROUTER_SYSTEM, WRITER_SYSTEM
 from fantasy_rag.agent.tools import TOOLS, run_tool
 from fantasy_rag.analytics.queries import (
+    SKILL,
     AmbiguousPlayer,
     latest_week,
     league_roster,
@@ -225,9 +226,38 @@ def _named_players(args: dict[str, Any]) -> list[dict[str, Any]]:
     return [p for p in found if isinstance(p, dict) and isinstance(p.get("name"), str)]
 
 
+def _question_tokens(question: str) -> list[str]:
+    """Words in order, normalized like players.search_name, possessives dropped."""
+    return normalize_name(re.sub(r"['\u2019]s\b", "", question)).split()
+
+
 def _question_words(question: str) -> set[str]:
-    """Words normalized like players.search_name, possessives dropped ("Jefferson's")."""
-    return set(normalize_name(re.sub(r"['\u2019]s\b", "", question)).split())
+    return set(_question_tokens(question))
+
+
+def _pairs(question: str) -> set[tuple[str, str]]:
+    """Adjacent words within one phrase: "bucky, dalton" (a list) is no "bucky dalton"."""
+    return {
+        pair
+        for part in re.split(r"[,;:/!?()\n]+", question)
+        for t in [_question_tokens(part)]
+        for pair in zip(t, t[1:], strict=False)
+    }
+
+
+def _without_names(tokens: list[str], names: set[str]) -> list[str]:
+    """`tokens` with every full-name span in `names` cut out ("chase brown" goes, a lone
+    "chase" stays, so "ja'marr chase" still names Ja'Marr Chase)."""
+    out = list(tokens)
+    for name in sorted(names, key=lambda n: -len(n.split())):
+        span = name.split()
+        i = 0
+        while span and i + len(span) <= len(out):
+            if out[i : i + len(span)] == span:
+                del out[i : i + len(span)]
+            else:
+                i += 1
+    return out
 
 
 def _surname(name: str) -> str:
@@ -241,38 +271,53 @@ def swapped_player(
     args: dict[str, Any],
     covered: set[str] | None = None,
 ) -> str | None:
-    """A looked-up player the question never names, while it does name another player of
-    his position by surname ("is loop safe?" answered with the roster's other kicker).
-    `covered`: surnames of players other calls already resolved successfully; a named
-    player covered there (or in this same call) makes the roster player a fair comparison.
+    """A looked-up player the question never names, while it does name another player by
+    surname: of his position ("is loop safe?" answered with the roster's other kicker), or
+    of any fantasy position when the lookup kept the question's first name ("tyler loop"
+    looked up as Tyler Lockett, a receiver).
+    `covered`: names (normalized) of players other calls already resolved successfully; a
+    named player covered there (or in this same call) makes the roster player a fair
+    comparison. Their full-name spans and surnames are left out of the question, so "james
+    cook or kyren?" never reads "james" as Jordan James, while a lone "chase" after Chase
+    Brown still names Ja'Marr Chase.
 
-    Only a same-position, exact-surname match counts, and surnames that are everyday
-    words are skipped, so ordinary questions don't trigger it.
+    Only an exact surname of a player with stats this season counts, and surnames that are
+    everyday words are skipped, so ordinary questions don't trigger it.
     """
-    words = _question_words(question)
+    tokens = _question_tokens(question)
+    words = set(tokens)
     named = _named_players(args)
-    in_call = {_surname(p["name"]) for p in named}  # all resolve, or the call fails
-    surnames = words - COMMON_WORDS - in_call - (covered or set())
+    names = {normalize_name(p["name"]) for p in named} | (covered or set())
+    rest = set(_without_names(tokens, names))
+    surnames = rest - COMMON_WORDS - {n.split()[-1] for n in names if n.split()}
     if not surnames or not named:
         return None
     season, _ = latest_week(conn)
     for p in named:
         if _surname(p["name"]) in words:
             continue  # the question names him (a shared first name doesn't count)
+        first = normalize_name(p["name"]).split()[:1]
+        # The question says "<his first name> <another surname>" ("tyler loop" looked up as
+        # Tyler Lockett): a swap across positions, checked for that surname only. Anything
+        # else stays same-position, so "patrick mahomes or lamar?" never reads "patrick"
+        # as Tim Patrick, and "my guy" never matches a tight end surnamed Guy.
+        pairs = {b for a, b in _pairs(question) if first and a == first[0]}
+        cross = sorted(pairs & surnames)
         try:
             ref = resolve_player(conn, p["name"], p.get("position"), p.get("team"))
         except (AmbiguousPlayer, ValueError):
             continue
+        positions, check = (list(SKILL), cross) if cross else ([ref.position], sorted(surnames))
         other = conn.execute(
             text(
                 "SELECT p.full_name, p.position, p.team FROM players p"
-                " WHERE p.position = :pos AND p.id <> :id"
+                " WHERE p.position = ANY(:pos) AND p.id <> :id"
                 " AND split_part(p.search_name, ' ', -1) = ANY(:words)"
                 " AND EXISTS (SELECT 1 FROM player_week_stats s"
                 "             WHERE s.player_id = p.id AND s.season = :season)"
                 " ORDER BY p.full_name LIMIT 1"
             ),
-            {"pos": ref.position, "id": ref.id, "words": sorted(surnames), "season": season},
+            {"pos": positions, "id": ref.id, "words": check, "season": season},
         ).first()
         if other is not None:
             return (
@@ -307,7 +352,7 @@ def route(
         done: dict[str, ToolResultBlockParam] = {}
 
         def covered() -> set[str]:  # only lookups that succeeded count
-            return {_surname(n) for c in calls if c.result for n in _resolved_names(c.result)}
+            return {normalize_name(n) for c in calls if c.result for n in _resolved_names(c.result)}
 
         # A call that looks like a swap waits until this round's other calls ran: one of
         # them may resolve the named player, which makes it a fair comparison.
@@ -459,6 +504,11 @@ def ask(
     rejected = None
     if found:
         rejected, answer = answer, _withheld()
+    elif windows:
+        # The app states the window (the narrowest, so true of every search), never the model.
+        scope = SEARCH_SCOPE.format(days=min(windows))
+        if scope not in (x.strip() for x in answer.limitations):
+            answer.limitations.append(scope)
     if capped:
         answer.limitations.append(f"stopped after {MAX_ROUNDS} rounds of tool calls")
     return Turn(
